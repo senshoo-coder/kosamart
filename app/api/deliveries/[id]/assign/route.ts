@@ -13,6 +13,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   // 기사 조회: 쿠키 우선, 없으면 device_uuid fallback
   const cookieStore = await cookies()
   const cookieUserId = cookieStore.get('cosmart_user_id')?.value
+  const cookieRole = cookieStore.get('cosmart_role')?.value
 
   let driver: { id: string; nickname: string } | null = null
   if (cookieUserId) {
@@ -22,6 +23,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!driver && driver_uuid) {
     const { data } = await supabase.from('users').select('id, nickname').eq('device_uuid', driver_uuid).single()
     driver = data
+  }
+  // 데모 기사 계정 fallback (DB에 없는 경우)
+  if (!driver && cookieRole === 'driver' && cookieUserId) {
+    const { error: upsertErr } = await supabase
+      .from('users')
+      .upsert(
+        { id: cookieUserId, nickname: '배달기사', role: 'driver', device_uuid: driver_uuid || cookieUserId, password_hash: 'demo', status: 'active' },
+        { onConflict: 'id', ignoreDuplicates: true }
+      )
+    if (!upsertErr) {
+      driver = { id: cookieUserId, nickname: '배달기사' }
+    }
   }
 
   if (!driver) return NextResponse.json({ data: null, error: '기사 인증 실패' }, { status: 401 })

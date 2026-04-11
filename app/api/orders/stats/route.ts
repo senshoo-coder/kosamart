@@ -1,0 +1,63 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createAdminClient } from '@/lib/supabase/server'
+import { DEMO_STATS } from '@/lib/demo-data'
+import { cookies } from 'next/headers'
+
+const isDemoMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_URL?.startsWith('https')
+
+// GET /api/orders/stats — 대시보드 통계
+export async function GET(_req: NextRequest) {
+  if (isDemoMode) return NextResponse.json({ data: DEMO_STATS, error: null })
+
+  const supabase = await createAdminClient()
+
+  // 사장님이면 본인 store_id로 필터
+  const cookieStore = await cookies()
+  const cookieRole = cookieStore.get('cosmart_role')?.value
+  const cookieUserId = cookieStore.get('cosmart_user_id')?.value
+
+  let storeId: string | null = null
+  if (cookieRole === 'owner' && cookieUserId) {
+    const { data: ownerUser } = await supabase.from('users').select('store_id').eq('id', cookieUserId).single()
+    storeId = ownerUser?.store_id ?? null
+  }
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const todayISO = today.toISOString()
+
+  let pendingQ = supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'pending')
+  let paidQ = supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'paid')
+  let revenueQ = supabase.from('orders').select('total_amount').eq('status', 'delivered').gte('created_at', todayISO)
+
+  if (storeId) {
+    pendingQ = pendingQ.eq('store_id', storeId)
+    paidQ = paidQ.eq('store_id', storeId)
+    revenueQ = revenueQ.eq('store_id', storeId)
+  }
+
+  const [
+    { count: newOrders },
+    { count: paidOrders },
+    { count: delivering },
+    { data: revenueData },
+  ] = await Promise.all([
+    pendingQ,
+    paidQ,
+    supabase.from('deliveries').select('*', { count: 'exact', head: true }).in('status', ['picked_up', 'delivering']),
+    revenueQ,
+  ])
+
+  const todayRevenue = revenueData?.reduce((sum, o) => sum + (o.total_amount ?? 0), 0) ?? 0
+
+  return NextResponse.json({
+    data: {
+      todayOrders: newOrders ?? 0,
+      pendingCount: newOrders ?? 0,
+      paidCount: paidOrders ?? 0,
+      deliveringCount: delivering ?? 0,
+      todayRevenue,
+    },
+    error: null,
+  })
+}

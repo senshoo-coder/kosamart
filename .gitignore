@@ -1,0 +1,9 @@
+node_modules/
+.next/
+cosmart-nextjs-master/
+.env*.local
+*.pdf
+*.hwp
+*.docx
+.claude/
+.playwright-mcp/

@@ -51,6 +51,16 @@ export default function ShopPage() {
 
   if (loading) return <LoadingScreen />
 
+  if (groupBuys.length === 0) {
+    return (
+      <div className="min-h-screen bg-[#f9f9f9] flex flex-col items-center justify-center gap-3 pb-16">
+        <span className="text-6xl">🛒</span>
+        <p className="text-[16px] font-bold text-[#1a1c1c]">현재 진행중인 공구가 없습니다</p>
+        <p className="text-[13px] text-[#a3a3a3]">다음 공구 일정을 기다려주세요</p>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-[#f9f9f9]">
       {/* 헤더 */}

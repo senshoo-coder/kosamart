@@ -20,7 +20,10 @@ export default function ProductsPage() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [editProduct, setEditProduct] = useState<Product | null>(null)
   const [saving, setSaving] = useState(false)
+  const [togglingGb, setTogglingGb] = useState(false)
   const [form, setForm] = useState({ name: '', description: '', price: '', unit: '팩', stock_limit: '' })
+
+  const currentGb = groupBuys.find(gb => gb.id === selectedGb) ?? null
 
   useEffect(() => {
     fetch('/api/group-buys')
@@ -31,6 +34,21 @@ export default function ProductsPage() {
         setLoading(false)
       })
   }, [])
+
+  async function toggleGbActive() {
+    if (!currentGb) return
+    setTogglingGb(true)
+    const newStatus = currentGb.status === 'active' ? 'draft' : 'active'
+    const res = await fetch(`/api/group-buys/${currentGb.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus }),
+    })
+    if (res.ok) {
+      setGroupBuys(prev => prev.map(gb => gb.id === currentGb.id ? { ...gb, status: newStatus } : gb))
+    }
+    setTogglingGb(false)
+  }
 
   function loadProducts(gbId: string) {
     fetch(`/api/products?group_buy_id=${gbId}`)
@@ -107,6 +125,29 @@ export default function ProductsPage() {
           </button>
         ))}
       </div>
+
+      {/* 공구 활성화 토글 */}
+      {currentGb && (
+        <div className="flex items-center justify-between bg-white rounded-[12px] px-4 py-3" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+          <div>
+            <p className="text-[14px] font-semibold text-[#1a1c1c]">{currentGb.title}</p>
+            <p className="text-[12px] mt-0.5" style={{ color: currentGb.status === 'active' ? '#10b981' : '#a3a3a3' }}>
+              {currentGb.status === 'active' ? '● 공구 진행중 — 고객에게 노출됨' : '○ 비활성화 — 고객에게 숨김'}
+            </p>
+          </div>
+          <button
+            onClick={toggleGbActive}
+            disabled={togglingGb}
+            className="relative w-12 h-6 rounded-full transition-colors duration-200 disabled:opacity-60 flex-shrink-0"
+            style={{ background: currentGb.status === 'active' ? '#10b981' : '#d1d5db' }}
+          >
+            <div
+              className="w-5 h-5 bg-white rounded-full absolute top-0.5 shadow transition-all duration-200"
+              style={{ left: currentGb.status === 'active' ? '26px' : '2px' }}
+            />
+          </button>
+        </div>
+      )}
 
       {/* 상품 그리드 */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">

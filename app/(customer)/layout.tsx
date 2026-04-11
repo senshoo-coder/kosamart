@@ -3,7 +3,7 @@ import { MarketCartProvider } from '@/lib/cart/MarketCartContext'
 
 const NAV_ITEMS = [
   { href: '/market',  icon: 'home',        label: 'Home' },
-  { href: '/shop',    icon: 'diversity_3',  label: 'Groups' },
+  { href: '/shop',    icon: 'diversity_3',  label: '공구' },
   { href: '/orders',  icon: 'local_mall',  label: 'Orders' },
   { href: '/profile', icon: 'person',      label: 'Profile' },
 ]

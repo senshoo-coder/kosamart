@@ -80,10 +80,11 @@ export async function POST(req: NextRequest) {
         customer_id: user.id,
         kakao_nickname: nickname,
         delivery_address,
-        customer_memo: delivery_memo,
+        delivery_memo: delivery_memo || null,
         total_amount,
         order_number: orderNumber,
         store_id,
+        store_name,
         owner_memo: `[상점가] ${store_name}`,
       })
       .select()

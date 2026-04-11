@@ -57,6 +57,19 @@ export default function AdminStoreManagePage({ params }: { params: Promise<{ sto
   const [isNewProduct, setIsNewProduct] = useState(false)
   const [saving, setSaving] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [imageHeight, setImageHeight] = useState(192)
+  const [imagePosition, setImagePosition] = useState('center')
+  const [savingImgSettings, setSavingImgSettings] = useState(false)
+
+  async function saveImageSettings(height: number, position: string) {
+    setSavingImgSettings(true)
+    await fetch('/api/admin/stores-config', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: storeId, image_height: height, image_position: position }),
+    }).catch(() => {})
+    setSavingImgSettings(false)
+  }
 
   useEffect(() => {
     // 동적 가게 정보 우선, 없으면 정적 fallback
@@ -65,7 +78,11 @@ export default function AdminStoreManagePage({ params }: { params: Promise<{ sto
       .then(({ data }) => {
         if (Array.isArray(data)) {
           const found = data.find((s: any) => s.id === storeId)
-          if (found) setStore(found as Store)
+          if (found) {
+            setStore(found as Store)
+            if (found.image_height) setImageHeight(found.image_height)
+            if (found.image_position) setImagePosition(found.image_position)
+          }
         }
       })
       .catch(() => {
@@ -309,12 +326,20 @@ export default function AdminStoreManagePage({ params }: { params: Promise<{ sto
       {/* 가게 대표 이미지 */}
       <div className="bg-white rounded-[8px] overflow-hidden" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
         <div
-          className="relative h-48 flex items-center justify-center cursor-pointer group"
+          className="relative w-full flex items-center justify-center cursor-pointer group overflow-hidden"
           onClick={() => triggerUpload('store', null)}
-          style={{ background: images['store'] ? undefined : `linear-gradient(160deg, ${ACCENT}60, ${ACCENT}20, #1a1c1c)` }}
+          style={{
+            height: imageHeight,
+            background: images['store'] ? undefined : `linear-gradient(160deg, ${ACCENT}60, ${ACCENT}20, #1a1c1c)`,
+          }}
         >
           {images['store'] ? (
-            <img src={images['store']} alt={storeName} className="w-full h-full object-cover" />
+            <img
+              src={images['store']}
+              alt={storeName}
+              className="w-full h-full object-cover"
+              style={{ objectPosition: imagePosition }}
+            />
           ) : (
             <span className="text-[80px] opacity-40 select-none">{storeEmoji}</span>
           )}
@@ -329,6 +354,57 @@ export default function AdminStoreManagePage({ params }: { params: Promise<{ sto
             </div>
           )}
         </div>
+
+        {/* 이미지 최적화 컨트롤 */}
+        {images['store'] && (
+          <div className="px-5 py-3 flex flex-wrap items-center gap-5 border-b border-[#f0f0f0]">
+            {/* 높이 */}
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-[#a3a3a3] font-medium w-8">높이</span>
+              <div className="flex gap-1">
+                {([128, 192, 256, 320] as const).map(h => (
+                  <button
+                    key={h}
+                    onClick={() => { setImageHeight(h); saveImageSettings(h, imagePosition) }}
+                    className="px-2.5 py-1 rounded-[6px] text-[11px] font-semibold transition-all"
+                    style={imageHeight === h
+                      ? { background: ACCENT, color: '#fff' }
+                      : { background: '#f0f0f0', color: '#666' }}
+                  >
+                    {h === 128 ? 'S' : h === 192 ? 'M' : h === 256 ? 'L' : 'XL'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 초점 위치 */}
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-[#a3a3a3] font-medium w-8">위치</span>
+              <div className="grid grid-cols-3 gap-0.5">
+                {([
+                  ['top left', '↖'], ['top', '↑'], ['top right', '↗'],
+                  ['left', '←'],    ['center', '＋'], ['right', '→'],
+                  ['bottom left', '↙'], ['bottom', '↓'], ['bottom right', '↘'],
+                ] as [string, string][]).map(([pos, icon]) => (
+                  <button
+                    key={pos}
+                    onClick={() => { setImagePosition(pos); saveImageSettings(imageHeight, pos) }}
+                    className="w-6 h-6 rounded-[4px] text-[11px] flex items-center justify-center transition-all"
+                    style={imagePosition === pos
+                      ? { background: ACCENT, color: '#fff' }
+                      : { background: '#f0f0f0', color: '#888' }}
+                  >
+                    {icon}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {savingImgSettings && (
+              <span className="text-[11px] text-[#a3a3a3]">저장 중…</span>
+            )}
+          </div>
+        )}
 
         {/* 가게 정보 */}
         <div className="p-5">

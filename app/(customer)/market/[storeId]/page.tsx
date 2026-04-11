@@ -115,10 +115,14 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
       </header>
 
       {/* 히어로 */}
-      <div className="h-52 relative overflow-hidden"
-        style={{ background: storeImages['store'] ? undefined : `linear-gradient(160deg, ${store.accentColor}60 0%, ${store.accentColor}20 60%, #1a1c1c 100%)` }}>
+      <div className="relative overflow-hidden"
+        style={{
+          height: (store as any).image_height || 208,
+          background: storeImages['store'] ? undefined : `linear-gradient(160deg, ${store.accentColor}60 0%, ${store.accentColor}20 60%, #1a1c1c 100%)`,
+        }}>
         {storeImages['store'] ? (
-          <img src={storeImages['store']} alt={store.name} className="w-full h-full object-cover" />
+          <img src={storeImages['store']} alt={store.name} className="w-full h-full object-cover"
+            style={{ objectPosition: (store as any).image_position || 'center' }} />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-[120px] opacity-30 select-none">{store.emoji}</div>
         )}

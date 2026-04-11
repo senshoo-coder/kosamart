@@ -147,14 +147,17 @@ export default function MarketPage() {
             const storeImage = allImages[store.id]?.store
             const storeCartCount = cart.getStoreItemCount(store.id)
 
+            const imgHeight = (store as any).image_height || 160
+            const imgPosition = (store as any).image_position || 'center'
+
             return (
               <Link key={store.id} href={`/market/${store.id}`} className="block">
                 <div className="bg-white rounded-[8px] overflow-hidden">
                   {/* 이미지 */}
-                  <div className="h-[160px] w-full flex items-center justify-center overflow-hidden relative"
-                    style={{ background: storeImage ? undefined : gradient }}>
+                  <div className="w-full flex items-center justify-center overflow-hidden relative"
+                    style={{ height: imgHeight, background: storeImage ? undefined : gradient }}>
                     {storeImage ? (
-                      <img src={storeImage} alt={store.name} className="w-full h-full object-cover" />
+                      <img src={storeImage} alt={store.name} className="w-full h-full object-cover" style={{ objectPosition: imgPosition }} />
                     ) : (
                       <span className="text-[72px] opacity-60 select-none">{store.emoji}</span>
                     )}

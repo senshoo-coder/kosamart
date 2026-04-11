@@ -311,12 +311,16 @@ export default function OwnerStorePage() {
       {/* 가게 대표 이미지 */}
       <div className="bg-white rounded-[8px] overflow-hidden" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
         <div
-          className="relative h-48 flex items-center justify-center cursor-pointer group"
+          className="relative w-full flex items-center justify-center cursor-pointer group overflow-hidden"
           onClick={() => triggerUpload('store', null)}
-          style={{ background: images['store'] ? undefined : `linear-gradient(160deg, ${accentColor}60, ${accentColor}20, #1a1c1c)` }}
+          style={{
+            height: (store as any)?.image_height || 192,
+            background: images['store'] ? undefined : `linear-gradient(160deg, ${accentColor}60, ${accentColor}20, #1a1c1c)`,
+          }}
         >
           {images['store'] ? (
-            <img src={images['store']} alt={storeName} className="w-full h-full object-cover" />
+            <img src={images['store']} alt={storeName} className="w-full h-full object-cover"
+              style={{ objectPosition: (store as any)?.image_position || 'center' }} />
           ) : (
             <span className="text-[80px] opacity-40 select-none">{storeEmoji}</span>
           )}

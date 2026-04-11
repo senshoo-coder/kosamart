@@ -157,7 +157,7 @@ export default function MarketPage() {
                   <div className="w-full flex items-center justify-center overflow-hidden relative"
                     style={{ height: imgHeight, background: storeImage ? undefined : gradient }}>
                     {storeImage ? (
-                      <img src={storeImage} alt={store.name} className="w-full h-full object-fill" style={{ objectPosition: imgPosition }} />
+                      <img src={storeImage} alt={store.name} className="w-full h-full object-contain" style={{ objectPosition: imgPosition }} />
                     ) : (
                       <span className="text-[72px] opacity-60 select-none">{store.emoji}</span>
                     )}

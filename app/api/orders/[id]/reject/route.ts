@@ -1,48 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { sendTelegramMessage, notifyAdmin, TelegramMessages } from '@/lib/telegram/messages'
+import { notifyAdmin } from '@/lib/telegram/messages'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const { rejected_reason } = await req.json()
+  const body = await req.json().catch(() => ({}))
+  const rejected_reason = body.rejected_reason || ''
 
-  if (!rejected_reason?.trim()) {
-    return NextResponse.json({ data: null, error: '거절 사유를 입력해주세요' }, { status: 400 })
+  if (!rejected_reason.trim()) {
+    return NextResponse.json({ data: null, error: '취소 사유를 입력해주세요' }, { status: 400 })
   }
 
   const supabase = await createAdminClient()
 
-  // rejected_reason 컬럼이 없을 수 있으므로 status만 먼저 업데이트
-  let result = await supabase
+  // 1단계: status 업데이트 (단순하게 select 없이)
+  const { error: updateError } = await supabase
     .from('orders')
-    .update({ status: 'cancelled', rejected_reason })
+    .update({ status: 'cancelled' })
     .eq('id', id)
-    .select('*, customer:users!orders_customer_id_fkey(telegram_chat_id)')
+
+  if (updateError) {
+    return NextResponse.json({ data: null, error: updateError.message }, { status: 500 })
+  }
+
+  // 2단계: 업데이트된 order 조회 (단순 select, 조인 없음)
+  const { data: order } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('id', id)
     .single()
 
-  // rejected_reason 컬럼이 없어서 실패한 경우 status만 재시도
-  if (result.error) {
-    result = await supabase
-      .from('orders')
-      .update({ status: 'cancelled' })
-      .eq('id', id)
-      .select('*, customer:users!orders_customer_id_fkey(telegram_chat_id)')
-      .single()
-  }
+  // 배달 레코드 취소
+  await supabase.from('deliveries').update({ status: 'cancelled' }).eq('order_id', id).catch(() => {})
 
-  const { data: order, error } = result
-  if (error) return NextResponse.json({ data: null, error: error.message }, { status: 500 })
+  // 관리자 알림 (실패해도 무시)
+  await notifyAdmin(`❌ [주문 취소] 주문ID: ${id} | 사유: ${rejected_reason}`).catch(() => {})
 
-  // 연결된 배달 레코드도 cancelled로 업데이트 (기사 목록에 뜨지 않도록)
-  await supabase.from('deliveries').update({ status: 'cancelled' }).eq('order_id', id)
-
-  // 고객 개인 텔레그램 알림
-  if (order.customer?.telegram_chat_id) {
-    await sendTelegramMessage(order.customer.telegram_chat_id, TelegramMessages.orderRejected(order))
-  }
-
-  // 관리자 알림
-  await notifyAdmin(`❌ [주문 거절] ${order.kakao_nickname} | 사유: ${rejected_reason}`)
-
-  return NextResponse.json({ data: order, error: null })
+  return NextResponse.json({ data: order ?? { id, status: 'cancelled' }, error: null })
 }

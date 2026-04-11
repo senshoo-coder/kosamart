@@ -19,6 +19,7 @@ export default function DriverDeliveriesPage() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const [heldIds, setHeldIds] = useState<Set<string>>(new Set())
+  const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set())
   const [showHeld, setShowHeld] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -63,6 +64,11 @@ export default function DriverDeliveriesPage() {
 
   function handleUnhold(deliveryId: string) {
     setHeldIds(prev => { const next = new Set(prev); next.delete(deliveryId); return next })
+  }
+
+  function handleDelete(deliveryId: string) {
+    setHeldIds(prev => { const next = new Set(prev); next.delete(deliveryId); return next })
+    setDeletedIds(prev => new Set([...prev, deliveryId]))
   }
 
   async function handlePickup(deliveryId: string) {
@@ -124,8 +130,8 @@ export default function DriverDeliveriesPage() {
   }
 
   const inProgressCount = deliveries.filter(d => ['picked_up', 'delivering'].includes(d.status)).length
-  const activeAvailable = available.filter(d => !heldIds.has(d.id))
-  const heldDeliveries = available.filter(d => heldIds.has(d.id))
+  const activeAvailable = available.filter(d => !heldIds.has(d.id) && !deletedIds.has(d.id))
+  const heldDeliveries = available.filter(d => heldIds.has(d.id) && !deletedIds.has(d.id))
 
   return (
     <div className="min-h-screen bg-[#f9f9f9]">
@@ -180,6 +186,7 @@ export default function DriverDeliveriesPage() {
                       delivery={delivery}
                       onClaim={() => handleClaim(delivery.id)}
                       onHold={() => handleHold(delivery.id)}
+                      onDelete={() => handleDelete(delivery.id)}
                       loading={actionLoading === delivery.id}
                     />
                   ))}
@@ -209,6 +216,7 @@ export default function DriverDeliveriesPage() {
                         delivery={delivery}
                         onClaim={() => handleClaim(delivery.id)}
                         onHold={() => handleUnhold(delivery.id)}
+                        onDelete={() => handleDelete(delivery.id)}
                         loading={actionLoading === delivery.id}
                         held
                       />
@@ -375,10 +383,11 @@ export default function DriverDeliveriesPage() {
   )
 }
 
-function AvailableCard({ delivery, onClaim, onHold, loading, held = false }: {
+function AvailableCard({ delivery, onClaim, onHold, onDelete, loading, held = false }: {
   delivery: Delivery
   onClaim: () => void
   onHold: () => void
+  onDelete: () => void
   loading: boolean
   held?: boolean
 }) {
@@ -426,13 +435,20 @@ function AvailableCard({ delivery, onClaim, onHold, loading, held = false }: {
           <button
             onClick={onHold}
             disabled={loading}
-            className="h-[42px] px-4 rounded-[10px] text-[13px] font-semibold disabled:opacity-60"
+            className="h-[42px] px-3 rounded-[10px] text-[13px] font-semibold disabled:opacity-60"
             style={held
               ? { background: '#e0f2fe', color: '#0369a1' }
               : { background: '#f1f5f9', color: '#64748b' }
             }
           >
             {held ? '보류 해제' : '⏸ 보류'}
+          </button>
+          <button
+            onClick={onDelete}
+            disabled={loading}
+            className="h-[42px] px-3 rounded-[10px] text-[13px] font-semibold disabled:opacity-60 bg-[#fee2e2] text-[#b91c1c]"
+          >
+            삭제
           </button>
         </div>
       </div>

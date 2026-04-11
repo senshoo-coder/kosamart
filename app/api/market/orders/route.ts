@@ -1,7 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { generateOrderNumber } from '@/lib/utils'
-import { notifyAdmin, TelegramMessages } from '@/lib/telegram/messages'
+import { notifyAdmin, notifyStore, TelegramMessages } from '@/lib/telegram/messages'
+
+const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const SUPA_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+
+async function getStoreChatId(storeId: string): Promise<string | null> {
+  try {
+    const res = await fetch(`${SUPA_URL}/storage/v1/object/authenticated/config/stores-config.json`, {
+      headers: { Authorization: `Bearer ${SUPA_KEY}`, apikey: SUPA_KEY },
+    })
+    if (!res.ok) return null
+    const config = await res.json()
+    const override = config?.overrides?.[storeId]
+    if (override?.telegram_chat_id) return override.telegram_chat_id
+    const custom = config?.custom?.find((s: any) => s.id === storeId)
+    return custom?.telegram_chat_id ?? null
+  } catch { return null }
+}
 
 const isDemoMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_URL?.startsWith('https')
 
@@ -117,7 +134,7 @@ export async function POST(req: NextRequest) {
     })
 
     // 텔레그램 알림 (실패해도 주문은 성공)
-    await notifyAdmin(TelegramMessages.newMarketOrder({
+    const msg = TelegramMessages.newMarketOrder({
       order_number: order.order_number,
       kakao_nickname: order.kakao_nickname,
       store_name,
@@ -125,7 +142,12 @@ export async function POST(req: NextRequest) {
       delivery_address: order.delivery_address,
       total_amount: order.total_amount,
       items: orderItems,
-    })).catch(e => console.error('[market/orders] telegram error:', e))
+    })
+    const storeChatId = await getStoreChatId(store_id).catch(() => null)
+    await Promise.all([
+      notifyAdmin(msg).catch(e => console.error('[market/orders] telegram admin error:', e)),
+      notifyStore(storeChatId, msg).catch(e => console.error('[market/orders] telegram store error:', e)),
+    ])
 
     return NextResponse.json({ data: order, error: null }, { status: 201 })
   } catch (e: any) {

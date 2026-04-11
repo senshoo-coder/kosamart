@@ -74,7 +74,7 @@ export async function PATCH(req: NextRequest) {
   }
 
   // owner가 수정 가능한 필드만 허용
-  const ALLOWED = ['hours', 'minOrder', 'deliveryFee', 'isOpen', 'bank_account']
+  const ALLOWED = ['hours', 'minOrder', 'deliveryFee', 'isOpen', 'bank_account', 'telegram_chat_id']
   const filtered: Record<string, any> = {}
   for (const f of ALLOWED) {
     if (f in fields) filtered[f] = fields[f]

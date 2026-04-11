@@ -43,7 +43,7 @@ function buildHours(start: number, end: number): string {
 const DEFAULT_STORE = {
   id: '', name: '', emoji: '🏪', category: '기타', description: '',
   isOpen: true, badge: '', hours: '09:00~18:00', minOrder: 10000,
-  deliveryFee: 0, accentColor: '#10b981', bank_account: '',
+  deliveryFee: 0, accentColor: '#10b981', bank_account: '', telegram_chat_id: '',
 }
 
 function Toggle({ checked, onChange, disabled }: { checked: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
@@ -157,6 +157,7 @@ export default function AdminStoresPage() {
       deliveryFee: store.deliveryFee,
       accentColor: store.accentColor,
       bank_account: (store as any).bank_account || '',
+      telegram_chat_id: (store as any).telegram_chat_id || '',
       isCustom: store.isCustom,
     })
     setIsNewStore(false)
@@ -482,6 +483,15 @@ export default function AdminStoresPage() {
                   placeholder="예: 국민은행 123-456-789012 (홍길동)"
                   className="w-full border border-[#e0e0e0] rounded-[8px] px-4 py-2.5 text-[14px] text-[#1a1c1c] placeholder-[#c0c0c0] outline-none focus:border-[#8B5CF6]" />
                 <p className="text-[11px] text-[#a3a3a3] mt-1">주문 결제 화면에 표시됩니다</p>
+              </div>
+
+              {/* 텔레그램 가게방 */}
+              <div>
+                <label className="text-[12px] font-semibold text-[#1a1c1c] mb-1.5 block">텔레그램 가게방 Chat ID (선택)</label>
+                <input value={editingStore.telegram_chat_id || ''} onChange={e => setEditingStore({ ...editingStore, telegram_chat_id: e.target.value })}
+                  placeholder="예: -1001234567890"
+                  className="w-full border border-[#e0e0e0] rounded-[8px] px-4 py-2.5 text-[14px] text-[#1a1c1c] placeholder-[#c0c0c0] outline-none focus:border-[#8B5CF6] font-mono" />
+                <p className="text-[11px] text-[#a3a3a3] mt-1">주문 발생 시 관리방 + 가게방으로 동시 알림 발송</p>
               </div>
 
               {/* 영업 여부 */}

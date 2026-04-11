@@ -29,7 +29,8 @@ export interface StoreData {
   minOrder: number
   deliveryFee: number
   accentColor: string
-  bank_account?: string  // 계좌이체 정보 (예: "국민은행 123-456-789012 (홍길동)")
+  bank_account?: string       // 계좌이체 정보 (예: "국민은행 123-456-789012 (홍길동)")
+  telegram_chat_id?: string   // 가게방 텔레그램 Chat ID
 }
 
 async function readConfig(): Promise<StoresConfig> {

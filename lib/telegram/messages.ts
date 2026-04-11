@@ -19,16 +19,21 @@ export async function sendTelegramMessage(chatId: string | number, text: string)
   }
 }
 
-// 관리자 채팅방 전체 발송
+// 관리방 (관리자+관리팀)
 export async function notifyAdmin(text: string) {
   const chatId = process.env.TELEGRAM_ADMIN_CHAT_ID
   if (chatId) await sendTelegramMessage(chatId, text)
 }
 
-// 배송팀 채팅방 발송
+// 배달방 (관리자+관리팀+배달기사)
 export async function notifyDriver(text: string, driverChatId?: number) {
   const chatId = driverChatId ?? process.env.TELEGRAM_DRIVER_CHAT_ID
   if (chatId) await sendTelegramMessage(chatId, text)
+}
+
+// 가게방 (사장+멤버+관리자+관리팀) — chat_id는 stores-config에서 가져옴
+export async function notifyStore(storeChatId: string | number | null | undefined, text: string) {
+  if (storeChatId) await sendTelegramMessage(storeChatId, text)
 }
 
 // =============================================

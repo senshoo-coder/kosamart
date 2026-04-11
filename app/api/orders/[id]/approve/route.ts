@@ -20,12 +20,37 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   if (updateError) return NextResponse.json({ data: null, error: updateError.message }, { status: 500 })
 
-  const { data: order } = await supabase.from('orders').select('*').eq('id', id).single()
+  const { data: order } = await supabase
+    .from('orders')
+    .select('*, order_items(*)')
+    .eq('id', id)
+    .single()
 
-  await notifyAdmin(`✅ [주문 승인] 주문ID: ${id} | ₩${order?.total_amount?.toLocaleString() ?? ''}`).catch(() => {})
-  // 픽업 주문은 배달방 알림 제외
-  if (order?.delivery_address !== '매장 픽업') {
-    await notifyDriver(`🚚 배달 준비 요청: 주문ID ${id}\n주소: ${order?.delivery_address ?? ''}`).catch(() => {})
+  const items = (order?.order_items ?? [])
+    .map((i: any) => `• ${i.product_name} x${i.quantity} (₩${i.subtotal?.toLocaleString()})`)
+    .join('\n')
+
+  const isPickup = order?.delivery_address === '매장 픽업'
+
+  const msg = [
+    `✅ <b>[주문 승인]</b>`,
+    ``,
+    `주문번호: <code>${order?.order_number ?? id}</code>`,
+    `주문자: <b>${order?.kakao_nickname ?? '-'}</b>`,
+    `전화번호: ${order?.customer_phone ?? '-'}`,
+    `매장: ${order?.store_name ?? '-'}`,
+    `유형: ${isPickup ? '🏪 매장 픽업' : '🚚 배송'}`,
+    !isPickup ? `주소: ${order?.delivery_address}` : null,
+    order?.delivery_memo ? `메모: ${order?.delivery_memo}` : null,
+    `금액: <b>₩${order?.total_amount?.toLocaleString() ?? ''}</b>`,
+    ``,
+    items ? `상품:\n${items}` : null,
+  ].filter(Boolean).join('\n')
+
+  await notifyAdmin(msg).catch(() => {})
+
+  if (!isPickup) {
+    await notifyDriver(`🚚 배달 준비 요청: ${order?.kakao_nickname}\n📍 ${order?.delivery_address ?? ''}\n📞 ${order?.customer_phone ?? '-'}`).catch(() => {})
   }
 
   return NextResponse.json({ data: order ?? { id, status: 'approved' }, error: null })

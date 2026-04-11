@@ -34,7 +34,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   try { await supabase.from('deliveries').update({ status: 'cancelled' }).eq('order_id', id) } catch {}
 
   // 관리자 알림 (실패해도 무시)
-  await notifyAdmin(`❌ [주문 취소] 주문ID: ${id} | 사유: ${rejected_reason}`).catch(() => {})
+  const cancelMsg = [
+    `❌ <b>[주문 취소]</b>`,
+    ``,
+    `주문번호: <code>${order?.order_number ?? id}</code>`,
+    `주문자: <b>${order?.kakao_nickname ?? '-'}</b>`,
+    `전화번호: ${order?.customer_phone ?? '-'}`,
+    `매장: ${order?.store_name ?? '-'}`,
+    `금액: ₩${order?.total_amount?.toLocaleString() ?? ''}`,
+    `사유: <b>${rejected_reason}</b>`,
+  ].join('\n')
+  await notifyAdmin(cancelMsg).catch(() => {})
 
   return NextResponse.json({ data: order ?? { id, status: 'cancelled' }, error: null })
 }

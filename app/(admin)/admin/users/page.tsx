@@ -46,6 +46,10 @@ export default function AdminUsersPage() {
   const [selectedStoreId, setSelectedStoreId] = useState('')
   const [storeOptions, setStoreOptions] = useState<StoreOption[]>(STORES.map(s => ({ id: s.id, name: s.name, emoji: s.emoji })))
   const [assignLoading, setAssignLoading] = useState(false)
+  const [editModal, setEditModal] = useState<UserRow | null>(null)
+  const [editForm, setEditForm] = useState({ nickname: '', phone: '', role: '' })
+  const [editLoading, setEditLoading] = useState(false)
+  const [editError, setEditError] = useState('')
 
   const loadUsers = useCallback(async () => {
     setLoading(true)
@@ -63,6 +67,23 @@ export default function AdminUsersPage() {
       if (Array.isArray(data)) setStoreOptions(data.map((s: any) => ({ id: s.id, name: s.name, emoji: s.emoji || '🏪' })))
     }).catch(() => {})
   }, [])
+
+  async function handleEditSave() {
+    if (!editModal) return
+    setEditError('')
+    if (!editForm.nickname.trim()) { setEditError('닉네임을 입력하세요'); return }
+    setEditLoading(true)
+    const res = await fetch(`/api/admin/users/${editModal.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'update_info', ...editForm }),
+    })
+    const json = await res.json()
+    if (!res.ok) { setEditError(json.error || '수정 실패'); setEditLoading(false); return }
+    setEditModal(null)
+    await loadUsers()
+    setEditLoading(false)
+  }
 
   async function handleAssignStore() {
     if (!storeModal) return
@@ -223,6 +244,11 @@ export default function AdminUsersPage() {
                             {actionLoading === user.id + 'approve' ? '…' : '활성화'}
                           </button>
                         )}
+                        <button
+                          onClick={() => { setEditModal(user); setEditForm({ nickname: user.nickname, phone: user.phone || '', role: user.role }); setEditError('') }}
+                          className="text-[11px] px-3 py-1.5 rounded-[8px] bg-[#eff6ff] text-[#1d4ed8] font-medium border border-[#dbeafe]">
+                          ✏️ 수정
+                        </button>
                         {user.role === 'owner' && (
                           <button
                             onClick={() => { setStoreModal(user); setSelectedStoreId(user.store_id || '') }}
@@ -292,6 +318,42 @@ export default function AdminUsersPage() {
             <div className="flex gap-3 pt-2">
               <Button variant="secondary" className="flex-1" onClick={() => setShowCreate(false)}>취소</Button>
               <Button className="flex-1" onClick={handleCreate} loading={createLoading}>생성</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 유저 정보 수정 모달 */}
+      {editModal && (
+        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center px-4 pb-4"
+          onClick={e => { if (e.target === e.currentTarget) setEditModal(null) }}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div className="relative w-full max-w-sm bg-white rounded-[16px] p-6 space-y-4">
+            <div>
+              <h3 className="text-[16px] font-bold text-[#1a1c1c]">유저 정보 수정</h3>
+              <p className="text-[11px] text-[#a3a3a3] mt-0.5 font-mono">{editModal.id.slice(0, 8)}…</p>
+            </div>
+            <Input label="닉네임" value={editForm.nickname} onChange={e => setEditForm(f => ({ ...f, nickname: e.target.value }))} />
+            <Input label="전화번호 (선택)" value={editForm.phone} onChange={e => setEditForm(f => ({ ...f, phone: e.target.value }))} placeholder="010-0000-0000" />
+            <div>
+              <p className="text-[11px] text-[#3c4a42] tracking-[0.5px] uppercase mb-2 font-medium">역할</p>
+              <div className="flex gap-2">
+                {(['customer', 'owner', 'driver', 'admin'] as const).map(r => (
+                  <button key={r} onClick={() => setEditForm(f => ({ ...f, role: r }))}
+                    className="flex-1 py-2 rounded-[10px] text-[11px] font-medium transition-colors"
+                    style={editForm.role === r
+                      ? { background: '#6d28d9', color: '#fff' }
+                      : { background: '#f2f4f6', color: '#1a1c1c' }
+                    }>
+                    {ROLE_LABELS[r]}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {editError && <p className="text-[#b91c1c] text-[12px]">{editError}</p>}
+            <div className="flex gap-3 pt-2">
+              <Button variant="secondary" className="flex-1" onClick={() => setEditModal(null)}>취소</Button>
+              <Button className="flex-1" loading={editLoading} onClick={handleEditSave}>저장</Button>
             </div>
           </div>
         </div>

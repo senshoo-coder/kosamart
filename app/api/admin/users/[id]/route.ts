@@ -42,6 +42,17 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ data, error: null })
   }
 
+  if (action === 'update_info') {
+    const { nickname, phone, role } = body
+    if (!nickname?.trim()) return NextResponse.json({ data: null, error: '닉네임을 입력하세요' }, { status: 400 })
+    const { data, error } = await supabase
+      .from('users').update({ nickname: nickname.trim(), phone: phone || null, role: role || undefined })
+      .eq('id', id)
+      .select('id, nickname, role, status, phone, store_id').single()
+    if (error) return NextResponse.json({ data: null, error: error.message }, { status: 500 })
+    return NextResponse.json({ data, error: null })
+  }
+
   if (action === 'assign_store') {
     const { store_id } = body
     const { data, error } = await supabase

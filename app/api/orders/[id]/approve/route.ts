@@ -23,7 +23,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { data: order } = await supabase.from('orders').select('*').eq('id', id).single()
 
   await notifyAdmin(`✅ [주문 승인] 주문ID: ${id} | ₩${order?.total_amount?.toLocaleString() ?? ''}`).catch(() => {})
-  await notifyDriver(`🚚 배달 준비 요청: 주문ID ${id}\n주소: ${order?.delivery_address ?? ''}`).catch(() => {})
+  // 픽업 주문은 배달방 알림 제외
+  if (order?.delivery_address !== '매장 픽업') {
+    await notifyDriver(`🚚 배달 준비 요청: 주문ID ${id}\n주소: ${order?.delivery_address ?? ''}`).catch(() => {})
+  }
 
   return NextResponse.json({ data: order ?? { id, status: 'approved' }, error: null })
 }

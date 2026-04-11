@@ -12,7 +12,9 @@ export async function POST(req: NextRequest) {
     switch (new_status) {
       case 'approved':
         await notifyAdmin(TelegramMessages.orderApproved(order))
-        await notifyDriver(`🚚 새 배달 준비 요청: ${order.kakao_nickname}\n📍 ${order.delivery_address}`)
+        if (order.delivery_address !== '매장 픽업') {
+          await notifyDriver(`🚚 새 배달 준비 요청: ${order.kakao_nickname}\n📍 ${order.delivery_address}`)
+        }
         break
       case 'rejected':
         await notifyAdmin(TelegramMessages.orderRejected(order))

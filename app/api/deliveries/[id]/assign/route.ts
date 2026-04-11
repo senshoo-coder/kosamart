@@ -24,16 +24,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const { data } = await supabase.from('users').select('id, nickname').eq('device_uuid', driver_uuid).single()
     driver = data
   }
-  // 데모 기사 계정 fallback (DB에 없는 경우)
-  if (!driver && cookieRole === 'driver' && cookieUserId) {
+  // 데모 기사 계정 fallback (DB에 없는 경우 — device_uuid로 upsert)
+  if (!driver && cookieRole === 'driver' && driver_uuid) {
     const { error: upsertErr } = await supabase
       .from('users')
       .upsert(
-        { id: cookieUserId, nickname: '배달기사', role: 'driver', device_uuid: driver_uuid || cookieUserId, password_hash: 'demo', status: 'active' },
-        { onConflict: 'id', ignoreDuplicates: true }
+        { device_uuid: driver_uuid, nickname: '배달기사', role: 'driver', password_hash: 'demo', status: 'active' },
+        { onConflict: 'device_uuid', ignoreDuplicates: true }
       )
     if (!upsertErr) {
-      driver = { id: cookieUserId, nickname: '배달기사' }
+      const { data: created } = await supabase.from('users').select('id, nickname').eq('device_uuid', driver_uuid).single()
+      driver = created
     }
   }
 

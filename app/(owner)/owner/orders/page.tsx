@@ -57,11 +57,23 @@ function OwnerOrdersContent() {
   async function handleReject() {
     if (!rejectModal || !rejectReason.trim()) return
     setActionLoading(rejectModal.orderId)
-    await fetch(`/api/orders/${rejectModal.orderId}/reject`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ rejected_reason: rejectReason }),
-    })
+    try {
+      const res = await fetch(`/api/orders/${rejectModal.orderId}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rejected_reason: rejectReason }),
+      })
+      const json = await res.json()
+      if (!res.ok || json.error) {
+        alert(`거절 처리 실패: ${json.error || '알 수 없는 오류'}`)
+        setActionLoading(null)
+        return
+      }
+    } catch {
+      alert('네트워크 오류가 발생했습니다')
+      setActionLoading(null)
+      return
+    }
     setRejectModal(null)
     setRejectReason('')
     loadOrders()
@@ -241,17 +253,17 @@ function OwnerOrdersContent() {
         >
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <div className="relative w-full max-w-sm bg-white rounded-[16px] p-6">
-            <h3 className="text-[16px] font-bold text-[#1a1c1c] mb-1">주문 거절</h3>
+            <h3 className="text-[16px] font-bold text-[#1a1c1c] mb-1">주문 취소 처리</h3>
             <p className="text-[11px] text-[#a3a3a3] mb-4 font-mono">{rejectModal.orderNumber}</p>
             <textarea
               value={rejectReason}
               onChange={e => setRejectReason(e.target.value)}
-              placeholder="거절 사유 입력 (필수)"
+              placeholder="취소 사유 입력 (필수) — 예: 재료 소진, 영업 종료 등"
               className="w-full bg-[#f2f4f6] border border-transparent rounded-[12px] px-4 py-3 text-[#1a1c1c] text-[14px] placeholder-[#a3a3a3] outline-none focus:border-[#10b981] focus:bg-white resize-none h-24"
             />
             <div className="flex gap-3 mt-4">
-              <Button variant="secondary" className="flex-1" onClick={() => setRejectModal(null)}>취소</Button>
-              <Button variant="danger" className="flex-1" onClick={handleReject} loading={!!actionLoading}>거절 확정</Button>
+              <Button variant="secondary" className="flex-1" onClick={() => setRejectModal(null)}>닫기</Button>
+              <Button variant="danger" className="flex-1" onClick={handleReject} loading={!!actionLoading}>취소 확정</Button>
             </div>
           </div>
         </div>

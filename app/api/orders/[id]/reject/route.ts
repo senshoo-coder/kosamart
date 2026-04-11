@@ -11,13 +11,26 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   }
 
   const supabase = await createAdminClient()
-  const { data: order, error } = await supabase
+
+  // rejected_reason 컬럼이 없을 수 있으므로 status만 먼저 업데이트
+  let result = await supabase
     .from('orders')
-    .update({ status: 'rejected', rejected_reason })
+    .update({ status: 'cancelled', rejected_reason })
     .eq('id', id)
     .select('*, customer:users!orders_customer_id_fkey(telegram_chat_id)')
     .single()
 
+  // rejected_reason 컬럼이 없어서 실패한 경우 status만 재시도
+  if (result.error) {
+    result = await supabase
+      .from('orders')
+      .update({ status: 'cancelled' })
+      .eq('id', id)
+      .select('*, customer:users!orders_customer_id_fkey(telegram_chat_id)')
+      .single()
+  }
+
+  const { data: order, error } = result
   if (error) return NextResponse.json({ data: null, error: error.message }, { status: 500 })
 
   // 연결된 배달 레코드도 cancelled로 업데이트 (기사 목록에 뜨지 않도록)

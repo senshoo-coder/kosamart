@@ -43,6 +43,9 @@ export default function OwnerStorePage() {
   const [storeId, setStoreId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [products, setProducts] = useState<DBProduct[]>([])
+  const [editingInfo, setEditingInfo] = useState(false)
+  const [infoForm, setInfoForm] = useState({ hours: '', minOrder: 0, deliveryFee: 0 })
+  const [savingInfo, setSavingInfo] = useState(false)
   const [images, setImages] = useState<ImageMap>({})
   const [uploading, setUploading] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -82,6 +85,32 @@ export default function OwnerStorePage() {
     } catch {}
     setLoading(false)
   }, [])
+
+  function startEditInfo() {
+    setInfoForm({
+      hours: store?.hours || '',
+      minOrder: store?.minOrder || 0,
+      deliveryFee: store?.deliveryFee || 0,
+    })
+    setEditingInfo(true)
+  }
+
+  async function saveInfo() {
+    if (!storeId) return
+    setSavingInfo(true)
+    try {
+      const res = await fetch('/api/store/info', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ store_id: storeId, ...infoForm }),
+      })
+      const json = await res.json()
+      if (json.error) { alert(json.error); return }
+      setStore((prev: any) => prev ? { ...prev, ...infoForm } : prev)
+      setEditingInfo(false)
+    } catch { alert('저장 중 오류가 발생했습니다') }
+    finally { setSavingInfo(false) }
+  }
 
   async function loadProducts(sid: string) {
     try {
@@ -357,24 +386,85 @@ export default function OwnerStorePage() {
 
           <p className="text-[13px] text-[#3c4a42] mb-4">{store?.description}</p>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-[#f9f9f9] rounded-[8px] p-3">
-              <p className="text-[11px] text-[#a3a3a3] mb-1">영업시간</p>
-              <p className="text-[13px] font-semibold text-[#1a1c1c]">{store?.hours || '—'}</p>
+          {/* 영업정보 — 보기/편집 전환 */}
+          {editingInfo ? (
+            <div className="flex flex-col gap-3">
+              <div>
+                <label className="text-[11px] text-[#a3a3a3] font-medium block mb-1">영업시간</label>
+                <input
+                  type="text"
+                  value={infoForm.hours}
+                  onChange={e => setInfoForm(f => ({ ...f, hours: e.target.value }))}
+                  placeholder="예) 09:00 ~ 20:00"
+                  className="w-full border border-[#e0e0e0] rounded-[8px] px-3 py-2 text-[13px] text-[#1a1c1c] focus:outline-none focus:border-[#0058be]"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[11px] text-[#a3a3a3] font-medium block mb-1">최소 주문 (원)</label>
+                  <input
+                    type="number"
+                    value={infoForm.minOrder}
+                    onChange={e => setInfoForm(f => ({ ...f, minOrder: Number(e.target.value) }))}
+                    className="w-full border border-[#e0e0e0] rounded-[8px] px-3 py-2 text-[13px] text-[#1a1c1c] focus:outline-none focus:border-[#0058be]"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] text-[#a3a3a3] font-medium block mb-1">배달비 (원, 0=무료)</label>
+                  <input
+                    type="number"
+                    value={infoForm.deliveryFee}
+                    onChange={e => setInfoForm(f => ({ ...f, deliveryFee: Number(e.target.value) }))}
+                    className="w-full border border-[#e0e0e0] rounded-[8px] px-3 py-2 text-[13px] text-[#1a1c1c] focus:outline-none focus:border-[#0058be]"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2 pt-1">
+                <button
+                  onClick={saveInfo}
+                  disabled={savingInfo}
+                  className="flex-1 py-2.5 rounded-[8px] text-[13px] font-semibold text-white"
+                  style={{ background: accentColor, opacity: savingInfo ? 0.6 : 1 }}
+                >
+                  {savingInfo ? '저장 중…' : '저장'}
+                </button>
+                <button
+                  onClick={() => setEditingInfo(false)}
+                  className="px-5 py-2.5 rounded-[8px] text-[13px] font-medium text-[#666] bg-[#f0f0f0]"
+                >
+                  취소
+                </button>
+              </div>
             </div>
-            <div className="bg-[#f9f9f9] rounded-[8px] p-3">
-              <p className="text-[11px] text-[#a3a3a3] mb-1">최소 주문</p>
-              <p className="text-[13px] font-semibold text-[#1a1c1c]">{store?.minOrder.toLocaleString()}원</p>
+          ) : (
+            <div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-[#f9f9f9] rounded-[8px] p-3">
+                  <p className="text-[11px] text-[#a3a3a3] mb-1">영업시간</p>
+                  <p className="text-[13px] font-semibold text-[#1a1c1c]">{store?.hours || '—'}</p>
+                </div>
+                <div className="bg-[#f9f9f9] rounded-[8px] p-3">
+                  <p className="text-[11px] text-[#a3a3a3] mb-1">최소 주문</p>
+                  <p className="text-[13px] font-semibold text-[#1a1c1c]">{store?.minOrder?.toLocaleString()}원</p>
+                </div>
+                <div className="bg-[#f9f9f9] rounded-[8px] p-3">
+                  <p className="text-[11px] text-[#a3a3a3] mb-1">배달비</p>
+                  <p className="text-[13px] font-semibold text-[#1a1c1c]">{store?.deliveryFee === 0 ? '무료' : `${store?.deliveryFee?.toLocaleString()}원`}</p>
+                </div>
+                <div className="bg-[#f9f9f9] rounded-[8px] p-3">
+                  <p className="text-[11px] text-[#a3a3a3] mb-1">판매 상품</p>
+                  <p className="text-[13px] font-semibold text-[#1a1c1c]">{products.length}개</p>
+                </div>
+              </div>
+              <button
+                onClick={startEditInfo}
+                className="mt-3 w-full py-2 rounded-[8px] text-[13px] font-medium border"
+                style={{ color: accentColor, borderColor: accentColor + '40', background: accentColor + '08' }}
+              >
+                영업정보 수정
+              </button>
             </div>
-            <div className="bg-[#f9f9f9] rounded-[8px] p-3">
-              <p className="text-[11px] text-[#a3a3a3] mb-1">배달비</p>
-              <p className="text-[13px] font-semibold text-[#1a1c1c]">{store?.deliveryFee === 0 ? '무료' : `${store?.deliveryFee.toLocaleString()}원`}</p>
-            </div>
-            <div className="bg-[#f9f9f9] rounded-[8px] p-3">
-              <p className="text-[11px] text-[#a3a3a3] mb-1">판매 상품</p>
-              <p className="text-[13px] font-semibold text-[#1a1c1c]">{products.length}개</p>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 

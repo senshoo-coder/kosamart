@@ -18,6 +18,8 @@ export default function DriverDeliveriesPage() {
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
+  const [heldIds, setHeldIds] = useState<Set<string>>(new Set())
+  const [showHeld, setShowHeld] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const driverUuid = getLocalStorage('cosmart_device_uuid')
@@ -53,6 +55,14 @@ export default function DriverDeliveriesPage() {
     if (!res.ok) { const d = await res.json(); alert(d.error || '배달 수락 실패') }
     loadAll()
     setActionLoading(null)
+  }
+
+  function handleHold(deliveryId: string) {
+    setHeldIds(prev => new Set([...prev, deliveryId]))
+  }
+
+  function handleUnhold(deliveryId: string) {
+    setHeldIds(prev => { const next = new Set(prev); next.delete(deliveryId); return next })
   }
 
   async function handlePickup(deliveryId: string) {
@@ -114,6 +124,8 @@ export default function DriverDeliveriesPage() {
   }
 
   const inProgressCount = deliveries.filter(d => ['picked_up', 'delivering'].includes(d.status)).length
+  const activeAvailable = available.filter(d => !heldIds.has(d.id))
+  const heldDeliveries = available.filter(d => heldIds.has(d.id))
 
   return (
     <div className="min-h-screen bg-[#f9f9f9]">
@@ -125,7 +137,7 @@ export default function DriverDeliveriesPage() {
         <div>
           <h1 className="text-[17px] font-bold text-[#1a1c1c]">배달 목록</h1>
           <p className="text-[11px] text-[#a3a3a3]">
-            수락가능 {available.length}건 · 배달중 {inProgressCount}건
+            수락가능 {activeAvailable.length}건 · 배달중 {inProgressCount}건{heldDeliveries.length > 0 ? ` · 보류 ${heldDeliveries.length}건` : ''}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -152,25 +164,57 @@ export default function DriverDeliveriesPage() {
         ) : (
           <>
             {/* 수락 가능한 배달 */}
-            {available.length > 0 && (
+            {activeAvailable.length > 0 && (
               <section>
                 <div className="flex items-center gap-2 mb-3">
                   <span className="w-2 h-2 bg-[#10b981] rounded-full animate-pulse" />
                   <h2 className="text-[13px] font-bold text-[#1a1c1c]">수락 가능한 배달</h2>
                   <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#d1fae5] text-[#065f46]">
-                    {available.length}건
+                    {activeAvailable.length}건
                   </span>
                 </div>
                 <div className="space-y-3">
-                  {available.map(delivery => (
+                  {activeAvailable.map(delivery => (
                     <AvailableCard
                       key={delivery.id}
                       delivery={delivery}
                       onClaim={() => handleClaim(delivery.id)}
+                      onHold={() => handleHold(delivery.id)}
                       loading={actionLoading === delivery.id}
                     />
                   ))}
                 </div>
+              </section>
+            )}
+
+            {/* 보류한 배달 */}
+            {heldDeliveries.length > 0 && (
+              <section>
+                <button
+                  onClick={() => setShowHeld(v => !v)}
+                  className="flex items-center gap-2 mb-3 w-full text-left"
+                >
+                  <span className="w-2 h-2 bg-[#94a3b8] rounded-full" />
+                  <h2 className="text-[13px] font-bold text-[#64748b]">보류한 배달</h2>
+                  <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#f1f5f9] text-[#64748b]">
+                    {heldDeliveries.length}건
+                  </span>
+                  <span className="ml-auto text-[11px] text-[#94a3b8]">{showHeld ? '접기 ▲' : '펼치기 ▼'}</span>
+                </button>
+                {showHeld && (
+                  <div className="space-y-3">
+                    {heldDeliveries.map(delivery => (
+                      <AvailableCard
+                        key={delivery.id}
+                        delivery={delivery}
+                        onClaim={() => handleClaim(delivery.id)}
+                        onHold={() => handleUnhold(delivery.id)}
+                        loading={actionLoading === delivery.id}
+                        held
+                      />
+                    ))}
+                  </div>
+                )}
               </section>
             )}
 
@@ -331,21 +375,28 @@ export default function DriverDeliveriesPage() {
   )
 }
 
-function AvailableCard({ delivery, onClaim, loading }: {
+function AvailableCard({ delivery, onClaim, onHold, loading, held = false }: {
   delivery: Delivery
   onClaim: () => void
+  onHold: () => void
   loading: boolean
+  held?: boolean
 }) {
   const order = delivery.order
+  const borderColor = held ? '#94a3b8' : '#10b981'
   return (
-    <div className="bg-white rounded-[8px] overflow-hidden" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)', borderLeft: '3px solid #10b981' }}>
+    <div className="bg-white rounded-[8px] overflow-hidden" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)', borderLeft: `3px solid ${borderColor}` }}>
       <div className="p-4">
         <div className="flex items-start justify-between mb-2">
           <div>
             <p className="text-[14px] font-bold text-[#1a1c1c]">{order?.kakao_nickname}</p>
             <p className="text-[11px] text-[#a3a3a3] font-mono">{order?.order_number}</p>
           </div>
-          <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#d1fae5] text-[#065f46] font-medium">수락가능</span>
+          {held ? (
+            <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#f1f5f9] text-[#64748b] font-medium">보류중</span>
+          ) : (
+            <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#d1fae5] text-[#065f46] font-medium">수락가능</span>
+          )}
         </div>
         <div className="space-y-1.5 mb-3">
           <div className="flex items-start gap-2">
@@ -362,15 +413,28 @@ function AvailableCard({ delivery, onClaim, loading }: {
             <p className="text-[14px] font-bold text-[#10b981] ml-5">{formatPrice(order.total_amount)}</p>
           )}
         </div>
-        <button
-          onClick={onClaim}
-          disabled={loading}
-          className="w-full h-[42px] rounded-[10px] bg-[#10b981] text-white text-[13px] font-semibold disabled:opacity-60 flex items-center justify-center gap-2"
-        >
-          {loading ? (
-            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          ) : '🙋 배달 수락하기'}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={onClaim}
+            disabled={loading}
+            className="flex-1 h-[42px] rounded-[10px] bg-[#10b981] text-white text-[13px] font-semibold disabled:opacity-60 flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : '🙋 배달 수락하기'}
+          </button>
+          <button
+            onClick={onHold}
+            disabled={loading}
+            className="h-[42px] px-4 rounded-[10px] text-[13px] font-semibold disabled:opacity-60"
+            style={held
+              ? { background: '#e0f2fe', color: '#0369a1' }
+              : { background: '#f1f5f9', color: '#64748b' }
+            }
+          >
+            {held ? '보류 해제' : '⏸ 보류'}
+          </button>
+        </div>
       </div>
     </div>
   )

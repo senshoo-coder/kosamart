@@ -91,14 +91,14 @@ export default function CartPage() {
     return map
   }, [storeIds.join(','), dynamicStores])
 
-  const someStoreNoSlots = pickupType === 'delivery' && storeIds.some(sid => storeSlotsMap[sid]?.length === 0)
+  const someStoreNoSlots = storeIds.some(sid => storeSlotsMap[sid]?.length === 0)
 
   async function handleOrder() {
-    if (pickupType === 'delivery' && someStoreNoSlots) {
+    if (someStoreNoSlots) {
       alert('일부 가게의 운영시간이 종료되었습니다. 내일 다시 주문해주세요.')
       return
     }
-    if (pickupType === 'delivery' && !phone.trim()) {
+    if (!phone.trim()) {
       alert('전화번호를 입력해주세요')
       return
     }
@@ -129,7 +129,7 @@ export default function CartPage() {
     }
 
     try {
-      if (pickupType === 'delivery') setLocalStorage('cosmart_phone', phone)
+      setLocalStorage('cosmart_phone', phone)
 
       const results = await Promise.all(storeIds.map(async sid => {
         const store = getStore(sid)
@@ -152,12 +152,10 @@ export default function CartPage() {
             store_name: (dynamicStores[sid]?.name) || store?.name || sid,
             device_uuid: deviceUuid,
             nickname,
-            customer_phone: pickupType === 'delivery' ? phone.trim() : undefined,
+            customer_phone: phone.trim(),
             pickup_type: pickupType,
             delivery_address: pickupType === 'delivery' ? address : '매장 픽업',
-            delivery_memo: pickupType === 'delivery'
-              ? `희망시간 ${slotLabel}${memo ? ' / ' + memo : ''}`
-              : memo,
+            delivery_memo: `희망시간 ${slotLabel}${memo ? ' / ' + memo : ''}`,
             items,
             total_amount,
           }),
@@ -324,10 +322,10 @@ export default function CartPage() {
             </button>
           </div>
 
-          {/* 전화번호 — 배송 시 필수 */}
+          {/* 전화번호 — 항상 필수 */}
           <div>
             <label className="text-[12px] text-[#a3a3a3] mb-1.5 block">
-              전화번호 {pickupType === 'delivery' ? <span className="text-[#dc2626]">*</span> : '(선택)'}
+              전화번호 <span className="text-[#dc2626]">*</span>
             </label>
             <input
               type="tel"
@@ -351,8 +349,8 @@ export default function CartPage() {
             </div>
           )}
 
-          {/* 가게별 희망 수령 시간 */}
-          {pickupType === 'delivery' && storeIds.map(sid => {
+          {/* 가게별 희망 수령 시간 (배송·픽업 공통) */}
+          {storeIds.map(sid => {
             const storeInfo = dynamicStores[sid] || getStore(sid)
             const slots = storeSlotsMap[sid] || []
             const currentSlot = timeSlots[sid] ?? ''

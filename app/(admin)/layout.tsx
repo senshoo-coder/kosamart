@@ -4,10 +4,10 @@ import { AdminSidebar } from '@/components/layout/AdminSidebar'
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav'
 
 const MOBILE_NAV = [
-  { href: '/admin/dashboard', icon: '📊', label: '대시보드' },
-  { href: '/admin/stores',    icon: '🏪', label: '가게' },
-  { href: '/admin/orders',    icon: '📋', label: '주문' },
-  { href: '/admin/drivers',   icon: '🚴', label: '기사' },
+  { href: '/admin/dashboard', icon: 'dashboard',       label: 'Dash' },
+  { href: '/admin/stores',    icon: 'storefront',      label: 'Stores' },
+  { href: '/admin/orders',    icon: 'receipt_long',    label: 'Orders' },
+  { href: '/admin/drivers',   icon: 'directions_bike', label: 'Drivers' },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

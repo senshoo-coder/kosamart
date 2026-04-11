@@ -2,10 +2,10 @@ import { MobileBottomNav } from '@/components/layout/MobileBottomNav'
 import { MarketCartProvider } from '@/lib/cart/MarketCartContext'
 
 const NAV_ITEMS = [
-  { href: '/market',  icon: '🏪', label: '상점가' },
-  { href: '/shop',    icon: '🛒', label: '공동구매' },
-  { href: '/orders',  icon: '📋', label: '주문내역' },
-  { href: '/profile', icon: '👤', label: '프로필' },
+  { href: '/market',  icon: 'home',        label: 'Home' },
+  { href: '/shop',    icon: 'diversity_3',  label: 'Groups' },
+  { href: '/orders',  icon: 'local_mall',  label: 'Orders' },
+  { href: '/profile', icon: 'person',      label: 'Profile' },
 ]
 
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {

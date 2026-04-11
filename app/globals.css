@@ -1,55 +1,155 @@
 @import "tailwindcss";
 
+@theme {
+  /* Stitch Design System - Precision Minimalism */
+
+  /* Primary (Customer - Emerald) */
+  --color-primary: #006c49;
+  --color-primary-container: #10b981;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #00422b;
+  --color-primary-fixed: #6ffbbe;
+  --color-primary-fixed-dim: #4edea3;
+  --color-on-primary-fixed: #002113;
+  --color-on-primary-fixed-variant: #005236;
+
+  /* Secondary (Owner - Blue) */
+  --color-secondary: #0058be;
+  --color-secondary-container: #2170e4;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #fefcff;
+  --color-secondary-fixed: #d8e2ff;
+  --color-secondary-fixed-dim: #adc6ff;
+  --color-on-secondary-fixed: #001a42;
+  --color-on-secondary-fixed-variant: #004395;
+
+  /* Tertiary (Driver - Amber) */
+  --color-tertiary: #855300;
+  --color-tertiary-container: #e29100;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #523200;
+  --color-tertiary-fixed: #ffddb8;
+  --color-tertiary-fixed-dim: #ffb95f;
+  --color-on-tertiary-fixed: #2a1700;
+  --color-on-tertiary-fixed-variant: #653e00;
+
+  /* Quaternary (Admin - Purple) */
+  --color-quaternary: #8B5CF6;
+  --color-quaternary-container: #C4B5FD;
+
+  /* Surface Scale */
+  --color-surface: #f7f9fb;
+  --color-surface-bright: #f7f9fb;
+  --color-surface-dim: #d8dadc;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f2f4f6;
+  --color-surface-container: #eceef0;
+  --color-surface-container-high: #e6e8ea;
+  --color-surface-container-highest: #e0e3e5;
+  --color-surface-variant: #e0e3e5;
+  --color-surface-tint: #006c49;
+
+  /* On Surface */
+  --color-on-surface: #191c1e;
+  --color-on-surface-variant: #3c4a42;
+  --color-on-background: #191c1e;
+  --color-background: #f7f9fb;
+
+  /* Outline */
+  --color-outline: #6c7a71;
+  --color-outline-variant: #bbcabf;
+
+  /* Inverse */
+  --color-inverse-surface: #2d3133;
+  --color-inverse-primary: #4edea3;
+  --color-inverse-on-surface: #eff1f3;
+
+  /* Error */
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error: #ffffff;
+  --color-on-error-container: #93000a;
+
+  /* Border Radius */
+  --radius-DEFAULT: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-full: 9999px;
+
+  /* Font Family */
+  --font-headline: "Plus Jakarta Sans", sans-serif;
+  --font-body: "Pretendard", "Inter", sans-serif;
+}
+
 * { box-sizing: border-box; }
 
 html, body {
-  background: #060B18;
-  color: #F1F5F9;
-  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f7f9fb;
+  color: #191c1e;
+  font-family: 'Pretendard', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Plus Jakarta Sans', 'Pretendard', sans-serif;
+}
+
+/* Scrollbar */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 2px; }
 
+/* Stitch Design Utilities */
+
+/* Page background */
 .gradient-bg {
-  background:
-    radial-gradient(ellipse at top left, rgba(16,185,129,0.12) 0%, transparent 45%),
-    radial-gradient(ellipse at bottom right, rgba(99,102,241,0.08) 0%, transparent 45%),
-    #060B18;
+  background: #f7f9fb;
 }
 
-.glass {
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.08);
+/* Elevated card - white on light bg */
+.card-elevated {
+  background: #ffffff;
+  box-shadow: 0 12px 32px rgba(25, 28, 30, 0.04);
+  border-radius: 0.75rem;
 }
 
-.card-3d {
-  background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
-  border: 1px solid rgba(255,255,255,0.09);
-  box-shadow:
-    0 8px 32px rgba(0,0,0,0.45),
-    0 2px 8px rgba(0,0,0,0.25),
-    inset 0 1px 0 rgba(255,255,255,0.09);
+/* Tonal container */
+.tonal-container {
+  background: rgba(0, 108, 73, 0.04);
+  border-radius: 0.75rem;
 }
 
+/* Ambient shadow (Stitch spec) */
+.shadow-ambient {
+  box-shadow: 0 12px 32px rgba(25, 28, 30, 0.04);
+}
+
+/* Ghost border (Stitch spec) - for inputs */
+.ghost-border {
+  box-shadow: inset 0 0 0 1px rgba(187, 202, 191, 0.20);
+}
+
+/* Font weight helpers */
 .font-600 { font-weight: 600; }
 .font-700 { font-weight: 700; }
 .font-800 { font-weight: 800; }
 
+/* Animations */
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
-  50%       { box-shadow: 0 0 0 8px rgba(16,185,129,0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 108, 73, 0.3); }
+  50%       { box-shadow: 0 0 0 8px rgba(0, 108, 73, 0); }
 }
 
 .animate-slide-up { animation: slideUp 0.3s ease; }
 .animate-fade-in  { animation: fadeIn 0.2s ease; }
 .animate-pulse-glow { animation: pulse-glow 2s infinite; }
+
+/* No scrollbar */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

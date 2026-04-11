@@ -1,8 +1,8 @@
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav'
 
 const NAV = [
-  { href: '/driver/deliveries', icon: '📦', label: '배달 목록' },
-  { href: '/driver/history',    icon: '✅', label: '완료 내역' },
+  { href: '/driver/deliveries', icon: 'local_shipping', label: 'Deliver' },
+  { href: '/driver/history',    icon: 'history',        label: 'History' },
 ]
 
 export default function DriverLayout({ children }: { children: React.ReactNode }) {

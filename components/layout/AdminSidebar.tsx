@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { STORES } from '@/lib/market-data'
 
-const STORES_LIST = STORES.map(s => ({ id: s.id, name: s.name, emoji: s.emoji }))
+const STATIC_STORES_LIST = STORES.map(s => ({ id: s.id, name: s.name, emoji: s.emoji }))
 
 const TOP_NAV = [
   { href: '/admin/dashboard', icon: 'dashboard',      label: '대시보드' },
@@ -19,6 +19,8 @@ const BOTTOM_NAV = [
   { href: '/admin/analytics', icon: 'bar_chart',       label: '전체 분석' },
 ]
 
+interface StoreItem { id: string; name: string; emoji: string }
+
 export function AdminSidebar() {
   const pathname = usePathname()
 
@@ -27,12 +29,25 @@ export function AdminSidebar() {
 
   const [storesOpen, setStoresOpen] = useState(isStoreManagePath)
   const [ordersOpen, setOrdersOpen] = useState(isOrdersPath)
+  const [storesList, setStoresList] = useState<StoreItem[]>(STATIC_STORES_LIST)
 
   // 경로 변경 시 해당 섹션 자동 열기
   useEffect(() => {
     if (isStoreManagePath) setStoresOpen(true)
     if (isOrdersPath) setOrdersOpen(true)
   }, [pathname, isStoreManagePath, isOrdersPath])
+
+  // 동적 가게 목록 로드 (이름/이모지 변경 반영)
+  useEffect(() => {
+    fetch('/api/market/stores')
+      .then(r => r.json())
+      .then(({ data }) => {
+        if (Array.isArray(data)) {
+          setStoresList(data.map((s: any) => ({ id: s.id, name: s.name, emoji: s.emoji })))
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   function NavLink({ href, icon, label }: { href: string; icon: string; label: string }) {
     const active = pathname === href || (href !== '/admin/dashboard' && pathname.startsWith(href + '/') && !pathname.includes('/manage') && !pathname.includes('/orders'))
@@ -105,7 +120,7 @@ export function AdminSidebar() {
                 전체 목록
               </Link>
               {/* 가게별 관리 */}
-              {STORES_LIST.map(store => {
+              {storesList.map(store => {
                 const active = pathname === `/admin/stores/${store.id}/manage` || pathname.startsWith(`/admin/stores/${store.id}/manage`)
                 return (
                   <Link
@@ -165,7 +180,7 @@ export function AdminSidebar() {
                 전체 주문
               </Link>
               {/* 가게별 주문 */}
-              {STORES_LIST.map(store => {
+              {storesList.map(store => {
                 const active = pathname === `/admin/stores/${store.id}/orders` || pathname.startsWith(`/admin/stores/${store.id}/orders`)
                 return (
                   <Link

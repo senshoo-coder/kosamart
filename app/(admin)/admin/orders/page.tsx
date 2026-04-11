@@ -7,7 +7,8 @@ import { formatPrice, timeAgo } from '@/lib/utils'
 import { STORES } from '@/lib/market-data'
 import type { Order, OrderStatus } from '@/lib/types'
 
-const STORE_NAME_MAP: Record<string, { name: string; emoji: string }> = Object.fromEntries(
+// Static fallback — overridden by dynamic fetch below
+let STORE_NAME_MAP: Record<string, { name: string; emoji: string }> = Object.fromEntries(
   STORES.map(s => [s.id, { name: s.name, emoji: s.emoji }])
 )
 
@@ -29,6 +30,22 @@ function OwnerOrdersContent() {
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [rejectModal, setRejectModal] = useState<{ orderId: string; orderNumber: string } | null>(null)
   const [rejectReason, setRejectReason] = useState('')
+
+  const [storeNameMap, setStoreNameMap] = useState(STORE_NAME_MAP)
+
+  useEffect(() => {
+    fetch('/api/market/stores')
+      .then(r => r.json())
+      .then(({ data }) => {
+        if (Array.isArray(data)) {
+          const map: Record<string, { name: string; emoji: string }> = {}
+          data.forEach((s: any) => { map[s.id] = { name: s.name, emoji: s.emoji } })
+          STORE_NAME_MAP = map
+          setStoreNameMap(map)
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   const loadOrders = useCallback(() => {
     setLoading(true)
@@ -137,7 +154,7 @@ function OwnerOrdersContent() {
               <tr><td colSpan={8} className="text-center py-10 text-[#a3a3a3] text-[13px]">주문이 없습니다</td></tr>
             ) : (
               orders.map(order => {
-                const storeInfo = (order as any).store_id ? STORE_NAME_MAP[(order as any).store_id] : null
+                const storeInfo = (order as any).store_id ? storeNameMap[(order as any).store_id] : null
                 return (
                 <tr key={order.id} className="border-b border-[#f9f9f9] hover:bg-[#f9f9f9] transition-colors">
                   <td className="px-4 py-3 text-[11px] text-[#a3a3a3] font-mono">{order.order_number}</td>
@@ -207,7 +224,7 @@ function OwnerOrdersContent() {
             <p className="text-[14px] font-semibold text-[#1a1c1c]">주문이 없습니다</p>
           </div>
         ) : orders.map(order => {
-          const storeInfo = (order as any).store_id ? STORE_NAME_MAP[(order as any).store_id] : null
+          const storeInfo = (order as any).store_id ? storeNameMap[(order as any).store_id] : null
           return (
           <div key={order.id} className="bg-white rounded-[8px] p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
             <div className="flex justify-between items-start mb-2">

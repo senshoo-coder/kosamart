@@ -29,8 +29,21 @@ function AdminStoreOrdersContent({ storeId }: { storeId: string }) {
   const [rejectModal, setRejectModal] = useState<{ orderId: string; orderNumber: string } | null>(null)
   const [rejectReason, setRejectReason] = useState('')
 
-  const store = STORES.find(s => s.id === storeId)
-  const storeName = store?.name || storeId
+  const [storeName, setStoreName] = useState<string>(
+    STORES.find(s => s.id === storeId)?.name || storeId
+  )
+
+  useEffect(() => {
+    fetch('/api/market/stores')
+      .then(r => r.json())
+      .then(({ data }) => {
+        if (Array.isArray(data)) {
+          const found = data.find((s: any) => s.id === storeId)
+          if (found?.name) setStoreName(found.name)
+        }
+      })
+      .catch(() => {})
+  }, [storeId])
 
   const loadOrders = useCallback(() => {
     setLoading(true)

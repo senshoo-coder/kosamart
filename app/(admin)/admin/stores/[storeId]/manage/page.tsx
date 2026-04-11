@@ -59,8 +59,19 @@ export default function AdminStoreManagePage({ params }: { params: Promise<{ sto
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
 
   useEffect(() => {
-    const found = STORES.find(s => s.id === storeId)
-    if (found) setStore(found)
+    // 동적 가게 정보 우선, 없으면 정적 fallback
+    fetch('/api/market/stores')
+      .then(r => r.json())
+      .then(({ data }) => {
+        if (Array.isArray(data)) {
+          const found = data.find((s: any) => s.id === storeId)
+          if (found) setStore(found as Store)
+        }
+      })
+      .catch(() => {
+        const found = STORES.find(s => s.id === storeId)
+        if (found) setStore(found)
+      })
     loadProducts(storeId)
     loadImages(storeId)
     setLoading(false)

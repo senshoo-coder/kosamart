@@ -30,8 +30,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     .eq('id', id)
     .single()
 
-  // 배달 레코드 취소
-  await supabase.from('deliveries').update({ status: 'cancelled' }).eq('order_id', id).catch(() => {})
+  // 배달 레코드 취소 (실패해도 무시)
+  try { await supabase.from('deliveries').update({ status: 'cancelled' }).eq('order_id', id) } catch {}
 
   // 관리자 알림 (실패해도 무시)
   await notifyAdmin(`❌ [주문 취소] 주문ID: ${id} | 사유: ${rejected_reason}`).catch(() => {})

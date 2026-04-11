@@ -74,7 +74,7 @@ export default function MarketPage() {
         {/* 섹션 타이틀 + 배너 */}
         <div className="flex flex-col gap-4">
           <div className="flex items-end justify-between">
-            <h2 className="text-[28px] font-bold text-[#1a1c1c] tracking-[-1px] leading-[36px]">공덕 시장</h2>
+            <h2 className="text-[28px] font-bold text-[#1a1c1c] tracking-[-1px] leading-[36px]">평창동 상점가</h2>
             <button className="text-[14px] text-[#10b981] font-medium pb-1">전체보기</button>
           </div>
 

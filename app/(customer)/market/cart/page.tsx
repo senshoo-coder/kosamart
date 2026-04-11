@@ -1,24 +1,46 @@
 'use client'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useMarketCart } from '@/lib/cart/MarketCartContext'
 import { getStore } from '@/lib/market-data'
 import { getLocalStorage, setLocalStorage, generateDeviceUUID } from '@/lib/utils'
 
-const TIME_SLOTS = [
-  { value: '09-10', label: '09:00 ~ 10:00' },
-  { value: '10-11', label: '10:00 ~ 11:00' },
-  { value: '11-12', label: '11:00 ~ 12:00' },
-  { value: '12-13', label: '12:00 ~ 13:00' },
-  { value: '13-14', label: '13:00 ~ 14:00' },
-  { value: '14-15', label: '14:00 ~ 15:00' },
-  { value: '15-16', label: '15:00 ~ 16:00' },
-  { value: '16-17', label: '16:00 ~ 17:00' },
-  { value: '17-18', label: '17:00 ~ 18:00' },
-  { value: '18-19', label: '18:00 ~ 19:00' },
-  { value: '19-20', label: '19:00 ~ 20:00' },
-  { value: '20-21', label: '20:00 ~ 21:00' },
-]
+// 가게 운영시간 '11:00~23:00' 형식 파싱 → [시작시, 종료시]
+function parseHours(hours: string): [number, number] | null {
+  const m = hours.match(/^(\d{1,2}):(\d{2})~(\d{1,2}):(\d{2})$/)
+  if (!m) return null
+  return [parseInt(m[1]), parseInt(m[3])]
+}
+
+// 가게들의 운영시간 교집합으로 1시간 단위 슬롯 생성
+function buildTimeSlots(storeIds: string[]): { value: string; label: string }[] {
+  let start = 0
+  let end = 24
+
+  for (const sid of storeIds) {
+    const hours = getStore(sid)?.hours
+    if (!hours) continue
+    const parsed = parseHours(hours)
+    if (!parsed) continue
+    start = Math.max(start, parsed[0])  // 가장 늦게 여는 가게 기준
+    end   = Math.min(end,   parsed[1])  // 가장 일찍 닫는 가게 기준
+  }
+
+  // 기본값 (가게 정보 없을 때)
+  if (start === 0 && end === 24) { start = 9; end = 21 }
+
+  const now = new Date()
+  const currentH = now.getHours()
+
+  const slots: { value: string; label: string }[] = []
+  for (let h = start; h < end; h++) {
+    if (h <= currentH) continue  // 이미 지난 시간대 제외
+    const s = String(h).padStart(2, '0')
+    const e = String(h + 1).padStart(2, '0')
+    slots.push({ value: `${h}-${h + 1}`, label: `${s}:00 ~ ${e}:00` })
+  }
+  return slots
+}
 
 export default function CartPage() {
   const router = useRouter()
@@ -28,13 +50,18 @@ export default function CartPage() {
     return getLocalStorage('cosmart_address') || ''
   })
   const [pickupType, setPickupType] = useState<'delivery' | 'pickup'>('delivery')
-  const [timeSlot, setTimeSlot] = useState('12-13')
   const [memo, setMemo] = useState('')
   const [consent, setConsent] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const nickname = typeof window !== 'undefined' ? getLocalStorage('cosmart_nickname') : null
   const storeIds = Object.keys(cart.storeGroups)
+
+  const TIME_SLOTS = useMemo(() => buildTimeSlots(storeIds), [storeIds.join(',')])
+  const [timeSlot, setTimeSlot] = useState(() => {
+    const slots = buildTimeSlots(Object.keys(cart.storeGroups))
+    return slots[0]?.value ?? ''
+  })
 
   const MIN_ORDER_PER_STORE = 5000
   const belowMinStores = storeIds.filter(sid => cart.getStoreTotal(sid) < MIN_ORDER_PER_STORE)
@@ -46,8 +73,31 @@ export default function CartPage() {
   }, 0)
 
   const selectedTimeLabel = TIME_SLOTS.find(t => t.value === timeSlot)?.label || timeSlot
+  const noSlotsAvailable = pickupType === 'delivery' && TIME_SLOTS.length === 0
+
+  // 가게별 운영시간 교집합 범위 (안내용)
+  const hoursInfo = useMemo(() => {
+    let start = 0; let end = 24
+    for (const sid of storeIds) {
+      const h = getStore(sid)?.hours
+      if (!h) continue
+      const p = parseHours(h)
+      if (!p) continue
+      start = Math.max(start, p[0]); end = Math.min(end, p[1])
+    }
+    if (start === 0 && end === 24) return null
+    return `${String(start).padStart(2,'0')}:00 ~ ${String(end).padStart(2,'0')}:00`
+  }, [storeIds.join(',')])
 
   async function handleOrder() {
+    if (pickupType === 'delivery' && noSlotsAvailable) {
+      alert('현재 주문 가능한 수령 시간대가 없습니다. 내일 운영 시작 후 다시 주문해주세요.')
+      return
+    }
+    if (pickupType === 'delivery' && !timeSlot) {
+      alert('희망 수령 시간을 선택해주세요')
+      return
+    }
     if (pickupType === 'delivery' && !address.trim()) {
       alert('\uBC30\uC1A1 \uC8FC\uC18C\uB97C \uC785\uB825\uD574\uC8FC\uC138\uC694')
       return
@@ -280,17 +330,28 @@ export default function CartPage() {
                 />
               </div>
               <div>
-                <label className="text-[12px] text-[#a3a3a3] mb-1.5 block">{'\uD76C\uB9DD \uC218\uB839 \uC2DC\uAC04'}</label>
-                <select
-                  value={timeSlot}
-                  onChange={e => setTimeSlot(e.target.value)}
-                  className="w-full border border-[#e0e0e0] rounded-xl px-4 py-3 text-[14px] text-[#1a1c1c] outline-none bg-white focus:border-[#10b981] appearance-none"
-                  style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 12 12\'%3E%3Cpath fill=\'%23999\' d=\'M6 8L1 3h10z\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 16px center' }}
-                >
-                  {TIME_SLOTS.map(t => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
-                  ))}
-                </select>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-[12px] text-[#a3a3a3]">희망 수령 시간</label>
+                  {hoursInfo && (
+                    <span className="text-[11px] text-[#10b981] font-medium">운영 {hoursInfo}</span>
+                  )}
+                </div>
+                {noSlotsAvailable ? (
+                  <div className="w-full border border-[#fca5a5] bg-[#fff1f1] rounded-xl px-4 py-3 text-[13px] text-[#dc2626]">
+                    현재 운영시간이 종료되었습니다. 내일 다시 주문해주세요.
+                  </div>
+                ) : (
+                  <select
+                    value={timeSlot}
+                    onChange={e => setTimeSlot(e.target.value)}
+                    className="w-full border border-[#e0e0e0] rounded-xl px-4 py-3 text-[14px] text-[#1a1c1c] outline-none bg-white focus:border-[#10b981] appearance-none"
+                    style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 12 12\'%3E%3Cpath fill=\'%23999\' d=\'M6 8L1 3h10z\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 16px center' }}
+                  >
+                    {TIME_SLOTS.map(t => (
+                      <option key={t.value} value={t.value}>{t.label}</option>
+                    ))}
+                  </select>
+                )}
               </div>
             </>
           )}
@@ -322,9 +383,9 @@ export default function CartPage() {
         <button
           type="button"
           onClick={handleOrder}
-          disabled={loading}
+          disabled={loading || noSlotsAvailable}
           className="w-full py-4 rounded-2xl text-[15px] font-bold text-white disabled:opacity-50 active:opacity-80"
-          style={{ background: '#10b981' }}
+          style={{ background: noSlotsAvailable ? '#94a3b8' : '#10b981' }}
         >
           {loading
             ? '\uCC98\uB9AC \uC911...'

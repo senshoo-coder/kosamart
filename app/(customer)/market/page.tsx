@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { STORES } from '@/lib/market-data'
@@ -37,12 +37,29 @@ const PARTICIPANTS: Record<string, number> = {
 
 export default function MarketPage() {
   const [activeCategory, setActiveCategory] = useState('전체')
+  const [activeStoreIds, setActiveStoreIds] = useState<Set<string> | null>(null)
   const storeIds = useMemo(() => STORES.map(s => s.id), [])
   const allImages = useAllStoreImages(storeIds)
   const cart = useMarketCart()
   const router = useRouter()
 
+  useEffect(() => {
+    fetch('/api/market/stores')
+      .then(r => r.json())
+      .then(({ data }) => {
+        if (!data) return // DB 없으면 전체 노출
+        const ids = new Set<string>(
+          data.filter((s: { store_id: string; is_active: boolean }) => s.is_active !== false).map((s: { store_id: string }) => s.store_id)
+        )
+        // DB에 없는 store_id는 기본 활성으로 간주
+        STORES.forEach(s => { if (!data.find((d: { store_id: string }) => d.store_id === s.id)) ids.add(s.id) })
+        setActiveStoreIds(ids)
+      })
+      .catch(() => {}) // 실패 시 전체 노출
+  }, [])
+
   const filteredStores = STORES.filter(store => {
+    if (activeStoreIds !== null && !activeStoreIds.has(store.id)) return false
     if (activeCategory === '전체') return true
     const short = CATEGORY_MAP[store.category] || store.category
     return short === activeCategory

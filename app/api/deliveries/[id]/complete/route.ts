@@ -13,7 +13,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       status: 'delivered',
       delivered_at: new Date().toISOString(),
       driver_memo: body.driver_memo,
-      driver_photo_url: body.driver_photo_url ?? null,
+      delivery_photo_url: body.driver_photo_url ?? null,
     })
     .eq('id', id)
     .select(`*, order:orders(id, kakao_nickname, delivery_address, total_amount)`)

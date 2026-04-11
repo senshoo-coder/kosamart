@@ -104,12 +104,18 @@ export default function DriverDeliveriesPage() {
       const uploadRes = await fetch('/api/deliveries/upload-photo', { method: 'POST', body: formData })
       if (uploadRes.ok) { const { url } = await uploadRes.json(); photoUrl = url }
     }
-    await fetch(`/api/deliveries/${completeModal.id}/complete`, {
+    const res = await fetch(`/api/deliveries/${completeModal.id}/complete`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ driver_memo: driverMemo, driver_photo_url: photoUrl }),
     })
     setUploading(false)
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}))
+      alert(`완료 처리 실패: ${d.error || '서버 오류'}`)
+      setActionLoading(null)
+      return
+    }
     closeCompleteModal()
     loadAll()
     setActionLoading(null)

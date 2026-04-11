@@ -35,10 +35,16 @@ const PARTICIPANTS: Record<string, number> = {
   'bakery': 19,
 }
 
+interface DynamicStore {
+  id: string; name: string; emoji: string; category: string; description: string
+  isOpen: boolean; badge?: string; hours?: string; minOrder: number
+  deliveryFee: number; accentColor: string; is_active: boolean; isCustom: boolean
+}
+
 export default function MarketPage() {
   const [activeCategory, setActiveCategory] = useState('전체')
-  const [activeStoreIds, setActiveStoreIds] = useState<Set<string> | null>(null)
-  const storeIds = useMemo(() => STORES.map(s => s.id), [])
+  const [dynamicStores, setDynamicStores] = useState<DynamicStore[] | null>(null)
+  const storeIds = useMemo(() => (dynamicStores ?? STORES).map(s => s.id), [dynamicStores])
   const allImages = useAllStoreImages(storeIds)
   const cart = useMarketCart()
   const router = useRouter()
@@ -46,20 +52,19 @@ export default function MarketPage() {
   useEffect(() => {
     fetch('/api/market/stores')
       .then(r => r.json())
-      .then(({ data }) => {
-        if (!data) return // DB 없으면 전체 노출
-        const ids = new Set<string>(
-          data.filter((s: { store_id: string; is_active: boolean }) => s.is_active !== false).map((s: { store_id: string }) => s.store_id)
-        )
-        // DB에 없는 store_id는 기본 활성으로 간주
-        STORES.forEach(s => { if (!data.find((d: { store_id: string }) => d.store_id === s.id)) ids.add(s.id) })
-        setActiveStoreIds(ids)
-      })
-      .catch(() => {}) // 실패 시 전체 노출
+      .then(({ data }) => { if (data) setDynamicStores(data) })
+      .catch(() => {})
   }, [])
 
-  const filteredStores = STORES.filter(store => {
-    if (activeStoreIds !== null && !activeStoreIds.has(store.id)) return false
+  const baseStores: DynamicStore[] = dynamicStores ?? STORES.map(s => ({
+    id: s.id, name: s.name, emoji: s.emoji, category: s.category,
+    description: s.description, isOpen: s.isOpen, badge: s.badge,
+    hours: s.hours, minOrder: s.minOrder, deliveryFee: s.deliveryFee,
+    accentColor: s.accentColor, is_active: true, isCustom: false,
+  }))
+
+  const filteredStores = baseStores.filter(store => {
+    if (!store.is_active) return false
     if (activeCategory === '전체') return true
     const short = CATEGORY_MAP[store.category] || store.category
     return short === activeCategory

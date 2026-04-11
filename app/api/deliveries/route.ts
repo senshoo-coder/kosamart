@@ -83,7 +83,9 @@ export async function GET(req: NextRequest) {
 
   // pending 배달은 승인된 주문(order.status = 'approved')만 노출
   // 취소/거절 주문의 delivery는 제외
+  // 매장 픽업 주문은 배달 기사 목록에 노출 안 함
   const filtered = data?.filter(d => {
+    if (d.order?.delivery_address === '매장 픽업') return false
     if (d.status === 'pending') {
       return d.order?.status === 'approved'
     }

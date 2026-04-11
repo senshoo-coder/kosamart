@@ -47,8 +47,9 @@ export default function DriverDeliveriesPage() {
       fetch('/api/deliveries?status=pending').then(r => r.json()),
       fetch(`/api/deliveries?driver_uuid=${driverUuid ?? ''}&status=assigned,picked_up,delivering`).then(r => r.json()),
     ]).then(([avail, mine]) => {
-      setAvailable(avail.data || [])
-      setDeliveries(mine.data || [])
+      const isPickup = (d: Delivery) => d.order?.delivery_address === '매장 픽업'
+      setAvailable((avail.data || []).filter((d: Delivery) => !isPickup(d)))
+      setDeliveries((mine.data || []).filter((d: Delivery) => !isPickup(d)))
       setLoading(false)
     }).catch(() => setLoading(false))
   }

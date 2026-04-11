@@ -319,7 +319,7 @@ export default function OwnerStorePage() {
           }}
         >
           {images['store'] ? (
-            <img src={images['store']} alt={storeName} className="w-full h-full object-cover"
+            <img src={images['store']} alt={storeName} className="w-full h-full object-fill"
               style={{ objectPosition: (store as any)?.image_position || 'center' }} />
           ) : (
             <span className="text-[80px] opacity-40 select-none">{storeEmoji}</span>

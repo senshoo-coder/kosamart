@@ -337,7 +337,7 @@ export default function AdminStoreManagePage({ params }: { params: Promise<{ sto
             <img
               src={images['store']}
               alt={storeName}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-fill"
               style={{ objectPosition: imagePosition }}
             />
           ) : (

@@ -75,7 +75,7 @@ function LoginForm() {
       {/* 상단 로고 */}
       <div className="flex items-center gap-2 px-6 pt-12 pb-6">
         <span className="text-2xl">🚚</span>
-        <span className="font-extrabold text-[24px] text-[#191c1e] tracking-[-0.75px]">Cosamart</span>
+        <span className="font-extrabold text-[24px] text-[#191c1e] tracking-[-0.75px]">평창동 상점가</span>
       </div>
 
       {/* 역할 전환 탭 */}
@@ -208,7 +208,7 @@ function LoginForm() {
       {/* 푸터 */}
       <div className="px-6 py-8 text-center">
         <p className="text-[10px] text-[#94a3b8] tracking-[-0.5px]">
-          © 2024 COSAMART CORP. ALL RIGHTS RESERVED.
+          © 2024 평창동 상점가. ALL RIGHTS RESERVED.
         </p>
       </div>
     </main>

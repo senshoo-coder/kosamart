@@ -57,7 +57,7 @@ export default function MarketPage() {
       >
         <div className="flex items-center gap-2">
           <span className="text-lg">🚚</span>
-          <span className="font-bold text-[20px] text-[#10b981] tracking-[-1px]">COSAMART</span>
+          <span className="font-bold text-[20px] text-[#10b981] tracking-[-1px]">평창동 상점가</span>
         </div>
         <div className="flex items-center gap-4 text-[#1a1c1c] text-[18px]">
           <button>🔔</button>

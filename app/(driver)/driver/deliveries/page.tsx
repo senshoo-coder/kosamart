@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { DeliveryStatusBadge } from '@/components/ui/badge'
-import { formatPrice, getLocalStorage } from '@/lib/utils'
+import { formatPrice, getLocalStorage, setLocalStorage, generateDeviceUUID } from '@/lib/utils'
 import type { Delivery } from '@/lib/types'
 
 export default function DriverDeliveriesPage() {
@@ -23,7 +23,14 @@ export default function DriverDeliveriesPage() {
   const [showHeld, setShowHeld] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const driverUuid = getLocalStorage('cosmart_device_uuid')
+  const driverUuid = (() => {
+    let uuid = getLocalStorage('cosmart_device_uuid')
+    if (!uuid) {
+      uuid = generateDeviceUUID()
+      setLocalStorage('cosmart_device_uuid', uuid)
+    }
+    return uuid
+  })()
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {})

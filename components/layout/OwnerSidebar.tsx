@@ -18,7 +18,7 @@ export function OwnerSidebar() {
       <div className="flex items-center gap-2.5 px-3 mb-8">
         <div className="w-9 h-9 rounded-[10px] flex items-center justify-center text-lg bg-[#f0fdf4]">🛒</div>
         <div>
-          <p className="font-bold text-[#1a1c1c] text-sm leading-tight">코사마트</p>
+          <p className="font-bold text-[#1a1c1c] text-sm leading-tight">평창동 상점가</p>
           <p className="text-[11px] text-[#10b981] font-medium">사장님 모드</p>
         </div>
       </div>
@@ -45,7 +45,7 @@ export function OwnerSidebar() {
         })}
       </nav>
 
-      <div className="px-3 text-[11px] text-[#a3a3a3] mt-4">평창동 코사마트</div>
+      <div className="px-3 text-[11px] text-[#a3a3a3] mt-4">평창동 평창동 상점가</div>
     </aside>
   )
 }

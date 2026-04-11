@@ -56,6 +56,9 @@ export async function GET(req: NextRequest) {
     ownerStoreId = ownerUser?.store_id ?? null
   }
 
+  // 관리자가 특정 가게 주문 조회 시 store_id 쿼리 파라미터 지원
+  const adminStoreId = cookieRole === 'admin' ? searchParams.get('store_id') : null
+
   let query = supabase
     .from('orders')
     .select(`
@@ -71,6 +74,11 @@ export async function GET(req: NextRequest) {
   // 사장님: 본인 가게 주문만
   if (ownerStoreId) {
     query = query.eq('store_id', ownerStoreId)
+  }
+
+  // 관리자: 특정 가게 필터
+  if (adminStoreId) {
+    query = query.eq('store_id', adminStoreId)
   }
 
   // 고객: 본인 주문만

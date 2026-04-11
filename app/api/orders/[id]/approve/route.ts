@@ -1,32 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { sendTelegramMessage, notifyAdmin, notifyDriver, TelegramMessages } from '@/lib/telegram/messages'
+import { notifyAdmin, notifyDriver } from '@/lib/telegram/messages'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const body = await req.json().catch(() => ({}))
   const supabase = await createAdminClient()
 
-  const { data: order, error } = await supabase
-    .from('orders')
-    .update({ status: 'approved', owner_memo: body.owner_memo, approved_at: new Date().toISOString() })
-    .eq('id', id)
-    .select(`*, items:order_items(*), customer:users!orders_customer_id_fkey(telegram_chat_id)`)
-    .single()
-
-  if (error) return NextResponse.json({ data: null, error: error.message }, { status: 500 })
-
-  // 고객 개인 텔레그램 알림
-  const customerMsg = TelegramMessages.orderApproved(order)
-  if (order.customer?.telegram_chat_id) {
-    await sendTelegramMessage(order.customer.telegram_chat_id, customerMsg)
+  const updatePayload: Record<string, any> = {
+    status: 'approved',
+    approved_at: new Date().toISOString(),
   }
+  if (body.owner_memo) updatePayload.owner_memo = body.owner_memo
 
-  // 관리자 알림
-  await notifyAdmin(`✅ [주문 승인] ${order.kakao_nickname} | ₩${order.total_amount.toLocaleString()}`)
+  const { error: updateError } = await supabase
+    .from('orders')
+    .update(updatePayload)
+    .eq('id', id)
 
-  // 배달팀 알림
-  await notifyDriver(`🚚 배달 준비 요청: ${order.kakao_nickname}\n주소: ${order.delivery_address}`)
+  if (updateError) return NextResponse.json({ data: null, error: updateError.message }, { status: 500 })
 
-  return NextResponse.json({ data: order, error: null })
+  const { data: order } = await supabase.from('orders').select('*').eq('id', id).single()
+
+  await notifyAdmin(`✅ [주문 승인] 주문ID: ${id} | ₩${order?.total_amount?.toLocaleString() ?? ''}`).catch(() => {})
+  await notifyDriver(`🚚 배달 준비 요청: 주문ID ${id}\n주소: ${order?.delivery_address ?? ''}`).catch(() => {})
+
+  return NextResponse.json({ data: order ?? { id, status: 'approved' }, error: null })
 }

@@ -49,7 +49,13 @@ function OwnerOrdersContent() {
 
   async function handleApprove(orderId: string) {
     setActionLoading(orderId)
-    await fetch(`/api/orders/${orderId}/approve`, { method: 'POST' })
+    try {
+      const res = await fetch(`/api/orders/${orderId}/approve`, { method: 'POST' })
+      if (!res.ok) {
+        const d = await res.json()
+        alert(`오류: ${d.error || '승인 실패'}`)
+      }
+    } catch { alert('네트워크 오류가 발생했습니다') }
     loadOrders()
     setActionLoading(null)
   }

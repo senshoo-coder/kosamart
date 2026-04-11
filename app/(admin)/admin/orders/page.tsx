@@ -71,7 +71,13 @@ function OwnerOrdersContent() {
 
   async function handleApprove(orderId: string) {
     setActionLoading(orderId)
-    await fetch(`/api/orders/${orderId}/approve`, { method: 'POST' })
+    try {
+      const res = await fetch(`/api/orders/${orderId}/approve`, { method: 'POST' })
+      if (!res.ok) {
+        const d = await res.json()
+        alert(`오류: ${d.error || '승인 실패'}`)
+      }
+    } catch { alert('네트워크 오류가 발생했습니다') }
     loadOrders()
     setActionLoading(null)
   }
@@ -79,11 +85,19 @@ function OwnerOrdersContent() {
   async function handleReject() {
     if (!rejectModal || !rejectReason.trim()) return
     setActionLoading(rejectModal.orderId)
-    await fetch(`/api/orders/${rejectModal.orderId}/reject`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ rejected_reason: rejectReason }),
-    })
+    try {
+      const res = await fetch(`/api/orders/${rejectModal.orderId}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rejected_reason: rejectReason }),
+      })
+      const json = await res.json()
+      if (!res.ok || json.error) {
+        alert(`오류: ${json.error || '취소 처리 실패'}`)
+        setActionLoading(null)
+        return
+      }
+    } catch { alert('네트워크 오류가 발생했습니다'); setActionLoading(null); return }
     setRejectModal(null)
     setRejectReason('')
     loadOrders()

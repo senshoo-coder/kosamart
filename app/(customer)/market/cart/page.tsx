@@ -20,7 +20,7 @@ function buildSlotsForStore(hours: string | undefined): { value: string; label: 
   const currentH = new Date().getHours()
   const slots: { value: string; label: string }[] = []
   for (let h = start; h < end; h++) {
-    if (h <= currentH) continue
+    if (h < currentH) continue
     const s = String(h).padStart(2, '0')
     const e = String(h + 1).padStart(2, '0')
     slots.push({ value: `${h}-${h + 1}`, label: `${s}:00 ~ ${e}:00` })

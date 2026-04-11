@@ -188,7 +188,7 @@ export default function OwnerDeliveryPage() {
       {/* 기사 선택 모달 */}
       {assignModal && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4 pb-4"
+          className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center px-4 pb-4"
           onClick={e => { if (e.target === e.currentTarget) setAssignModal(null) }}
         >
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />

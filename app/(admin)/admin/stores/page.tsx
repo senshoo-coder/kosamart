@@ -341,7 +341,7 @@ export default function AdminStoresPage() {
 
       {/* 가게 추가/수정 모달 */}
       {editingStore && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" onClick={() => setEditingStore(null)}>
+        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center" onClick={() => setEditingStore(null)}>
           <div className="absolute inset-0 bg-black/50" />
           <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white rounded-t-[16px] sm:rounded-[16px] p-6"
             onClick={e => e.stopPropagation()}>
@@ -456,7 +456,7 @@ export default function AdminStoresPage() {
 
       {/* 삭제 확인 모달 */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-5" onClick={() => setDeleteConfirm(null)}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center px-5" onClick={() => setDeleteConfirm(null)}>
           <div className="absolute inset-0 bg-black/50" />
           <div className="relative bg-white rounded-[16px] p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-3">

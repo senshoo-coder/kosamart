@@ -213,7 +213,7 @@ export default function AdminUsersPage() {
 
       {/* 계정 생성 모달 */}
       {showCreate && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4 pb-4"
+        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center px-4 pb-4"
           onClick={e => { if (e.target === e.currentTarget) setShowCreate(false) }}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <div className="relative w-full max-w-sm bg-white rounded-[16px] p-6 space-y-4">
@@ -264,7 +264,7 @@ export default function AdminUsersPage() {
 
       {/* PW초기화 모달 */}
       {resetTarget && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4 pb-4"
+        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center px-4 pb-4"
           onClick={e => { if (e.target === e.currentTarget) setResetTarget(null) }}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <div className="relative w-full max-w-sm bg-white rounded-[16px] p-6 space-y-4">

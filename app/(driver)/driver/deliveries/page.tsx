@@ -264,7 +264,7 @@ export default function DriverDeliveriesPage() {
 
       {/* 배달 완료 모달 (바텀시트) */}
       {completeModal && (
-        <div className="fixed inset-0 z-50 flex items-end">
+        <div className="fixed inset-0 z-[60] flex items-end">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={closeCompleteModal} />
           <div className="relative w-full bg-white rounded-t-[20px] p-5">
             <div className="w-10 h-1 bg-[#e8e8e8] rounded-full mx-auto mb-4" />
@@ -333,7 +333,7 @@ export default function DriverDeliveriesPage() {
 
       {/* 이슈 보고 모달 */}
       {issueModal && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4 pb-4">
+        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center px-4 pb-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIssueModal(null)} />
           <div className="relative w-full max-w-sm bg-white rounded-[16px] p-6">
             <h3 className="text-[16px] font-bold text-[#1a1c1c] mb-4">배달 이슈 보고</h3>

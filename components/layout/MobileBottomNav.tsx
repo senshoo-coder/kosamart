@@ -17,7 +17,7 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md rounded-t-2xl"
+      className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-md rounded-t-2xl"
       style={{ boxShadow: '0 -4px 20px rgba(25,28,30,0.05)' }}
     >
       <div className="flex h-[64px] pb-safe">

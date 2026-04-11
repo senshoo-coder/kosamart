@@ -11,7 +11,7 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
   const { storeId } = use(params)
   const router = useRouter()
   const staticStore = getStore(storeId)
-  const [dynamicInfo, setDynamicInfo] = useState<{ name?: string; emoji?: string; description?: string } | null>(null)
+  const [dynamicInfo, setDynamicInfo] = useState<{ name?: string; emoji?: string; description?: string; bank_account?: string; hours?: string; minOrder?: number; deliveryFee?: number } | null>(null)
   const { products: dbProducts } = useStoreProducts(storeId)
   const cart = useMarketCart()
 
@@ -25,7 +25,15 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
       .then(({ data }) => {
         if (Array.isArray(data)) {
           const found = data.find((s: any) => s.id === storeId)
-          if (found) setDynamicInfo({ name: found.name, emoji: found.emoji, description: found.description })
+          if (found) setDynamicInfo({
+            name: found.name,
+            emoji: found.emoji,
+            description: found.description,
+            bank_account: found.bank_account,
+            hours: found.hours,
+            minOrder: found.minOrder,
+            deliveryFee: found.deliveryFee,
+          })
         }
       })
       .catch(() => {})
@@ -160,6 +168,12 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
           <span className="text-xl">🚚</span>
           <p className="text-[12px] text-[#3c4a42] leading-relaxed">여러 가게 상품을 장바구니에 담아 <b className="text-[#10b981]">묶음배송</b> 가능</p>
         </div>
+        {(store as any).bank_account && (
+          <div className="mt-3 bg-[#fffbeb] border border-[#fde68a] rounded-xl px-4 py-3">
+            <p className="text-[11px] text-[#92400e] mb-1 font-medium">💳 계좌이체 안내</p>
+            <p className="text-[13px] font-semibold text-[#1a1c1c]">{(store as any).bank_account}</p>
+          </div>
+        )}
       </div>
 
       {/* 카테고리 */}

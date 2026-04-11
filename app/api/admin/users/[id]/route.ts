@@ -42,6 +42,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ data, error: null })
   }
 
+  if (action === 'assign_store') {
+    const { store_id } = body
+    const { data, error } = await supabase
+      .from('users').update({ store_id: store_id || null }).eq('id', id)
+      .select('id, nickname, role, status, store_id').single()
+    if (error) return NextResponse.json({ data: null, error: error.message }, { status: 500 })
+    return NextResponse.json({ data, error: null })
+  }
+
   if (action === 'reset_password') {
     if (!password || password.length < 6) return NextResponse.json({ data: null, error: '비밀번호 6자 이상' }, { status: 400 })
     const password_hash = await bcrypt.hash(password, 10)

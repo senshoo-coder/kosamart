@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { STORES } from '@/lib/market-data'
 
+interface StoreOption { id: string; name: string; emoji: string }
+
 interface UserRow {
   id: string
   nickname: string
@@ -40,6 +42,10 @@ export default function AdminUsersPage() {
   const [createError, setCreateError] = useState('')
   const [resetTarget, setResetTarget] = useState<UserRow | null>(null)
   const [newPassword, setNewPassword] = useState('')
+  const [storeModal, setStoreModal] = useState<UserRow | null>(null)
+  const [selectedStoreId, setSelectedStoreId] = useState('')
+  const [storeOptions, setStoreOptions] = useState<StoreOption[]>(STORES.map(s => ({ id: s.id, name: s.name, emoji: s.emoji })))
+  const [assignLoading, setAssignLoading] = useState(false)
 
   const loadUsers = useCallback(async () => {
     setLoading(true)
@@ -51,6 +57,26 @@ export default function AdminUsersPage() {
   }, [tab])
 
   useEffect(() => { loadUsers() }, [loadUsers])
+
+  useEffect(() => {
+    fetch('/api/market/stores').then(r => r.json()).then(({ data }) => {
+      if (Array.isArray(data)) setStoreOptions(data.map((s: any) => ({ id: s.id, name: s.name, emoji: s.emoji || '🏪' })))
+    }).catch(() => {})
+  }, [])
+
+  async function handleAssignStore() {
+    if (!storeModal) return
+    setAssignLoading(true)
+    await fetch(`/api/admin/users/${storeModal.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'assign_store', store_id: selectedStoreId }),
+    })
+    setStoreModal(null)
+    setSelectedStoreId('')
+    await loadUsers()
+    setAssignLoading(false)
+  }
 
   async function doAction(userId: string, action: string) {
     setActionLoading(userId + action)
@@ -197,6 +223,15 @@ export default function AdminUsersPage() {
                             {actionLoading === user.id + 'approve' ? '…' : '활성화'}
                           </button>
                         )}
+                        {user.role === 'owner' && (
+                          <button
+                            onClick={() => { setStoreModal(user); setSelectedStoreId(user.store_id || '') }}
+                            className="text-[11px] px-3 py-1.5 rounded-[8px] font-medium border"
+                            style={{ background: user.store_id ? '#ede9fe' : '#fef3c7', color: user.store_id ? '#6d28d9' : '#b45309', borderColor: user.store_id ? '#ddd6fe' : '#fde68a' }}
+                          >
+                            {user.store_id ? '🏪 가게변경' : '⚠️ 가게미배정'}
+                          </button>
+                        )}
                         <button onClick={() => { setResetTarget(user); setNewPassword('') }}
                           className="text-[11px] px-3 py-1.5 rounded-[8px] bg-[#f2f4f6] text-[#3c4a42] font-medium border border-[#e8e8e8]">
                           PW초기화
@@ -257,6 +292,43 @@ export default function AdminUsersPage() {
             <div className="flex gap-3 pt-2">
               <Button variant="secondary" className="flex-1" onClick={() => setShowCreate(false)}>취소</Button>
               <Button className="flex-1" onClick={handleCreate} loading={createLoading}>생성</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 담당가게 설정 모달 */}
+      {storeModal && (
+        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center px-4 pb-4"
+          onClick={e => { if (e.target === e.currentTarget) setStoreModal(null) }}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div className="relative w-full max-w-sm bg-white rounded-[16px] p-6 space-y-4">
+            <div>
+              <h3 className="text-[16px] font-bold text-[#1a1c1c]">담당 가게 설정</h3>
+              <p className="text-[12px] text-[#a3a3a3] mt-0.5">{storeModal.nickname} 사장님</p>
+            </div>
+            <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
+              <button
+                onClick={() => setSelectedStoreId('')}
+                className="py-2 px-3 rounded-[10px] text-[12px] font-medium text-left transition-colors col-span-2"
+                style={selectedStoreId === '' ? { background: '#fee2e2', color: '#b91c1c' } : { background: '#f2f4f6', color: '#6b7280' }}
+              >
+                🚫 미배정
+              </button>
+              {storeOptions.map(s => (
+                <button key={s.id} onClick={() => setSelectedStoreId(s.id)}
+                  className="py-2 px-3 rounded-[10px] text-[12px] font-medium text-left transition-colors"
+                  style={selectedStoreId === s.id
+                    ? { background: '#6d28d9', color: '#fff' }
+                    : { background: '#f2f4f6', color: '#1a1c1c' }
+                  }>
+                  {s.emoji} {s.name}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-3 pt-2">
+              <Button variant="secondary" className="flex-1" onClick={() => setStoreModal(null)}>취소</Button>
+              <Button className="flex-1" loading={assignLoading} onClick={handleAssignStore}>저장</Button>
             </div>
           </div>
         </div>

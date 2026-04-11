@@ -1,5 +1,5 @@
 'use client'
-import { useState, use, useMemo } from 'react'
+import { useState, use, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { getStore } from '@/lib/market-data'
 import type { StoreProduct } from '@/lib/market-data'
@@ -10,12 +10,29 @@ import { useMarketCart } from '@/lib/cart/MarketCartContext'
 export default function StorePage({ params }: { params: Promise<{ storeId: string }> }) {
   const { storeId } = use(params)
   const router = useRouter()
-  const store = getStore(storeId)
+  const staticStore = getStore(storeId)
+  const [dynamicInfo, setDynamicInfo] = useState<{ name?: string; emoji?: string; description?: string } | null>(null)
   const { products: dbProducts } = useStoreProducts(storeId)
   const cart = useMarketCart()
 
   const [activeCategory, setActiveCategory] = useState('전체')
-  const storeImages = useStoreImages(store?.id)
+  const storeImages = useStoreImages(storeId)
+
+  // 동적 가게 정보 로드 (이름 변경 반영)
+  useEffect(() => {
+    fetch('/api/market/stores')
+      .then(r => r.json())
+      .then(({ data }) => {
+        if (Array.isArray(data)) {
+          const found = data.find((s: any) => s.id === storeId)
+          if (found) setDynamicInfo({ name: found.name, emoji: found.emoji, description: found.description })
+        }
+      })
+      .catch(() => {})
+  }, [storeId])
+
+  // 동적 정보로 오버레이된 store 객체
+  const store = staticStore ? { ...staticStore, ...dynamicInfo } : null
 
   // DB 상품 우선, 없으면 정적 데이터 fallback
   const products: (StoreProduct & { imageUrl?: string })[] = useMemo(() => {

@@ -60,11 +60,23 @@ export default function OwnerStorePage() {
       if (raw) {
         const user = JSON.parse(raw)
         if (user.store_id) {
-          setStoreId(user.store_id)
-          const found = STORES.find(s => s.id === user.store_id)
+          const sid = user.store_id
+          setStoreId(sid)
+          // 정적 fallback 먼저 세팅
+          const found = STORES.find(s => s.id === sid)
           if (found) setStore(found)
-          loadProducts(user.store_id)
-          loadImages(user.store_id)
+          // 동적 가게 정보로 덮어쓰기 (이름 변경 반영)
+          fetch('/api/market/stores')
+            .then(r => r.json())
+            .then(({ data }) => {
+              if (Array.isArray(data)) {
+                const dynamic = data.find((s: any) => s.id === sid)
+                if (dynamic) setStore((prev: any) => prev ? { ...prev, ...dynamic } : dynamic)
+              }
+            })
+            .catch(() => {})
+          loadProducts(sid)
+          loadImages(sid)
         }
       }
     } catch {}

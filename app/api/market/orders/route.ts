@@ -95,10 +95,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ data: null, error: 'order_insert: ' + error.message }, { status: 500 })
     }
 
-    // 주문 상품 저장
-    const orderItems = items.map((i: typeof items[0]) => ({
-      ...i,
+    // 주문 상품 저장 (market 상품은 products 테이블에 없으므로 product_id는 null)
+    const orderItems = items.map((i: any) => ({
       order_id: order.id,
+      product_id: null,
+      product_name: i.product_name,
+      unit_price: i.unit_price,
+      quantity: i.quantity,
+      subtotal: i.subtotal ?? i.unit_price * i.quantity,
     }))
     const { error: itemsErr } = await supabase.from('order_items').insert(orderItems)
     if (itemsErr) {

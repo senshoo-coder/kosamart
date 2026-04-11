@@ -25,15 +25,17 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
       .then(({ data }) => {
         if (Array.isArray(data)) {
           const found = data.find((s: any) => s.id === storeId)
-          if (found) setDynamicInfo({
-            name: found.name,
-            emoji: found.emoji,
-            description: found.description,
-            bank_account: found.bank_account,
-            hours: found.hours,
-            minOrder: found.minOrder,
-            deliveryFee: found.deliveryFee,
-          })
+          if (found) {
+            const info: Record<string, any> = {}
+            if (found.name !== undefined) info.name = found.name
+            if (found.emoji !== undefined) info.emoji = found.emoji
+            if (found.description !== undefined) info.description = found.description
+            if (found.bank_account) info.bank_account = found.bank_account
+            if (found.hours) info.hours = found.hours
+            if (found.minOrder !== undefined && found.minOrder !== null) info.minOrder = found.minOrder
+            if (found.deliveryFee !== undefined && found.deliveryFee !== null) info.deliveryFee = found.deliveryFee
+            setDynamicInfo(info)
+          }
         }
       })
       .catch(() => {})

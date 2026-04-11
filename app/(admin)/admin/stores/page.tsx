@@ -33,7 +33,7 @@ const ACCENT_OPTIONS = ['#10b981', '#6d28d9', '#2170e4', '#e29100', '#ef4444', '
 const DEFAULT_STORE = {
   id: '', name: '', emoji: '🏪', category: '기타', description: '',
   isOpen: true, badge: '', hours: '09:00~18:00', minOrder: 10000,
-  deliveryFee: 0, accentColor: '#10b981',
+  deliveryFee: 0, accentColor: '#10b981', bank_account: '',
 }
 
 function Toggle({ checked, onChange, disabled }: { checked: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
@@ -146,6 +146,7 @@ export default function AdminStoresPage() {
       minOrder: store.minOrder,
       deliveryFee: store.deliveryFee,
       accentColor: store.accentColor,
+      bank_account: (store as any).bank_account || '',
       isCustom: store.isCustom,
     })
     setIsNewStore(false)
@@ -436,6 +437,15 @@ export default function AdminStoresPage() {
                       style={{ background: color, borderColor: editingStore.accentColor === color ? '#1a1c1c' : 'transparent', transform: editingStore.accentColor === color ? 'scale(1.2)' : 'scale(1)' }} />
                   ))}
                 </div>
+              </div>
+
+              {/* 계좌이체 정보 */}
+              <div>
+                <label className="text-[12px] font-semibold text-[#1a1c1c] mb-1.5 block">계좌이체 정보 (선택)</label>
+                <input value={editingStore.bank_account || ''} onChange={e => setEditingStore({ ...editingStore, bank_account: e.target.value })}
+                  placeholder="예: 국민은행 123-456-789012 (홍길동)"
+                  className="w-full border border-[#e0e0e0] rounded-[8px] px-4 py-2.5 text-[14px] text-[#1a1c1c] placeholder-[#c0c0c0] outline-none focus:border-[#8B5CF6]" />
+                <p className="text-[11px] text-[#a3a3a3] mt-1">주문 결제 화면에 표시됩니다</p>
               </div>
 
               {/* 영업 여부 */}

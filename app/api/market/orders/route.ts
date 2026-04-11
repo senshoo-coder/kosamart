@@ -8,7 +8,7 @@ const isDemoMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PU
 // POST /api/market/orders — 상점가 주문 생성
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { store_id, store_name, device_uuid, nickname, pickup_type, delivery_address, delivery_memo, items, total_amount } = body
+  const { store_id, store_name, device_uuid, nickname, pickup_type, delivery_address, delivery_memo, items, total_amount, customer_phone } = body
 
   if (!store_id || !delivery_address || !items?.length) {
     return NextResponse.json({ data: null, error: '필수 항목 누락' }, { status: 400 })
@@ -79,6 +79,7 @@ export async function POST(req: NextRequest) {
       .insert({
         customer_id: user.id,
         kakao_nickname: nickname,
+        customer_phone: customer_phone || null,
         delivery_address,
         delivery_memo: delivery_memo || null,
         total_amount,

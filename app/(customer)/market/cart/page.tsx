@@ -1,40 +1,26 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useMarketCart } from '@/lib/cart/MarketCartContext'
 import { getStore } from '@/lib/market-data'
 import { getLocalStorage, setLocalStorage, generateDeviceUUID } from '@/lib/utils'
 
-// 가게 운영시간 '11:00~23:00' 형식 파싱 → [시작시, 종료시]
+// 가게 운영시간 '11:00~23:00' 파싱
 function parseHours(hours: string): [number, number] | null {
   const m = hours.match(/^(\d{1,2}):(\d{2})~(\d{1,2}):(\d{2})$/)
   if (!m) return null
   return [parseInt(m[1]), parseInt(m[3])]
 }
 
-// 가게들의 운영시간 교집합으로 1시간 단위 슬롯 생성
-function buildTimeSlots(storeIds: string[]): { value: string; label: string }[] {
-  let start = 0
-  let end = 24
-
-  for (const sid of storeIds) {
-    const hours = getStore(sid)?.hours
-    if (!hours) continue
-    const parsed = parseHours(hours)
-    if (!parsed) continue
-    start = Math.max(start, parsed[0])  // 가장 늦게 여는 가게 기준
-    end   = Math.min(end,   parsed[1])  // 가장 일찍 닫는 가게 기준
-  }
-
-  // 기본값 (가게 정보 없을 때)
-  if (start === 0 && end === 24) { start = 9; end = 21 }
-
-  const now = new Date()
-  const currentH = now.getHours()
-
+// 가게 한 곳의 운영시간 기반 슬롯 생성
+function buildSlotsForStore(hours: string | undefined): { value: string; label: string }[] {
+  const parsed = hours ? parseHours(hours) : null
+  const start = parsed ? parsed[0] : 9
+  const end   = parsed ? parsed[1] : 21
+  const currentH = new Date().getHours()
   const slots: { value: string; label: string }[] = []
   for (let h = start; h < end; h++) {
-    if (h <= currentH) continue  // 이미 지난 시간대 제외
+    if (h <= currentH) continue
     const s = String(h).padStart(2, '0')
     const e = String(h + 1).padStart(2, '0')
     slots.push({ value: `${h}-${h + 1}`, label: `${s}:00 ~ ${e}:00` })
@@ -49,19 +35,42 @@ export default function CartPage() {
     if (typeof window === 'undefined') return ''
     return getLocalStorage('cosmart_address') || ''
   })
+  const [phone, setPhone] = useState(() => {
+    if (typeof window === 'undefined') return ''
+    return getLocalStorage('cosmart_phone') || ''
+  })
   const [pickupType, setPickupType] = useState<'delivery' | 'pickup'>('delivery')
+  // 가게별 희망 수령 시간 { storeId: slotValue }
+  const [timeSlots, setTimeSlots] = useState<Record<string, string>>({})
   const [memo, setMemo] = useState('')
   const [consent, setConsent] = useState(false)
   const [loading, setLoading] = useState(false)
+  // 동적 가게 정보 (bank_account 등) — /api/market/stores에서 로드
+  const [dynamicStores, setDynamicStores] = useState<Record<string, any>>({})
 
   const nickname = typeof window !== 'undefined' ? getLocalStorage('cosmart_nickname') : null
   const storeIds = Object.keys(cart.storeGroups)
 
-  const TIME_SLOTS = useMemo(() => buildTimeSlots(storeIds), [storeIds.join(',')])
-  const [timeSlot, setTimeSlot] = useState(() => {
-    const slots = buildTimeSlots(Object.keys(cart.storeGroups))
-    return slots[0]?.value ?? ''
-  })
+  // 동적 가게 정보 로드
+  useEffect(() => {
+    fetch('/api/market/stores')
+      .then(r => r.json())
+      .then(({ data }) => {
+        if (!Array.isArray(data)) return
+        const map: Record<string, any> = {}
+        data.forEach((s: any) => { map[s.id] = s })
+        setDynamicStores(map)
+        // 가게별 첫 번째 유효 슬롯으로 초기화
+        const initial: Record<string, string> = {}
+        storeIds.forEach(sid => {
+          const hours = map[sid]?.hours || getStore(sid)?.hours
+          const slots = buildSlotsForStore(hours)
+          initial[sid] = slots[0]?.value ?? ''
+        })
+        setTimeSlots(initial)
+      })
+      .catch(() => {})
+  }, [storeIds.join(',')])
 
   const MIN_ORDER_PER_STORE = 5000
   const belowMinStores = storeIds.filter(sid => cart.getStoreTotal(sid) < MIN_ORDER_PER_STORE)
@@ -72,30 +81,25 @@ export default function CartPage() {
     return sum + (store?.deliveryFee || 0)
   }, 0)
 
-  const selectedTimeLabel = TIME_SLOTS.find(t => t.value === timeSlot)?.label || timeSlot
-  const noSlotsAvailable = pickupType === 'delivery' && TIME_SLOTS.length === 0
+  // 가게별 슬롯 계산
+  const storeSlotsMap = useMemo(() => {
+    const map: Record<string, { value: string; label: string }[]> = {}
+    storeIds.forEach(sid => {
+      const hours = dynamicStores[sid]?.hours || getStore(sid)?.hours
+      map[sid] = buildSlotsForStore(hours)
+    })
+    return map
+  }, [storeIds.join(','), dynamicStores])
 
-  // 가게별 운영시간 교집합 범위 (안내용)
-  const hoursInfo = useMemo(() => {
-    let start = 0; let end = 24
-    for (const sid of storeIds) {
-      const h = getStore(sid)?.hours
-      if (!h) continue
-      const p = parseHours(h)
-      if (!p) continue
-      start = Math.max(start, p[0]); end = Math.min(end, p[1])
-    }
-    if (start === 0 && end === 24) return null
-    return `${String(start).padStart(2,'0')}:00 ~ ${String(end).padStart(2,'0')}:00`
-  }, [storeIds.join(',')])
+  const someStoreNoSlots = pickupType === 'delivery' && storeIds.some(sid => storeSlotsMap[sid]?.length === 0)
 
   async function handleOrder() {
-    if (pickupType === 'delivery' && noSlotsAvailable) {
-      alert('현재 주문 가능한 수령 시간대가 없습니다. 내일 운영 시작 후 다시 주문해주세요.')
+    if (pickupType === 'delivery' && someStoreNoSlots) {
+      alert('일부 가게의 운영시간이 종료되었습니다. 내일 다시 주문해주세요.')
       return
     }
-    if (pickupType === 'delivery' && !timeSlot) {
-      alert('희망 수령 시간을 선택해주세요')
+    if (pickupType === 'delivery' && !phone.trim()) {
+      alert('전화번호를 입력해주세요')
       return
     }
     if (pickupType === 'delivery' && !address.trim()) {
@@ -125,6 +129,8 @@ export default function CartPage() {
     }
 
     try {
+      if (pickupType === 'delivery') setLocalStorage('cosmart_phone', phone)
+
       const results = await Promise.all(storeIds.map(async sid => {
         const store = getStore(sid)
         const items = cart.storeGroups[sid].map(i => ({
@@ -135,19 +141,22 @@ export default function CartPage() {
           subtotal: i.unit_price * i.quantity,
         }))
         const total_amount = items.reduce((s, i) => s + i.subtotal, 0)
+        const slotValue = timeSlots[sid] ?? ''
+        const slotLabel = storeSlotsMap[sid]?.find(t => t.value === slotValue)?.label || slotValue
 
         const res = await fetch('/api/market/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             store_id: sid,
-            store_name: store?.name || sid,
+            store_name: (dynamicStores[sid]?.name) || store?.name || sid,
             device_uuid: deviceUuid,
             nickname,
+            customer_phone: pickupType === 'delivery' ? phone.trim() : undefined,
             pickup_type: pickupType,
-            delivery_address: pickupType === 'delivery' ? address : '\uB9E4\uC7A5 \uD53D\uC5C5',
+            delivery_address: pickupType === 'delivery' ? address : '매장 픽업',
             delivery_memo: pickupType === 'delivery'
-              ? '\uD76C\uB9DD\uC2DC\uAC04 ' + selectedTimeLabel + (memo ? ' / ' + memo : '')
+              ? `희망시간 ${slotLabel}${memo ? ' / ' + memo : ''}`
               : memo,
             items,
             total_amount,
@@ -158,7 +167,9 @@ export default function CartPage() {
 
       const failed = results.filter(r => !r.ok)
       if (failed.length === 0) {
-        if (pickupType === 'delivery') setLocalStorage('cosmart_address', address)
+        if (pickupType === 'delivery') {
+          setLocalStorage('cosmart_address', address)
+        }
         cart.clearAll()
         router.push('/orders')
       } else {
@@ -294,86 +305,120 @@ export default function CartPage() {
         </div>
 
         <div className="bg-white rounded-[8px] p-4 space-y-3" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-          <p className="text-[14px] font-bold text-[#1a1c1c]">{'\uBC30\uC1A1 \uC815\uBCF4'}</p>
+          <p className="text-[14px] font-bold text-[#1a1c1c]">배송 정보</p>
 
           <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => setPickupType('delivery')}
+            <button type="button" onClick={() => setPickupType('delivery')}
               className="py-3 px-2 rounded-xl border text-[13px] font-semibold transition-all"
               style={pickupType === 'delivery'
                 ? { borderColor: '#10b981', background: 'rgba(16,185,129,0.08)', color: '#10b981' }
-                : { borderColor: '#e0e0e0', background: '#fafafa', color: '#3c4a42' }
-              }
-            >{'\uBB38\uC55E \uBC30\uC1A1'}</button>
-            <button
-              type="button"
-              onClick={() => setPickupType('pickup')}
+                : { borderColor: '#e0e0e0', background: '#fafafa', color: '#3c4a42' }}>
+              문앞 배송
+            </button>
+            <button type="button" onClick={() => setPickupType('pickup')}
               className="py-3 px-2 rounded-xl border text-[13px] font-semibold transition-all"
               style={pickupType === 'pickup'
                 ? { borderColor: '#10b981', background: 'rgba(16,185,129,0.08)', color: '#10b981' }
-                : { borderColor: '#e0e0e0', background: '#fafafa', color: '#3c4a42' }
-              }
-            >{'\uB9E4\uC7A5 \uD53D\uC5C5'}</button>
+                : { borderColor: '#e0e0e0', background: '#fafafa', color: '#3c4a42' }}>
+              매장 픽업
+            </button>
+          </div>
+
+          {/* 전화번호 — 배송 시 필수 */}
+          <div>
+            <label className="text-[12px] text-[#a3a3a3] mb-1.5 block">
+              전화번호 {pickupType === 'delivery' ? <span className="text-[#dc2626]">*</span> : '(선택)'}
+            </label>
+            <input
+              type="tel"
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
+              placeholder="010-0000-0000"
+              className="w-full border border-[#e0e0e0] rounded-xl px-4 py-3 text-[#1a1c1c] placeholder-[#c0c0c0] text-[14px] outline-none focus:border-[#10b981]"
+            />
           </div>
 
           {pickupType === 'delivery' && (
-            <>
-              <div>
-                <label className="text-[12px] text-[#a3a3a3] mb-1.5 block">{'\uC0C1\uC138 \uC8FC\uC18C *'}</label>
-                <input
-                  type="text"
-                  value={address}
-                  onChange={e => setAddress(e.target.value)}
-                  placeholder={'\uB3D9, \uD638\uC218\uAE4C\uC9C0 \uC815\uD655\uD788'}
-                  className="w-full border border-[#e0e0e0] rounded-xl px-4 py-3 text-[#1a1c1c] placeholder-[#c0c0c0] text-[14px] outline-none focus:border-[#10b981]"
-                />
-              </div>
-              <div>
+            <div>
+              <label className="text-[12px] text-[#a3a3a3] mb-1.5 block">상세 주소 <span className="text-[#dc2626]">*</span></label>
+              <input
+                type="text"
+                value={address}
+                onChange={e => setAddress(e.target.value)}
+                placeholder="동, 호수까지 정확히"
+                className="w-full border border-[#e0e0e0] rounded-xl px-4 py-3 text-[#1a1c1c] placeholder-[#c0c0c0] text-[14px] outline-none focus:border-[#10b981]"
+              />
+            </div>
+          )}
+
+          {/* 가게별 희망 수령 시간 */}
+          {pickupType === 'delivery' && storeIds.map(sid => {
+            const storeInfo = dynamicStores[sid] || getStore(sid)
+            const slots = storeSlotsMap[sid] || []
+            const currentSlot = timeSlots[sid] ?? ''
+            return (
+              <div key={sid}>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-[12px] text-[#a3a3a3]">희망 수령 시간</label>
-                  {hoursInfo && (
-                    <span className="text-[11px] text-[#10b981] font-medium">운영 {hoursInfo}</span>
+                  <label className="text-[12px] text-[#a3a3a3]">
+                    {storeInfo?.emoji || '🏪'} <span className="font-medium">{storeInfo?.name || sid}</span> 희망 수령 시간
+                  </label>
+                  {storeInfo?.hours && (
+                    <span className="text-[11px] text-[#10b981] font-medium">운영 {storeInfo.hours}</span>
                   )}
                 </div>
-                {noSlotsAvailable ? (
+                {slots.length === 0 ? (
                   <div className="w-full border border-[#fca5a5] bg-[#fff1f1] rounded-xl px-4 py-3 text-[13px] text-[#dc2626]">
-                    현재 운영시간이 종료되었습니다. 내일 다시 주문해주세요.
+                    현재 운영시간이 종료되었습니다
                   </div>
                 ) : (
                   <select
-                    value={timeSlot}
-                    onChange={e => setTimeSlot(e.target.value)}
+                    value={currentSlot}
+                    onChange={e => setTimeSlots(prev => ({ ...prev, [sid]: e.target.value }))}
                     className="w-full border border-[#e0e0e0] rounded-xl px-4 py-3 text-[14px] text-[#1a1c1c] outline-none bg-white focus:border-[#10b981] appearance-none"
-                    style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 12 12\'%3E%3Cpath fill=\'%23999\' d=\'M6 8L1 3h10z\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 16px center' }}
+                    style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 16px center' }}
                   >
-                    {TIME_SLOTS.map(t => (
+                    {slots.map(t => (
                       <option key={t.value} value={t.value}>{t.label}</option>
                     ))}
                   </select>
                 )}
               </div>
-            </>
-          )}
+            )
+          })}
+
           <div>
             <label className="text-[12px] text-[#a3a3a3] mb-1.5 block">
-              {pickupType === 'pickup' ? '\uD53D\uC5C5 \uBA54\uBAA8' : '\uBC30\uC1A1 \uBA54\uBAA8'} ({'\uC120\uD0DD'})
+              {pickupType === 'pickup' ? '픽업 메모' : '배송 메모'} (선택)
             </label>
             <input
               type="text"
               value={memo}
               onChange={e => setMemo(e.target.value)}
-              placeholder={pickupType === 'pickup' ? '\uBC29\uBB38 \uC608\uC815 \uC2DC\uAC04 \uB4F1' : '\uCD08\uC778\uC885 \uAE08\uC9C0, \uBE44\uBC88 \uB4F1'}
+              placeholder={pickupType === 'pickup' ? '방문 예정 시간 등' : '초인종 금지, 비번 등'}
               className="w-full border border-[#e0e0e0] rounded-xl px-4 py-3 text-[#1a1c1c] placeholder-[#c0c0c0] text-[14px] outline-none focus:border-[#10b981]"
             />
           </div>
         </div>
 
-        <div className="bg-[#f0fdf8] border border-[#d1fae5] rounded-[8px] p-4">
-          <p className="text-[14px] font-semibold text-[#1a1c1c] mb-1">{'\uACC4\uC88C\uC774\uCCB4'}</p>
-          <p className="text-[13px] text-[#3c4a42]">{'\uAD6D\uBBFC\uC740\uD589'} <span className="font-semibold">123-456-789012</span> ({'\uCF54\uC0AC\uB9C8\uD2B8'})</p>
-          {nickname && <p className="text-[12px] text-amber-600 mt-1.5">{'\uC785\uAE08\uC790\uBA85\uC744 \uB2C9\uB124\uC784'} <b>'{nickname}'</b>({'\uC73C'}){'\uB85C \uD574\uC8FC\uC138\uC694'}</p>}
-        </div>
+        {/* 가게별 계좌이체 정보 */}
+        {storeIds.map(sid => {
+          const storeInfo = dynamicStores[sid]
+          const bankAccount = storeInfo?.bank_account
+          if (!bankAccount) return null
+          return (
+            <div key={sid} className="bg-[#f0fdf8] border border-[#d1fae5] rounded-[8px] p-4">
+              <p className="text-[13px] font-semibold text-[#1a1c1c] mb-1">
+                {storeInfo?.emoji} {storeInfo?.name} 계좌이체
+              </p>
+              <p className="text-[13px] text-[#3c4a42] font-medium">{bankAccount}</p>
+              {nickname && (
+                <p className="text-[12px] text-amber-600 mt-1.5">
+                  입금자명을 닉네임 <b>'{nickname}'</b>으로 해주세요
+                </p>
+              )}
+            </div>
+          )
+        })}
 
         <label className="flex items-start gap-3 cursor-pointer">
           <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} className="mt-0.5 accent-emerald-500" />
@@ -383,9 +428,9 @@ export default function CartPage() {
         <button
           type="button"
           onClick={handleOrder}
-          disabled={loading || noSlotsAvailable}
+          disabled={loading || someStoreNoSlots}
           className="w-full py-4 rounded-2xl text-[15px] font-bold text-white disabled:opacity-50 active:opacity-80"
-          style={{ background: noSlotsAvailable ? '#94a3b8' : '#10b981' }}
+          style={{ background: someStoreNoSlots ? '#94a3b8' : '#10b981' }}
         >
           {loading
             ? '\uCC98\uB9AC \uC911...'

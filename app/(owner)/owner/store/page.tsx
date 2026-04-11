@@ -44,7 +44,7 @@ export default function OwnerStorePage() {
   const [loading, setLoading] = useState(true)
   const [products, setProducts] = useState<DBProduct[]>([])
   const [editingInfo, setEditingInfo] = useState(false)
-  const [infoForm, setInfoForm] = useState({ hours: '', minOrder: 0, deliveryFee: 0 })
+  const [infoForm, setInfoForm] = useState({ hours: '', minOrder: 0, deliveryFee: 0, bank_account: '' })
   const [savingInfo, setSavingInfo] = useState(false)
   const [images, setImages] = useState<ImageMap>({})
   const [uploading, setUploading] = useState<string | null>(null)
@@ -91,6 +91,7 @@ export default function OwnerStorePage() {
       hours: store?.hours || '',
       minOrder: store?.minOrder || 0,
       deliveryFee: store?.deliveryFee || 0,
+      bank_account: (store as any)?.bank_account || '',
     })
     setEditingInfo(true)
   }
@@ -419,6 +420,17 @@ export default function OwnerStorePage() {
                   />
                 </div>
               </div>
+              <div>
+                <label className="text-[11px] text-[#a3a3a3] font-medium block mb-1">계좌이체 정보</label>
+                <input
+                  type="text"
+                  value={infoForm.bank_account}
+                  onChange={e => setInfoForm(f => ({ ...f, bank_account: e.target.value }))}
+                  placeholder="예) 국민은행 123-456-789012 (홍길동)"
+                  className="w-full border border-[#e0e0e0] rounded-[8px] px-3 py-2 text-[13px] text-[#1a1c1c] focus:outline-none focus:border-[#0058be]"
+                />
+                <p className="text-[11px] text-[#a3a3a3] mt-1">주문 결제 화면에 표시됩니다</p>
+              </div>
               <div className="flex gap-2 pt-1">
                 <button
                   onClick={saveInfo}
@@ -456,6 +468,12 @@ export default function OwnerStorePage() {
                   <p className="text-[13px] font-semibold text-[#1a1c1c]">{products.length}개</p>
                 </div>
               </div>
+              {(store as any)?.bank_account && (
+                <div className="mt-3 bg-[#f0fdf8] border border-[#d1fae5] rounded-[8px] p-3">
+                  <p className="text-[11px] text-[#a3a3a3] mb-1">계좌이체 정보</p>
+                  <p className="text-[13px] font-semibold text-[#1a1c1c]">{(store as any).bank_account}</p>
+                </div>
+              )}
               <button
                 onClick={startEditInfo}
                 className="mt-3 w-full py-2 rounded-[8px] text-[13px] font-medium border"

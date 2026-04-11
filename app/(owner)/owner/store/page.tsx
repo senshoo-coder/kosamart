@@ -2,6 +2,17 @@
 import { useState, useEffect, useRef } from 'react'
 import { STORES, type Store } from '@/lib/market-data'
 
+const HOUR_OPTIONS_START = Array.from({ length: 19 }, (_, i) => i + 5) // 05~23
+const HOUR_OPTIONS_END   = Array.from({ length: 19 }, (_, i) => i + 6) // 06~24
+
+function parseHoursRange(hours: string): { start: number; end: number } {
+  const m = (hours || '').match(/^(\d{1,2}):\d{2}~(\d{1,2}):\d{2}$/)
+  return { start: parseInt(m?.[1] || '9'), end: parseInt(m?.[2] || '22') }
+}
+function buildHours(start: number, end: number): string {
+  return `${String(start).padStart(2, '0')}:00~${String(end).padStart(2, '0')}:00`
+}
+
 interface DBProduct {
   id: string
   store_id: string
@@ -392,13 +403,35 @@ export default function OwnerStorePage() {
             <div className="flex flex-col gap-3">
               <div>
                 <label className="text-[11px] text-[#a3a3a3] font-medium block mb-1">영업시간</label>
-                <input
-                  type="text"
-                  value={infoForm.hours}
-                  onChange={e => setInfoForm(f => ({ ...f, hours: e.target.value }))}
-                  placeholder="예) 09:00 ~ 20:00"
-                  className="w-full border border-[#e0e0e0] rounded-[8px] px-3 py-2 text-[13px] text-[#1a1c1c] focus:outline-none focus:border-[#0058be]"
-                />
+                <div className="flex items-center gap-2">
+                  <select
+                    value={parseHoursRange(infoForm.hours).start}
+                    onChange={e => {
+                      const start = parseInt(e.target.value)
+                      const { end } = parseHoursRange(infoForm.hours)
+                      setInfoForm(f => ({ ...f, hours: buildHours(start, Math.max(start + 1, end)) }))
+                    }}
+                    className="flex-1 border border-[#e0e0e0] rounded-[8px] px-3 py-2 text-[13px] text-[#1a1c1c] focus:outline-none focus:border-[#0058be] bg-white"
+                  >
+                    {HOUR_OPTIONS_START.map(h => (
+                      <option key={h} value={h}>{String(h).padStart(2, '0')}:00</option>
+                    ))}
+                  </select>
+                  <span className="text-[#a3a3a3] text-sm flex-shrink-0">~</span>
+                  <select
+                    value={parseHoursRange(infoForm.hours).end}
+                    onChange={e => {
+                      const end = parseInt(e.target.value)
+                      const { start } = parseHoursRange(infoForm.hours)
+                      setInfoForm(f => ({ ...f, hours: buildHours(start, end) }))
+                    }}
+                    className="flex-1 border border-[#e0e0e0] rounded-[8px] px-3 py-2 text-[13px] text-[#1a1c1c] focus:outline-none focus:border-[#0058be] bg-white"
+                  >
+                    {HOUR_OPTIONS_END.map(h => (
+                      <option key={h} value={h}>{String(h).padStart(2, '0')}:00</option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>

@@ -29,6 +29,16 @@ interface StoresConfig {
 
 const CATEGORIES = ['편의점·슈퍼', '반찬·가정식', '정육·축산', '죽·분식', '치킨·튀김', '베이커리·카페', '한식', '중식', '일식', '기타']
 const ACCENT_OPTIONS = ['#10b981', '#6d28d9', '#2170e4', '#e29100', '#ef4444', '#ec4899', '#0ea5e9', '#14b8a6']
+const HOUR_OPTIONS_START = Array.from({ length: 19 }, (_, i) => i + 5) // 05~23
+const HOUR_OPTIONS_END   = Array.from({ length: 19 }, (_, i) => i + 6) // 06~24
+
+function parseHoursRange(hours: string): { start: number; end: number } {
+  const m = (hours || '').match(/^(\d{1,2}):\d{2}~(\d{1,2}):\d{2}$/)
+  return { start: parseInt(m?.[1] || '9'), end: parseInt(m?.[2] || '22') }
+}
+function buildHours(start: number, end: number): string {
+  return `${String(start).padStart(2, '0')}:00~${String(end).padStart(2, '0')}:00`
+}
 
 const DEFAULT_STORE = {
   id: '', name: '', emoji: '🏪', category: '기타', description: '',
@@ -397,20 +407,46 @@ export default function AdminStoresPage() {
                   className="w-full border border-[#e0e0e0] rounded-[8px] px-4 py-2.5 text-[14px] text-[#1a1c1c] placeholder-[#c0c0c0] outline-none focus:border-[#8B5CF6] resize-none h-20" />
               </div>
 
-              {/* 영업시간 + 뱃지 */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[12px] font-semibold text-[#1a1c1c] mb-1.5 block">영업시간</label>
-                  <input value={editingStore.hours} onChange={e => setEditingStore({ ...editingStore, hours: e.target.value })}
-                    placeholder="09:00~18:00"
-                    className="w-full border border-[#e0e0e0] rounded-[8px] px-4 py-2.5 text-[14px] text-[#1a1c1c] placeholder-[#c0c0c0] outline-none focus:border-[#8B5CF6]" />
+              {/* 영업시간 */}
+              <div>
+                <label className="text-[12px] font-semibold text-[#1a1c1c] mb-1.5 block">영업시간</label>
+                <div className="flex items-center gap-2">
+                  <select
+                    value={parseHoursRange(editingStore.hours).start}
+                    onChange={e => {
+                      const start = parseInt(e.target.value)
+                      const { end } = parseHoursRange(editingStore.hours)
+                      setEditingStore({ ...editingStore, hours: buildHours(start, Math.max(start + 1, end)) })
+                    }}
+                    className="flex-1 border border-[#e0e0e0] rounded-[8px] px-3 py-2.5 text-[13px] text-[#1a1c1c] outline-none focus:border-[#8B5CF6] bg-white"
+                  >
+                    {HOUR_OPTIONS_START.map(h => (
+                      <option key={h} value={h}>{String(h).padStart(2, '0')}:00</option>
+                    ))}
+                  </select>
+                  <span className="text-[#a3a3a3] text-sm flex-shrink-0">~</span>
+                  <select
+                    value={parseHoursRange(editingStore.hours).end}
+                    onChange={e => {
+                      const end = parseInt(e.target.value)
+                      const { start } = parseHoursRange(editingStore.hours)
+                      setEditingStore({ ...editingStore, hours: buildHours(start, end) })
+                    }}
+                    className="flex-1 border border-[#e0e0e0] rounded-[8px] px-3 py-2.5 text-[13px] text-[#1a1c1c] outline-none focus:border-[#8B5CF6] bg-white"
+                  >
+                    {HOUR_OPTIONS_END.map(h => (
+                      <option key={h} value={h}>{String(h).padStart(2, '0')}:00</option>
+                    ))}
+                  </select>
                 </div>
-                <div>
-                  <label className="text-[12px] font-semibold text-[#1a1c1c] mb-1.5 block">뱃지 (선택)</label>
-                  <input value={editingStore.badge} onChange={e => setEditingStore({ ...editingStore, badge: e.target.value })}
-                    placeholder="예: 인기, 신규"
-                    className="w-full border border-[#e0e0e0] rounded-[8px] px-4 py-2.5 text-[14px] text-[#1a1c1c] placeholder-[#c0c0c0] outline-none focus:border-[#8B5CF6]" />
-                </div>
+              </div>
+
+              {/* 뱃지 */}
+              <div>
+                <label className="text-[12px] font-semibold text-[#1a1c1c] mb-1.5 block">뱃지 (선택)</label>
+                <input value={editingStore.badge} onChange={e => setEditingStore({ ...editingStore, badge: e.target.value })}
+                  placeholder="예: 인기, 신규"
+                  className="w-full border border-[#e0e0e0] rounded-[8px] px-4 py-2.5 text-[14px] text-[#1a1c1c] placeholder-[#c0c0c0] outline-none focus:border-[#8B5CF6]" />
               </div>
 
               {/* 최소주문 + 배달비 */}

@@ -4,7 +4,12 @@ import { useSearchParams } from 'next/navigation'
 import { OrderStatusBadge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatPrice, timeAgo } from '@/lib/utils'
+import { STORES } from '@/lib/market-data'
 import type { Order, OrderStatus } from '@/lib/types'
+
+const STORE_NAME_MAP: Record<string, { name: string; emoji: string }> = Object.fromEntries(
+  STORES.map(s => [s.id, { name: s.name, emoji: s.emoji }])
+)
 
 const FILTER_TABS: Array<{ key: 'all' | OrderStatus; label: string }> = [
   { key: 'all',        label: '전체' },
@@ -120,20 +125,32 @@ function OwnerOrdersContent() {
         <table className="w-full">
           <thead>
             <tr className="border-b border-[#f5f5f5]">
-              {['주문번호', '닉네임', '주문 내역', '금액', '상태', '접수', '처리'].map(h => (
+              {['주문번호', '가게', '닉네임', '주문 내역', '금액', '상태', '접수', '처리'].map(h => (
                 <th key={h} className="text-left px-4 py-3 text-[11px] text-[#a3a3a3] font-medium">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={7} className="text-center py-10 text-[#a3a3a3] text-[13px]">로딩중...</td></tr>
+              <tr><td colSpan={8} className="text-center py-10 text-[#a3a3a3] text-[13px]">로딩중...</td></tr>
             ) : orders.length === 0 ? (
-              <tr><td colSpan={7} className="text-center py-10 text-[#a3a3a3] text-[13px]">주문이 없습니다</td></tr>
+              <tr><td colSpan={8} className="text-center py-10 text-[#a3a3a3] text-[13px]">주문이 없습니다</td></tr>
             ) : (
-              orders.map(order => (
+              orders.map(order => {
+                const storeInfo = (order as any).store_id ? STORE_NAME_MAP[(order as any).store_id] : null
+                return (
                 <tr key={order.id} className="border-b border-[#f9f9f9] hover:bg-[#f9f9f9] transition-colors">
                   <td className="px-4 py-3 text-[11px] text-[#a3a3a3] font-mono">{order.order_number}</td>
+                  <td className="px-4 py-3">
+                    {storeInfo ? (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-base leading-none">{storeInfo.emoji}</span>
+                        <span className="text-[12px] font-semibold text-[#1a1c1c]">{storeInfo.name}</span>
+                      </div>
+                    ) : (
+                      <span className="text-[11px] text-[#a3a3a3]">—</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3">
                     <p className="text-[13px] text-[#1a1c1c] font-semibold">{order.kakao_nickname}</p>
                   </td>
@@ -171,7 +188,8 @@ function OwnerOrdersContent() {
                     )}
                   </td>
                 </tr>
-              ))
+                )
+              })
             )}
           </tbody>
         </table>
@@ -188,12 +206,20 @@ function OwnerOrdersContent() {
             <span className="text-4xl">📋</span>
             <p className="text-[14px] font-semibold text-[#1a1c1c]">주문이 없습니다</p>
           </div>
-        ) : orders.map(order => (
+        ) : orders.map(order => {
+          const storeInfo = (order as any).store_id ? STORE_NAME_MAP[(order as any).store_id] : null
+          return (
           <div key={order.id} className="bg-white rounded-[8px] p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
             <div className="flex justify-between items-start mb-2">
               <div>
                 <p className="font-semibold text-[#1a1c1c] text-[14px]">{order.kakao_nickname}</p>
                 <p className="text-[11px] text-[#a3a3a3] font-mono">{order.order_number}</p>
+                {storeInfo && (
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <span className="text-xs">{storeInfo.emoji}</span>
+                    <span className="text-[11px] text-[#8B5CF6] font-medium">{storeInfo.name}</span>
+                  </div>
+                )}
               </div>
               <OrderStatusBadge status={order.status} />
             </div>
@@ -230,7 +256,8 @@ function OwnerOrdersContent() {
               <p className="text-[12px] text-center text-[#1d4ed8]">배달팀 배정 대기중</p>
             )}
           </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* 거절 사유 모달 */}

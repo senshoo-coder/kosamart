@@ -31,7 +31,7 @@ function OwnerOrdersContent() {
   const [rejectModal, setRejectModal] = useState<{ orderId: string; orderNumber: string } | null>(null)
   const [rejectReason, setRejectReason] = useState('')
   const [deleteModal, setDeleteModal] = useState<{ orderId: string; orderNumber: string } | null>(null)
-  const [photoModal, setPhotoModal] = useState<{ url: string; orderNumber: string } | null>(null)
+  const [photoModal, setPhotoModal] = useState<{ url: string; orderNumber: string; driverMemo?: string } | null>(null)
   const [photoLoading, setPhotoLoading] = useState<string | null>(null)
 
   const [storeNameMap, setStoreNameMap] = useState(STORE_NAME_MAP)
@@ -101,15 +101,22 @@ function OwnerOrdersContent() {
     setActionLoading(null)
   }
 
+  // Supabase는 delivery:deliveries(*) 를 배열로 반환하므로 첫 번째 요소 추출
+  function getDelivery(order: Order) {
+    const d = order.delivery as any
+    return Array.isArray(d) ? d[0] : d
+  }
+
   async function handleViewPhoto(order: Order) {
-    const photoPath = (order.delivery as any)?.delivery_photo_url
+    const delivery = getDelivery(order)
+    const photoPath = delivery?.delivery_photo_url
     if (!photoPath) return alert('사진이 없습니다')
     setPhotoLoading(order.id)
     try {
       const res = await fetch(`/api/admin/delivery-photo?path=${encodeURIComponent(photoPath)}`)
       const d = await res.json()
       if (!res.ok || !d.url) { alert(d.error || '사진을 불러올 수 없습니다'); return }
-      setPhotoModal({ url: d.url, orderNumber: order.order_number })
+      setPhotoModal({ url: d.url, orderNumber: order.order_number, driverMemo: delivery?.driver_memo })
     } catch { alert('네트워크 오류가 발생했습니다') }
     setPhotoLoading(null)
   }
@@ -243,7 +250,7 @@ function OwnerOrdersContent() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1.5">
-                      {order.status === 'delivered' && (order.delivery as any)?.delivery_photo_url && (
+                      {order.status === 'delivered' && getDelivery(order)?.delivery_photo_url && (
                         <button
                           onClick={() => handleViewPhoto(order)}
                           disabled={photoLoading === order.id}
@@ -334,7 +341,7 @@ function OwnerOrdersContent() {
               <p className="text-[12px] text-center text-[#1d4ed8]">배달팀 배정 대기중</p>
             )}
             <div className="flex gap-2 mt-2 pt-2 border-t border-[#f5f5f5]">
-              {order.status === 'delivered' && (order.delivery as any)?.delivery_photo_url && (
+              {order.status === 'delivered' && getDelivery(order)?.delivery_photo_url && (
                 <button
                   onClick={() => handleViewPhoto(order)}
                   disabled={photoLoading === order.id}
@@ -379,9 +386,15 @@ function OwnerOrdersContent() {
               <img
                 src={photoModal.url}
                 alt="배달 완료 사진"
-                className="w-full rounded-[8px] object-contain max-h-[70vh]"
+                className="w-full rounded-[8px] object-contain max-h-[60vh]"
               />
             </div>
+            {photoModal.driverMemo && (
+              <div className="mx-4 mb-3 px-3 py-2 bg-[#fef3c7] rounded-[8px]">
+                <p className="text-[11px] text-[#b45309] font-semibold mb-0.5">기사 메모</p>
+                <p className="text-[12px] text-[#b45309]">{photoModal.driverMemo}</p>
+              </div>
+            )}
             <p className="text-center text-[11px] text-[#a3a3a3] pb-3">이 링크는 60초 후 만료됩니다</p>
           </div>
         </div>

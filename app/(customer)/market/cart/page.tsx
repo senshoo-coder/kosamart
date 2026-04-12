@@ -88,8 +88,8 @@ export default function CartPage() {
   const hasWarnings = belowMinStores.length > 0
 
   const totalDeliveryFee = storeIds.reduce((sum, sid) => {
-    const store = getStore(sid)
-    return sum + (store?.deliveryFee || 0)
+    const fee = dynamicStores[sid]?.deliveryFee ?? getStore(sid)?.deliveryFee ?? 0
+    return sum + fee
   }, 0)
 
   // 가게별 슬롯 계산

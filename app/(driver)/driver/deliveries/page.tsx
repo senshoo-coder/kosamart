@@ -110,7 +110,16 @@ export default function DriverDeliveriesPage() {
       formData.append('file', photoFile)
       formData.append('deliveryId', completeModal.id)
       const uploadRes = await fetch('/api/deliveries/upload-photo', { method: 'POST', body: formData })
-      if (uploadRes.ok) { const { path } = await uploadRes.json(); photoUrl = path }
+      if (uploadRes.ok) {
+        const { path } = await uploadRes.json()
+        photoUrl = path
+      } else {
+        const err = await uploadRes.json().catch(() => ({}))
+        alert(`사진 업로드 실패: ${err.error || '스토리지 오류'}`)
+        setUploading(false)
+        setActionLoading(null)
+        return
+      }
     }
     const res = await fetch(`/api/deliveries/${completeModal.id}/complete`, {
       method: 'POST',

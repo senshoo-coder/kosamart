@@ -26,15 +26,6 @@ const STORE_GRADIENTS: Record<string, string> = {
   'bakery':        'linear-gradient(150deg, #713f12 0%, #422006 100%)',
 }
 
-const STORE_RATINGS: Record<string, number> = {
-  'central-super': 4.8,
-  'banchan':       4.7,
-  'butcher':       4.9,
-  'bonjuk':        4.6,
-  'chicken':       4.7,
-  'bakery':        4.8,
-}
-
 const PARTICIPANTS: Record<string, number> = {
   'central-super': 23,
   'banchan':       45,
@@ -48,29 +39,6 @@ interface DynamicStore {
   id: string; name: string; emoji: string; category: string; description: string
   isOpen: boolean; badge?: string; hours?: string; minOrder: number
   deliveryFee: number; accentColor: string; is_active: boolean; isCustom: boolean
-}
-
-function StarRating({ rating }: { rating: number }) {
-  const full = Math.floor(rating)
-  const half = rating - full >= 0.5
-  return (
-    <div className="flex items-center gap-1">
-      <span className="flex">
-        {[1,2,3,4,5].map(i => (
-          <svg key={i} viewBox="0 0 12 12" width="12" height="12" fill={i <= full ? '#f59e0b' : (i === full + 1 && half ? 'url(#half)' : '#ddd')}>
-            <defs>
-              <linearGradient id="half">
-                <stop offset="50%" stopColor="#f59e0b" />
-                <stop offset="50%" stopColor="#ddd" />
-              </linearGradient>
-            </defs>
-            <path d="M6 1l1.2 3.7H11L8.1 6.9l1.1 3.7L6 8.4l-3.2 2.2 1.1-3.7L1 4.7h3.8z" />
-          </svg>
-        ))}
-      </span>
-      <span className="text-[12px] font-semibold" style={{ color: '#3c4440' }}>{rating.toFixed(1)}</span>
-    </div>
-  )
 }
 
 function NeighborhoodIllustration() {
@@ -287,8 +255,6 @@ export default function MarketPage() {
             const gradient = STORE_GRADIENTS[store.id] || 'linear-gradient(150deg, #1e293b, #0f172a)'
             const storeImage = allImages[store.id]?.store
             const storeCartCount = cart.getStoreItemCount(store.id)
-            const rating = STORE_RATINGS[store.id] || 4.5
-
             const imgHeight = (store as any).image_height || 176
             const imgPosition = (store as any).image_position || 'center'
 
@@ -347,8 +313,7 @@ export default function MarketPage() {
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-3 mb-2.5">
-                      <StarRating rating={rating} />
+                    <div className="flex items-center gap-2 mb-2.5">
                       <span className="text-[12px]" style={{ color: '#8c9688' }}>
                         👥 {participants}명 참여중
                       </span>

@@ -49,6 +49,7 @@ export default function CartPage() {
   const [memo, setMemo] = useState('')
   const [consent, setConsent] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [showBankConfirm, setShowBankConfirm] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -115,7 +116,7 @@ export default function CartPage() {
       alert('최소 주문금액 미달: ' + names)
       return
     }
-    setShowConfirm(true)
+    setShowBankConfirm(true)
   }
 
   async function handleOrder() {
@@ -459,6 +460,60 @@ export default function CartPage() {
           {loading ? '처리 중...' : storeIds.length > 1 ? `가게별 주문하기 (${storeIds.length}건)` : '주문하기'}
         </button>
       </div>
+
+      {/* 계좌이체 확인 팝업 */}
+      {showBankConfirm && (
+        <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center px-4 pb-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowBankConfirm(false)} />
+          <div className="relative w-full max-w-sm bg-white rounded-[20px] p-6">
+            <div className="text-center mb-3">
+              <span className="text-[44px]">🏦</span>
+            </div>
+            <h3 className="text-[18px] font-bold text-[#1a1c1c] text-center mb-1">계좌이체 완료 하셨나요?</h3>
+            <p className="text-[13px] text-[#a3a3a3] text-center mb-4">아래 계좌로 입금 후 주문을 완료해주세요</p>
+
+            {storeIds.map(sid => {
+              const storeInfo = dynamicStores[sid]
+              const bankAccount = storeInfo?.bank_account
+              return (
+                <div key={sid} className="bg-[#f0fdf8] border border-[#d1fae5] rounded-[12px] p-4 mb-3">
+                  <p className="text-[12px] font-semibold text-[#3c4a42] mb-1.5">
+                    {storeInfo?.emoji || '🏪'} {storeInfo?.name || sid}
+                  </p>
+                  {bankAccount ? (
+                    <p className="text-[15px] font-bold text-[#1a1c1c]">{bankAccount}</p>
+                  ) : (
+                    <p className="text-[13px] text-[#a3a3a3]">계좌 정보 없음 (현장 결제)</p>
+                  )}
+                  <div className="flex items-center justify-between mt-2">
+                    <p className="text-[13px] font-bold text-[#10b981]">{cart.getStoreTotal(sid).toLocaleString()}원</p>
+                    {nickname && bankAccount && (
+                      <p className="text-[11px] text-amber-600">입금자명: <b>{nickname}</b></p>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+
+            <div className="flex gap-3 mt-2">
+              <button
+                onClick={() => setShowBankConfirm(false)}
+                className="flex-1 h-[48px] rounded-[12px] text-[14px] font-medium"
+                style={{ background: '#f2f4f6', color: '#1a1c1c' }}
+              >
+                아직 안 했어요
+              </button>
+              <button
+                onClick={() => { setShowBankConfirm(false); setShowConfirm(true) }}
+                className="flex-1 h-[48px] rounded-[12px] text-[14px] font-bold text-white"
+                style={{ background: '#10b981' }}
+              >
+                완료했어요 ✓
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 주문 확인 모달 (2-7) */}
       {showConfirm && (

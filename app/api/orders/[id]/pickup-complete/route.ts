@@ -50,12 +50,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   }
 
   // 상태 이력 기록
-  await supabase.from('order_status_logs').insert({
-    order_id: id,
-    from_status: 'approved',
-    to_status: 'picked_up_by_customer',
-    note: '매장 픽업 완료',
-  }).catch(() => {})
+  try {
+    await supabase.from('order_status_logs').insert({
+      order_id: id,
+      from_status: 'approved',
+      to_status: 'picked_up_by_customer',
+      note: '매장 픽업 완료',
+    })
+  } catch {}
 
   // 업데이트된 주문 조회
   const { data: updated } = await supabase

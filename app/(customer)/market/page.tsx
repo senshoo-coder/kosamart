@@ -307,7 +307,7 @@ export default function MarketPage() {
                       <img
                         src={storeImage}
                         alt={store.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain"
                         style={{ objectPosition: imgPosition }}
                       />
                     ) : (

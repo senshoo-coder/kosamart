@@ -30,6 +30,7 @@ function OwnerOrdersContent() {
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [rejectModal, setRejectModal] = useState<{ orderId: string; orderNumber: string } | null>(null)
   const [rejectReason, setRejectReason] = useState('')
+  const [deleteModal, setDeleteModal] = useState<{ orderId: string; orderNumber: string } | null>(null)
 
   const [storeNameMap, setStoreNameMap] = useState(STORE_NAME_MAP)
 
@@ -79,6 +80,22 @@ function OwnerOrdersContent() {
       }
     } catch { alert('네트워크 오류가 발생했습니다') }
     loadOrders()
+    setActionLoading(null)
+  }
+
+  async function handleDelete() {
+    if (!deleteModal) return
+    setActionLoading(deleteModal.orderId)
+    try {
+      const res = await fetch(`/api/orders/${deleteModal.orderId}/delete`, { method: 'POST' })
+      if (!res.ok) {
+        const d = await res.json()
+        alert(`삭제 실패: ${d.error || '오류'}`)
+      } else {
+        setDeleteModal(null)
+        loadOrders()
+      }
+    } catch { alert('네트워크 오류가 발생했습니다') }
     setActionLoading(null)
   }
 
@@ -156,7 +173,7 @@ function OwnerOrdersContent() {
         <table className="w-full">
           <thead>
             <tr className="border-b border-[#f5f5f5]">
-              {['주문번호', '가게', '닉네임', '주문 내역', '금액', '상태', '접수', '처리'].map(h => (
+              {['주문번호', '가게', '닉네임', '주문 내역', '금액', '상태', '접수', '처리', '관리'].map(h => (
                 <th key={h} className="text-left px-4 py-3 text-[11px] text-[#a3a3a3] font-medium">{h}</th>
               ))}
             </tr>
@@ -169,6 +186,7 @@ function OwnerOrdersContent() {
             ) : (
               orders.map(order => {
                 const storeInfo = (order as any).store_id ? storeNameMap[(order as any).store_id] : null
+                const isTerminal = ['cancelled', 'rejected', 'delivered', 'picked_up_by_customer'].includes(order.status)
                 return (
                 <tr key={order.id} className="border-b border-[#f9f9f9] hover:bg-[#f9f9f9] transition-colors">
                   <td className="px-4 py-3 text-[11px] text-[#a3a3a3] font-mono">{order.order_number}</td>
@@ -194,29 +212,35 @@ function OwnerOrdersContent() {
                   <td className="px-4 py-3">
                     {order.status === 'pending' && (
                       <div className="flex gap-2">
-                        <Button size="sm" onClick={() => handleConfirmPayment(order.id)} loading={actionLoading === order.id}>
-                          💰 입금확인
-                        </Button>
-                        <Button size="sm" variant="danger"
-                          onClick={() => setRejectModal({ orderId: order.id, orderNumber: order.order_number })}>
-                          거절
-                        </Button>
+                        <Button size="sm" onClick={() => handleConfirmPayment(order.id)} loading={actionLoading === order.id}>💰 입금확인</Button>
+                        <Button size="sm" variant="danger" onClick={() => setRejectModal({ orderId: order.id, orderNumber: order.order_number })}>거절</Button>
                       </div>
                     )}
                     {order.status === 'paid' && (
                       <div className="flex gap-2">
-                        <Button size="sm" onClick={() => handleApprove(order.id)} loading={actionLoading === order.id}>
-                          ✅ 승인
-                        </Button>
-                        <Button size="sm" variant="danger"
-                          onClick={() => setRejectModal({ orderId: order.id, orderNumber: order.order_number })}>
-                          거절
-                        </Button>
+                        <Button size="sm" onClick={() => handleApprove(order.id)} loading={actionLoading === order.id}>✅ 승인</Button>
+                        <Button size="sm" variant="danger" onClick={() => setRejectModal({ orderId: order.id, orderNumber: order.order_number })}>거절</Button>
                       </div>
                     )}
                     {order.status === 'approved' && (
                       <span className="text-[11px] text-[#1d4ed8]">배달팀 대기</span>
                     )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-1.5">
+                      {!isTerminal && (
+                        <button
+                          onClick={() => setRejectModal({ orderId: order.id, orderNumber: order.order_number })}
+                          disabled={actionLoading === order.id}
+                          className="text-[11px] px-2 py-1 rounded-[6px] bg-[#fef3c7] text-[#b45309] font-medium hover:bg-[#fde68a] disabled:opacity-50"
+                        >취소</button>
+                      )}
+                      <button
+                        onClick={() => setDeleteModal({ orderId: order.id, orderNumber: order.order_number })}
+                        disabled={actionLoading === order.id}
+                        className="text-[11px] px-2 py-1 rounded-[6px] bg-[#fee2e2] text-[#b91c1c] font-medium hover:bg-[#fecaca] disabled:opacity-50"
+                      >🗑️</button>
+                    </div>
                   </td>
                 </tr>
                 )
@@ -239,6 +263,7 @@ function OwnerOrdersContent() {
           </div>
         ) : orders.map(order => {
           const storeInfo = (order as any).store_id ? storeNameMap[(order as any).store_id] : null
+          const isTerminal = ['cancelled', 'rejected', 'delivered', 'picked_up_by_customer'].includes(order.status)
           return (
           <div key={order.id} className="bg-white rounded-[8px] p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
             <div className="flex justify-between items-start mb-2">
@@ -286,10 +311,44 @@ function OwnerOrdersContent() {
             {order.status === 'approved' && (
               <p className="text-[12px] text-center text-[#1d4ed8]">배달팀 배정 대기중</p>
             )}
+            <div className="flex gap-2 mt-2 pt-2 border-t border-[#f5f5f5]">
+              {!isTerminal && (
+                <button
+                  onClick={() => setRejectModal({ orderId: order.id, orderNumber: order.order_number })}
+                  className="flex-1 text-[12px] py-1.5 rounded-[8px] bg-[#fef3c7] text-[#b45309] font-medium"
+                >취소</button>
+              )}
+              <button
+                onClick={() => setDeleteModal({ orderId: order.id, orderNumber: order.order_number })}
+                className="flex-1 text-[12px] py-1.5 rounded-[8px] bg-[#fee2e2] text-[#b91c1c] font-medium"
+              >🗑️ 삭제</button>
+            </div>
           </div>
           )
         })}
       </div>
+
+      {/* 삭제 확인 모달 */}
+      {deleteModal && (
+        <div
+          className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center px-4 pb-4"
+          onClick={e => { if (e.target === e.currentTarget) setDeleteModal(null) }}
+        >
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div className="relative w-full max-w-sm bg-white rounded-[16px] p-6">
+            <h3 className="text-[16px] font-bold text-[#1a1c1c] mb-1">주문 완전 삭제</h3>
+            <p className="text-[11px] text-[#a3a3a3] mb-3 font-mono">{deleteModal.orderNumber}</p>
+            <div className="bg-[#fee2e2] rounded-[8px] px-4 py-3 mb-4">
+              <p className="text-[13px] text-[#b91c1c] font-semibold">⚠️ 이 작업은 되돌릴 수 없습니다</p>
+              <p className="text-[12px] text-[#b91c1c] mt-1">주문, 상품 내역, 배달 기록이 모두 삭제됩니다.</p>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="secondary" className="flex-1" onClick={() => setDeleteModal(null)}>취소</Button>
+              <Button variant="danger" className="flex-1" onClick={handleDelete} loading={actionLoading === deleteModal.orderId}>완전 삭제</Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 거절 사유 모달 */}
       {rejectModal && (

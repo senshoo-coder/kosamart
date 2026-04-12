@@ -84,6 +84,7 @@ export interface Order {
   delivery_address: string
   delivery_memo?: string
   kakao_nickname: string
+  customer_phone?: string
   owner_memo?: string
   rejected_reason?: string
   approved_at?: string

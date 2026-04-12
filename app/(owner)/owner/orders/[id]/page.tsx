@@ -137,6 +137,16 @@ export default function OrderDetailPage() {
         <h2 className="text-[13px] font-semibold text-[#1a1c1c] mb-3">{isPickup ? '픽업 정보' : '배송 정보'}</h2>
         <div className="space-y-2.5 text-[13px]">
           <div className="flex gap-3">
+            <span className="text-[#a3a3a3] w-14 flex-shrink-0">닉네임</span>
+            <span className="text-[#1a1c1c]">{order.kakao_nickname}</span>
+          </div>
+          {order.customer_phone && (
+            <div className="flex gap-3">
+              <span className="text-[#a3a3a3] w-14 flex-shrink-0">전화번호</span>
+              <a href={`tel:${order.customer_phone}`} className="text-[#1d4ed8] underline">{order.customer_phone}</a>
+            </div>
+          )}
+          <div className="flex gap-3">
             <span className="text-[#a3a3a3] w-14 flex-shrink-0">유형</span>
             <span className="text-[#1a1c1c]">{isPickup ? '🏪 매장 픽업' : '🚚 배달'}</span>
           </div>

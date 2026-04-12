@@ -168,6 +168,9 @@ function OwnerOrdersContent() {
                   <td className="px-4 py-3 text-[11px] text-[#a3a3a3] font-mono">{order.order_number}</td>
                   <td className="px-4 py-3">
                     <p className="text-[13px] text-[#1a1c1c] font-semibold">{order.kakao_nickname}</p>
+                    {order.customer_phone && (
+                      <a href={`tel:${order.customer_phone}`} className="text-[11px] text-[#1d4ed8]">{order.customer_phone}</a>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-[12px] text-[#3c4a42] max-w-xs truncate">
                     {order.items?.map(i => `${i.product_name}×${i.quantity}`).join(', ')}
@@ -233,6 +236,9 @@ function OwnerOrdersContent() {
             <div className="flex justify-between items-start mb-2">
               <div>
                 <p className="font-semibold text-[#1a1c1c] text-[14px]">{order.kakao_nickname}</p>
+                {order.customer_phone && (
+                  <a href={`tel:${order.customer_phone}`} className="text-[11px] text-[#1d4ed8]">{order.customer_phone}</a>
+                )}
                 <p className="text-[11px] text-[#a3a3a3] font-mono">{order.order_number}</p>
               </div>
               <OrderStatusBadge status={order.status} />

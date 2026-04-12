@@ -241,7 +241,7 @@ export default function CartPage() {
           const store = getStore(sid)
           const items = cart.storeGroups[sid]
           const storeTotal = cart.getStoreTotal(sid)
-          const storeBelowMin = storeTotal < MIN_ORDER_PER_STORE
+          const storeBelowMin = storeTotal < getMinOrder(sid)
 
           return (
             <div key={sid} className="bg-white rounded-[8px] overflow-hidden" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>

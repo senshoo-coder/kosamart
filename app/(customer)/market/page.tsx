@@ -71,7 +71,7 @@ export default function MarketPage() {
   })
 
   return (
-    <div className="min-h-screen bg-[#f9f9f9]">
+    <div className="min-h-[100dvh] bg-[#f9f9f9]">
       {/* 헤더 */}
       <header
         className="sticky top-0 z-40 flex items-center justify-between px-4 h-[56px] border-b border-[#eee]"
@@ -99,7 +99,7 @@ export default function MarketPage() {
         </div>
       </header>
 
-      <div className="px-5 pt-5 pb-6 flex flex-col gap-6">
+      <div className={`px-5 pt-5 flex flex-col gap-6 ${cart.totalItems > 0 ? 'pb-[88px]' : 'pb-6'}`}>
         {/* 섹션 타이틀 + 배너 */}
         <div className="flex flex-col gap-4">
           <div className="flex items-end justify-between">

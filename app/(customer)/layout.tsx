@@ -10,7 +10,7 @@ const NAV_ITEMS = [
 
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen pb-[64px]">
+    <div className="min-h-[100dvh]" style={{ paddingBottom: 'calc(64px + env(safe-area-inset-bottom))' }}>
       <MarketCartProvider>
         {children}
       </MarketCartProvider>

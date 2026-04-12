@@ -18,9 +18,9 @@ export function MobileBottomNav({ items }: MobileBottomNavProps) {
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-md rounded-t-2xl"
-      style={{ boxShadow: '0 -4px 20px rgba(25,28,30,0.05)' }}
+      style={{ boxShadow: '0 -4px 20px rgba(25,28,30,0.05)', paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <div className="flex h-[64px] pb-safe">
+      <div className="flex h-[64px]">
         {items.map((item) => {
           const active = pathname === item.href || pathname.startsWith(item.href + '/')
           return (

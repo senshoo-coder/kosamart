@@ -31,6 +31,8 @@ function OwnerOrdersContent() {
   const [rejectModal, setRejectModal] = useState<{ orderId: string; orderNumber: string } | null>(null)
   const [rejectReason, setRejectReason] = useState('')
   const [deleteModal, setDeleteModal] = useState<{ orderId: string; orderNumber: string } | null>(null)
+  const [photoModal, setPhotoModal] = useState<{ url: string; orderNumber: string } | null>(null)
+  const [photoLoading, setPhotoLoading] = useState<string | null>(null)
 
   const [storeNameMap, setStoreNameMap] = useState(STORE_NAME_MAP)
 
@@ -97,6 +99,19 @@ function OwnerOrdersContent() {
       }
     } catch { alert('네트워크 오류가 발생했습니다') }
     setActionLoading(null)
+  }
+
+  async function handleViewPhoto(order: Order) {
+    const photoPath = (order.delivery as any)?.delivery_photo_url
+    if (!photoPath) return alert('사진이 없습니다')
+    setPhotoLoading(order.id)
+    try {
+      const res = await fetch(`/api/admin/delivery-photo?path=${encodeURIComponent(photoPath)}`)
+      const d = await res.json()
+      if (!res.ok || !d.url) { alert(d.error || '사진을 불러올 수 없습니다'); return }
+      setPhotoModal({ url: d.url, orderNumber: order.order_number })
+    } catch { alert('네트워크 오류가 발생했습니다') }
+    setPhotoLoading(null)
   }
 
   async function handleReject() {
@@ -228,6 +243,13 @@ function OwnerOrdersContent() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1.5">
+                      {order.status === 'delivered' && (order.delivery as any)?.delivery_photo_url && (
+                        <button
+                          onClick={() => handleViewPhoto(order)}
+                          disabled={photoLoading === order.id}
+                          className="text-[11px] px-2 py-1 rounded-[6px] bg-[#dbeafe] text-[#1d4ed8] font-medium hover:bg-[#bfdbfe] disabled:opacity-50"
+                        >{photoLoading === order.id ? '...' : '📷'}</button>
+                      )}
                       {!isTerminal && (
                         <button
                           onClick={() => setRejectModal({ orderId: order.id, orderNumber: order.order_number })}
@@ -312,6 +334,13 @@ function OwnerOrdersContent() {
               <p className="text-[12px] text-center text-[#1d4ed8]">배달팀 배정 대기중</p>
             )}
             <div className="flex gap-2 mt-2 pt-2 border-t border-[#f5f5f5]">
+              {order.status === 'delivered' && (order.delivery as any)?.delivery_photo_url && (
+                <button
+                  onClick={() => handleViewPhoto(order)}
+                  disabled={photoLoading === order.id}
+                  className="flex-1 text-[12px] py-1.5 rounded-[8px] bg-[#dbeafe] text-[#1d4ed8] font-medium disabled:opacity-50"
+                >{photoLoading === order.id ? '로딩...' : '📷 배달사진'}</button>
+              )}
               {!isTerminal && (
                 <button
                   onClick={() => setRejectModal({ orderId: order.id, orderNumber: order.order_number })}
@@ -327,6 +356,36 @@ function OwnerOrdersContent() {
           )
         })}
       </div>
+
+      {/* 배달 사진 모달 */}
+      {photoModal && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center px-4"
+          onClick={e => { if (e.target === e.currentTarget) setPhotoModal(null) }}
+        >
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setPhotoModal(null)} />
+          <div className="relative w-full max-w-md bg-white rounded-[16px] overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#f5f5f5]">
+              <div>
+                <p className="text-[14px] font-bold text-[#1a1c1c]">배달 완료 사진</p>
+                <p className="text-[11px] text-[#a3a3a3] font-mono">{photoModal.orderNumber}</p>
+              </div>
+              <button
+                onClick={() => setPhotoModal(null)}
+                className="w-8 h-8 rounded-full bg-[#f2f4f6] flex items-center justify-center text-[#3c4a42] text-sm"
+              >✕</button>
+            </div>
+            <div className="p-1">
+              <img
+                src={photoModal.url}
+                alt="배달 완료 사진"
+                className="w-full rounded-[8px] object-contain max-h-[70vh]"
+              />
+            </div>
+            <p className="text-center text-[11px] text-[#a3a3a3] pb-3">이 링크는 60초 후 만료됩니다</p>
+          </div>
+        </div>
+      )}
 
       {/* 삭제 확인 모달 */}
       {deleteModal && (

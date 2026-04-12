@@ -110,7 +110,7 @@ export default function DriverDeliveriesPage() {
       formData.append('file', photoFile)
       formData.append('deliveryId', completeModal.id)
       const uploadRes = await fetch('/api/deliveries/upload-photo', { method: 'POST', body: formData })
-      if (uploadRes.ok) { const { url } = await uploadRes.json(); photoUrl = url }
+      if (uploadRes.ok) { const { path } = await uploadRes.json(); photoUrl = path }
     }
     const res = await fetch(`/api/deliveries/${completeModal.id}/complete`, {
       method: 'POST',

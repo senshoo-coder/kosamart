@@ -81,12 +81,19 @@ export default function MarketPage() {
           <span className="text-lg">🚚</span>
           <span className="font-bold text-[20px] text-[#10b981] tracking-[-1px]">평창동 상점가</span>
         </div>
-        <div className="flex items-center gap-4 text-[#1a1c1c] text-[18px]">
+        <div className="flex items-center gap-3 text-[#1a1c1c] text-[18px]">
           <button>🔔</button>
-          <button onClick={() => router.push('/market/cart')} className="relative">
-            🛍
+          <button
+            onClick={() => router.push('/market/cart')}
+            className="relative flex items-center gap-1 px-3 py-1.5 rounded-[10px] transition-colors"
+            style={cart.totalItems > 0
+              ? { background: '#10b981', color: '#fff' }
+              : { background: '#f2f4f6', color: '#1a1c1c' }
+            }
+          >
+            <span className="text-[17px]">🛒</span>
             {cart.totalItems > 0 && (
-              <span className="absolute -top-1 -right-2 bg-[#10b981] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">{cart.totalItems}</span>
+              <span className="text-[13px] font-bold">{cart.totalItems}</span>
             )}
           </button>
         </div>

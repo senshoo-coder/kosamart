@@ -4,6 +4,11 @@ import { STORES, type Store } from '@/lib/market-data'
 
 const HOUR_OPTIONS_START = Array.from({ length: 19 }, (_, i) => i + 5) // 05~23
 const HOUR_OPTIONS_END   = Array.from({ length: 19 }, (_, i) => i + 6) // 06~24
+const DAYS = [
+  { key: 'sun', label: '일' }, { key: 'mon', label: '월' }, { key: 'tue', label: '화' },
+  { key: 'wed', label: '수' }, { key: 'thu', label: '목' }, { key: 'fri', label: '금' },
+  { key: 'sat', label: '토' },
+]
 
 function parseHoursRange(hours: string): { start: number; end: number } {
   const m = (hours || '').match(/^(\d{1,2}):\d{2}~(\d{1,2}):\d{2}$/)
@@ -55,7 +60,8 @@ export default function OwnerStorePage() {
   const [loading, setLoading] = useState(true)
   const [products, setProducts] = useState<DBProduct[]>([])
   const [editingInfo, setEditingInfo] = useState(false)
-  const [infoForm, setInfoForm] = useState({ name: '', description: '', hours: '', minOrder: 0, deliveryFee: 0, bank_account: '', telegram_chat_id: '' })
+  const [infoForm, setInfoForm] = useState({ name: '', description: '', hours: '', minOrder: 0, deliveryFee: 0, bank_account: '', telegram_chat_id: '', weekly_closed: [] as string[], closed_dates: [] as string[] })
+  const [closedDateInput, setClosedDateInput] = useState('')
   const [savingInfo, setSavingInfo] = useState(false)
   const [images, setImages] = useState<ImageMap>({})
   const [uploading, setUploading] = useState<string | null>(null)
@@ -106,7 +112,10 @@ export default function OwnerStorePage() {
       deliveryFee: store?.deliveryFee || 0,
       bank_account: (store as any)?.bank_account || '',
       telegram_chat_id: (store as any)?.telegram_chat_id || '',
+      weekly_closed: (store as any)?.weekly_closed || [],
+      closed_dates: (store as any)?.closed_dates || [],
     })
+    setClosedDateInput('')
     setEditingInfo(true)
   }
 
@@ -496,6 +505,74 @@ export default function OwnerStorePage() {
                 />
                 <p className="text-[11px] text-[#a3a3a3] mt-1">주문 발생 시 가게방으로 알림이 발송됩니다</p>
               </div>
+
+              {/* 정기 휴무 요일 */}
+              <div>
+                <label className="text-[11px] text-[#a3a3a3] font-medium block mb-2">정기 휴무 요일</label>
+                <div className="flex gap-1">
+                  {DAYS.map(d => {
+                    const active = infoForm.weekly_closed.includes(d.key)
+                    return (
+                      <button key={d.key} type="button"
+                        onClick={() => setInfoForm(f => ({
+                          ...f,
+                          weekly_closed: active
+                            ? f.weekly_closed.filter(k => k !== d.key)
+                            : [...f.weekly_closed, d.key],
+                        }))}
+                        className="flex-1 py-2 rounded-[8px] text-[12px] font-bold transition-all border"
+                        style={active
+                          ? { background: '#fee2e2', color: '#b91c1c', borderColor: '#fca5a5' }
+                          : { background: '#f9f9f9', color: '#a3a3a3', borderColor: '#e0e0e0' }
+                        }
+                      >
+                        {d.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* 임시 휴무일 */}
+              <div>
+                <label className="text-[11px] text-[#a3a3a3] font-medium block mb-2">임시 휴무일 지정</label>
+                <div className="flex gap-2">
+                  <input
+                    type="date"
+                    value={closedDateInput}
+                    onChange={e => setClosedDateInput(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="flex-1 border border-[#e0e0e0] rounded-[8px] px-3 py-2 text-[13px] text-[#1a1c1c] focus:outline-none focus:border-[#b91c1c]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!closedDateInput || infoForm.closed_dates.includes(closedDateInput)) return
+                      setInfoForm(f => ({ ...f, closed_dates: [...f.closed_dates, closedDateInput].sort() }))
+                      setClosedDateInput('')
+                    }}
+                    className="px-4 py-2 rounded-[8px] text-[13px] font-semibold text-white"
+                    style={{ background: '#b91c1c' }}
+                  >
+                    추가
+                  </button>
+                </div>
+                {infoForm.closed_dates.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {infoForm.closed_dates.map(d => (
+                      <span key={d} className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium"
+                        style={{ background: '#fee2e2', color: '#b91c1c' }}>
+                        {d}
+                        <button type="button" className="ml-0.5 font-bold"
+                          onClick={() => setInfoForm(f => ({ ...f, closed_dates: f.closed_dates.filter(x => x !== d) }))}>
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div className="flex gap-2 pt-1">
                 <button
                   onClick={saveInfo}
@@ -537,6 +614,23 @@ export default function OwnerStorePage() {
                 <div className="mt-3 bg-[#f0fdf8] border border-[#d1fae5] rounded-[8px] p-3">
                   <p className="text-[11px] text-[#a3a3a3] mb-1">계좌이체 정보</p>
                   <p className="text-[13px] font-semibold text-[#1a1c1c]">{(store as any).bank_account}</p>
+                </div>
+              )}
+              {((store as any)?.weekly_closed?.length > 0 || (store as any)?.closed_dates?.length > 0) && (
+                <div className="mt-3 bg-[#fff8f8] border border-[#fecaca] rounded-[8px] p-3">
+                  <p className="text-[11px] text-[#a3a3a3] mb-1.5">휴무일</p>
+                  {(store as any)?.weekly_closed?.length > 0 && (
+                    <p className="text-[12px] font-semibold text-[#b91c1c] mb-1">
+                      매주 {DAYS.filter(d => (store as any).weekly_closed.includes(d.key)).map(d => d.label + '요일').join(', ')}
+                    </p>
+                  )}
+                  {(store as any)?.closed_dates?.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {(store as any).closed_dates.map((d: string) => (
+                        <span key={d} className="text-[11px] px-2 py-0.5 rounded-full bg-[#fee2e2] text-[#b91c1c]">{d}</span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
               <button

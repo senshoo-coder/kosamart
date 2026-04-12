@@ -28,6 +28,11 @@ interface StoresConfig {
 }
 
 const CATEGORIES = ['편의점·슈퍼', '반찬·가정식', '정육·축산', '죽·분식', '치킨·튀김', '베이커리·카페', '한식', '중식', '일식', '기타']
+const DAYS = [
+  { key: 'sun', label: '일' }, { key: 'mon', label: '월' }, { key: 'tue', label: '화' },
+  { key: 'wed', label: '수' }, { key: 'thu', label: '목' }, { key: 'fri', label: '금' },
+  { key: 'sat', label: '토' },
+]
 const ACCENT_OPTIONS = ['#10b981', '#6d28d9', '#2170e4', '#e29100', '#ef4444', '#ec4899', '#0ea5e9', '#14b8a6']
 const HOUR_OPTIONS_START = Array.from({ length: 19 }, (_, i) => i + 5) // 05~23
 const HOUR_OPTIONS_END   = Array.from({ length: 19 }, (_, i) => i + 6) // 06~24
@@ -68,6 +73,7 @@ export default function AdminStoresPage() {
   const [isNewStore, setIsNewStore] = useState(false)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [adminClosedDateInput, setAdminClosedDateInput] = useState('')
 
   useEffect(() => { loadAll() }, [])
 
@@ -158,8 +164,11 @@ export default function AdminStoresPage() {
       accentColor: store.accentColor,
       bank_account: (store as any).bank_account || '',
       telegram_chat_id: (store as any).telegram_chat_id || '',
+      weekly_closed: (store as any).weekly_closed || [],
+      closed_dates: (store as any).closed_dates || [],
       isCustom: store.isCustom,
     })
+    setAdminClosedDateInput('')
     setIsNewStore(false)
   }
 
@@ -492,6 +501,79 @@ export default function AdminStoresPage() {
                   placeholder="예: -1001234567890"
                   className="w-full border border-[#e0e0e0] rounded-[8px] px-4 py-2.5 text-[14px] text-[#1a1c1c] placeholder-[#c0c0c0] outline-none focus:border-[#8B5CF6] font-mono" />
                 <p className="text-[11px] text-[#a3a3a3] mt-1">주문 발생 시 관리방 + 가게방으로 동시 알림 발송</p>
+              </div>
+
+              {/* 정기 휴무 요일 */}
+              <div>
+                <label className="text-[12px] font-semibold text-[#1a1c1c] mb-1.5 block">정기 휴무 요일</label>
+                <div className="flex gap-1">
+                  {DAYS.map(d => {
+                    const active = (editingStore.weekly_closed || []).includes(d.key)
+                    return (
+                      <button key={d.key} type="button"
+                        onClick={() => setEditingStore({
+                          ...editingStore,
+                          weekly_closed: active
+                            ? (editingStore.weekly_closed || []).filter((k: string) => k !== d.key)
+                            : [...(editingStore.weekly_closed || []), d.key],
+                        })}
+                        className="flex-1 py-2 rounded-[8px] text-[12px] font-bold transition-all border"
+                        style={active
+                          ? { background: '#fee2e2', color: '#b91c1c', borderColor: '#fca5a5' }
+                          : { background: '#f9f9f9', color: '#a3a3a3', borderColor: '#e0e0e0' }
+                        }
+                      >
+                        {d.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* 임시 휴무일 */}
+              <div>
+                <label className="text-[12px] font-semibold text-[#1a1c1c] mb-1.5 block">임시 휴무일 지정</label>
+                <div className="flex gap-2">
+                  <input
+                    type="date"
+                    value={adminClosedDateInput}
+                    onChange={e => setAdminClosedDateInput(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="flex-1 border border-[#e0e0e0] rounded-[8px] px-4 py-2.5 text-[13px] text-[#1a1c1c] outline-none focus:border-[#b91c1c]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!adminClosedDateInput || (editingStore.closed_dates || []).includes(adminClosedDateInput)) return
+                      setEditingStore({
+                        ...editingStore,
+                        closed_dates: [...(editingStore.closed_dates || []), adminClosedDateInput].sort(),
+                      })
+                      setAdminClosedDateInput('')
+                    }}
+                    className="px-4 py-2 rounded-[8px] text-[13px] font-semibold text-white"
+                    style={{ background: '#b91c1c' }}
+                  >
+                    추가
+                  </button>
+                </div>
+                {(editingStore.closed_dates || []).length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {(editingStore.closed_dates || []).map((d: string) => (
+                      <span key={d} className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium"
+                        style={{ background: '#fee2e2', color: '#b91c1c' }}>
+                        {d}
+                        <button type="button" className="ml-0.5 font-bold"
+                          onClick={() => setEditingStore({
+                            ...editingStore,
+                            closed_dates: (editingStore.closed_dates || []).filter((x: string) => x !== d),
+                          })}>
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* 영업 여부 */}

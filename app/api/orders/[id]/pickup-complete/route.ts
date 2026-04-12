@@ -68,7 +68,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   // 텔레그램 알림 (관리자 + 가게)
   const msg = [
-    `🏪 <b>[픽업 완료]</b>`,
+    `🏪 <b>[고객 픽업 완료]</b>`,
     ``,
     `주문번호: <code>${order.order_number}</code>`,
     `주문자: <b>${order.kakao_nickname}</b>`,
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     `매장: ${order.store_name ?? '-'}`,
     `금액: <b>₩${order.total_amount?.toLocaleString() ?? ''}</b>`,
     ``,
-    `고객이 매장에서 상품을 픽업했습니다.`,
+    `고객이 매장에서 상품을 직접 픽업 완료했습니다. ✅`,
   ].join('\n')
 
   const storeChatId = order.store_id ? await getStoreChatId(order.store_id).catch(() => null) : null

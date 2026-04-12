@@ -52,9 +52,9 @@ ${order.delivery_memo ? `메모: ${order.delivery_memo}` : ''}
 
 → 관리자 페이지에서 입금 확인 후 승인해주세요`,
 
-  // 주문 승인 (고객에게)
+  // 주문 승인 (배달)
   orderApproved: (order: Order) => `
-✅ <b>[주문 승인 완료]</b>
+✅ <b>[주문 승인 완료 · 배달 준비]</b>
 
 <b>${order.kakao_nickname}</b>님의 주문이 승인되었습니다.
 
@@ -63,6 +63,31 @@ ${order.delivery_memo ? `메모: ${order.delivery_memo}` : ''}
 ${order.owner_memo ? `안내사항: ${order.owner_memo}` : ''}
 
 배달이 시작되면 다시 안내드립니다 🚚`,
+
+  // 고객 픽업 승인
+  pickupApproved: (order: Order) => `
+✅ <b>[고객 픽업 승인 · 준비완료]</b>
+
+<b>${order.kakao_nickname}</b>님의 픽업 주문이 승인되었습니다.
+
+주문번호: <code>${order.order_number}</code>
+매장: ${(order as any).store_name ?? '-'}
+금액: ₩${order.total_amount.toLocaleString()}
+${order.delivery_memo ? `메모: ${order.delivery_memo}` : ''}
+
+매장에서 준비가 완료되었습니다. 방문하여 픽업해 주세요 🏪`,
+
+  // 고객 픽업 완료
+  pickupCompleted: (order: Order) => `
+🏪 <b>[고객 픽업 완료]</b>
+
+<b>${order.kakao_nickname}</b>님이 직접 픽업을 완료했습니다.
+
+주문번호: <code>${order.order_number}</code>
+매장: ${(order as any).store_name ?? '-'}
+금액: ₩${order.total_amount.toLocaleString()}
+
+이용해주셔서 감사합니다 💚`,
 
   // 주문 거절 (고객에게)
   orderRejected: (order: Order) => `

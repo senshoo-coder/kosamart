@@ -7,13 +7,14 @@ import { formatPrice, timeAgo } from '@/lib/utils'
 import type { Order, OrderStatus } from '@/lib/types'
 
 const FILTER_TABS: Array<{ key: 'all' | OrderStatus; label: string }> = [
-  { key: 'all',        label: '전체' },
-  { key: 'pending',    label: '입금대기' },
-  { key: 'paid',       label: '입금완료' },
-  { key: 'approved',   label: '배송준비' },
-  { key: 'delivering', label: '배달중' },
-  { key: 'delivered',  label: '완료' },
-  { key: 'cancelled',  label: '취소/거절' },
+  { key: 'all',                    label: '전체' },
+  { key: 'pending',                label: '입금대기' },
+  { key: 'paid',                   label: '입금완료' },
+  { key: 'approved',               label: '배송준비' },
+  { key: 'delivering',             label: '배달중' },
+  { key: 'delivered',              label: '완료' },
+  { key: 'picked_up_by_customer',  label: '픽업완료' },
+  { key: 'cancelled',              label: '취소/거절' },
 ]
 
 function OwnerOrdersContent() {
@@ -54,6 +55,19 @@ function OwnerOrdersContent() {
       if (!res.ok) {
         const d = await res.json()
         alert(`오류: ${d.error || '승인 실패'}`)
+      }
+    } catch { alert('네트워크 오류가 발생했습니다') }
+    loadOrders()
+    setActionLoading(null)
+  }
+
+  async function handlePickupComplete(orderId: string) {
+    setActionLoading(orderId)
+    try {
+      const res = await fetch(`/api/orders/${orderId}/pickup-complete`, { method: 'POST' })
+      if (!res.ok) {
+        const d = await res.json()
+        alert(`오류: ${d.error || '픽업완료 처리 실패'}`)
       }
     } catch { alert('네트워크 오류가 발생했습니다') }
     loadOrders()
@@ -184,7 +198,12 @@ function OwnerOrdersContent() {
                         </Button>
                       </div>
                     )}
-                    {order.status === 'approved' && (
+                    {order.status === 'approved' && order.delivery_address === '매장 픽업' && (
+                      <Button size="sm" onClick={() => handlePickupComplete(order.id)} loading={actionLoading === order.id}>
+                        🏪 픽업완료
+                      </Button>
+                    )}
+                    {order.status === 'approved' && order.delivery_address !== '매장 픽업' && (
                       <span className="text-[11px] text-[#1d4ed8]">배달팀 대기</span>
                     )}
                   </td>
@@ -244,7 +263,12 @@ function OwnerOrdersContent() {
                 </Button>
               </div>
             )}
-            {order.status === 'approved' && (
+            {order.status === 'approved' && order.delivery_address === '매장 픽업' && (
+              <Button className="w-full" size="sm" onClick={() => handlePickupComplete(order.id)} loading={actionLoading === order.id}>
+                🏪 픽업완료
+              </Button>
+            )}
+            {order.status === 'approved' && order.delivery_address !== '매장 픽업' && (
               <p className="text-[12px] text-center text-[#1d4ed8]">배달팀 배정 대기중</p>
             )}
           </div>

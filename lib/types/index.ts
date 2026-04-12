@@ -8,15 +8,16 @@ export type UserStatus = 'pending' | 'active' | 'suspended'
 export type GroupBuyStatus = 'draft' | 'active' | 'closed' | 'cancelled'
 
 export type OrderStatus =
-  | 'pending'     // 주문접수 (입금대기)
-  | 'paid'        // 입금완료 (사장님 승인 대기)
-  | 'approved'    // 사장님 승인
-  | 'rejected'    // 사장님 거절
-  | 'preparing'   // 상품 준비중
-  | 'ready'       // 픽업 대기
-  | 'delivering'  // 배달중
-  | 'delivered'   // 배달완료
-  | 'cancelled'   // 취소
+  | 'pending'               // 주문접수 (입금대기)
+  | 'paid'                  // 입금완료 (사장님 승인 대기)
+  | 'approved'              // 사장님 승인
+  | 'rejected'              // 사장님 거절
+  | 'preparing'             // 상품 준비중
+  | 'ready'                 // 픽업 대기
+  | 'delivering'            // 배달중
+  | 'delivered'             // 배달완료
+  | 'picked_up_by_customer' // 고객 픽업 완료 (매장 픽업)
+  | 'cancelled'             // 취소
 
 export type DeliveryStatus =
   | 'pending'     // 배정 대기
@@ -86,6 +87,7 @@ export interface Order {
   owner_memo?: string
   rejected_reason?: string
   approved_at?: string
+  scheduled_at?: string
   created_at: string
   updated_at: string
   // denormalized fields from API joins
@@ -208,15 +210,16 @@ export interface StatusConfig {
 }
 
 export const ORDER_STATUS_CONFIG: Record<OrderStatus, StatusConfig> = {
-  pending:    { label: '입금대기',  color: 'gray',   icon: '⏳', description: '입금 확인 중' },
-  paid:       { label: '입금완료',  color: 'green',  icon: '💰', description: '입금 확인됨' },
-  approved:   { label: '승인완료',  color: 'blue',   icon: '✅', description: '사장님 승인' },
-  rejected:   { label: '거절됨',   color: 'red',    icon: '❌', description: '주문 거절' },
-  preparing:  { label: '준비중',   color: 'orange', icon: '📦', description: '상품 준비 중' },
-  ready:      { label: '픽업대기', color: 'purple', icon: '🏪', description: '매장 픽업 대기' },
-  delivering: { label: '배달중',   color: 'yellow', icon: '🚚', description: '배달 중' },
-  delivered:  { label: '배달완료', color: 'green',  icon: '🎉', description: '배달 완료' },
-  cancelled:  { label: '취소됨',   color: 'red',    icon: '🚫', description: '주문 취소' },
+  pending:               { label: '입금대기',   color: 'gray',   icon: '⏳', description: '입금 확인 중' },
+  paid:                  { label: '입금완료',   color: 'green',  icon: '💰', description: '입금 확인됨' },
+  approved:              { label: '승인완료',   color: 'blue',   icon: '✅', description: '사장님 승인' },
+  rejected:              { label: '거절됨',    color: 'red',    icon: '❌', description: '주문 거절' },
+  preparing:             { label: '준비중',    color: 'orange', icon: '📦', description: '상품 준비 중' },
+  ready:                 { label: '픽업대기',  color: 'purple', icon: '🏪', description: '매장 픽업 대기' },
+  delivering:            { label: '배달중',    color: 'yellow', icon: '🚚', description: '배달 중' },
+  delivered:             { label: '배달완료',  color: 'green',  icon: '🎉', description: '배달 완료' },
+  picked_up_by_customer: { label: '픽업완료',  color: 'green',  icon: '🏪', description: '고객 픽업 완료' },
+  cancelled:             { label: '취소됨',    color: 'red',    icon: '🚫', description: '주문 취소' },
 }
 
 export const DELIVERY_STATUS_CONFIG: Record<DeliveryStatus, StatusConfig> = {

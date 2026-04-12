@@ -144,6 +144,17 @@ export default function CartPage() {
         const slotValue = timeSlots[sid] ?? ''
         const slotLabel = storeSlotsMap[sid]?.find(t => t.value === slotValue)?.label || slotValue
 
+        // Build scheduled_at: today's date at the slot start hour (local time)
+        let scheduled_at: string | undefined
+        if (slotValue) {
+          const startH = parseInt(slotValue.split('-')[0], 10)
+          if (!isNaN(startH)) {
+            const d = new Date()
+            d.setHours(startH, 0, 0, 0)
+            scheduled_at = d.toISOString()
+          }
+        }
+
         const res = await fetch('/api/market/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -156,6 +167,7 @@ export default function CartPage() {
             pickup_type: pickupType,
             delivery_address: pickupType === 'delivery' ? address : '매장 픽업',
             delivery_memo: `희망시간 ${slotLabel}${memo ? ' / ' + memo : ''}`,
+            scheduled_at,
             items,
             total_amount,
           }),

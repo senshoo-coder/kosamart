@@ -25,7 +25,7 @@ const isDemoMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PU
 // POST /api/market/orders — 상점가 주문 생성
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { store_id, store_name, device_uuid, nickname, pickup_type, delivery_address, delivery_memo, items, total_amount, customer_phone } = body
+  const { store_id, store_name, device_uuid, nickname, pickup_type, delivery_address, delivery_memo, scheduled_at, items, total_amount, customer_phone } = body
 
   if (!store_id || !delivery_address || !items?.length) {
     return NextResponse.json({ data: null, error: '필수 항목 누락' }, { status: 400 })
@@ -99,6 +99,7 @@ export async function POST(req: NextRequest) {
         customer_phone: customer_phone || null,
         delivery_address,
         delivery_memo: delivery_memo || null,
+        scheduled_at: scheduled_at || null,
         total_amount,
         order_number: orderNumber,
         store_id,
@@ -128,10 +129,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ data: null, error: 'items_insert: ' + itemsErr.message }, { status: 500 })
     }
 
-    // 배달 레코드
-    await supabase.from('deliveries').insert({ order_id: order.id }).then(({ error: e }) => {
-      if (e) console.error('[market/orders] deliveries insert error:', e)
-    })
+    // 배달 레코드 — 픽업 주문은 배달 레코드 생성하지 않음
+    const isPickup = delivery_address === '매장 픽업'
+    if (!isPickup) {
+      await supabase.from('deliveries').insert({ order_id: order.id }).then(({ error: e }) => {
+        if (e) console.error('[market/orders] deliveries insert error:', e)
+      })
+    }
 
     // 텔레그램 알림 (실패해도 주문은 성공)
     const msg = TelegramMessages.newMarketOrder({

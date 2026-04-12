@@ -126,6 +126,32 @@ ${order.delivery_address ? `주소: ${order.delivery_address}` : ''}
 상품:
 ${order.items.map(i => `• ${i.product_name} x${i.quantity} (₩${i.subtotal.toLocaleString()})`).join('\n')}`,
 
+  // 픽업/배달 시간 알림 (T-60, T-30)
+  scheduleAlert: (order: {
+    order_number: string
+    kakao_nickname: string
+    customer_phone?: string
+    store_name: string
+    delivery_address: string
+    total_amount: number
+    scheduled_at: string
+  }, minutesBefore: number) => {
+    const isPickup = order.delivery_address === '매장 픽업'
+    const timeLabel = isPickup ? '픽업' : '배달'
+    const scheduledTime = new Date(order.scheduled_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })
+    return [
+      `⏰ <b>[${timeLabel} ${minutesBefore}분 전 알림]</b>`,
+      ``,
+      `주문번호: <code>${order.order_number}</code>`,
+      `주문자: <b>${order.kakao_nickname}</b>`,
+      `전화번호: ${order.customer_phone ?? '-'}`,
+      `매장: ${order.store_name}`,
+      isPickup ? `유형: 🏪 매장 픽업` : `유형: 🚚 배달\n주소: ${order.delivery_address}`,
+      `예정시간: <b>${scheduledTime}</b>`,
+      `금액: ₩${order.total_amount?.toLocaleString() ?? ''}`,
+    ].join('\n')
+  },
+
   // 일일 정산 리포트
   dailyReport: (data: {
     date: string

@@ -51,6 +51,15 @@ export default function OrderDetailPage() {
     setActionLoading(false)
   }
 
+  async function handlePickupComplete() {
+    if (!order) return
+    setActionLoading(true)
+    const res = await fetch(`/api/orders/${order.id}/pickup-complete`, { method: 'POST' })
+    if (res.ok) { const d = await res.json(); setOrder(d.data) }
+    else { const d = await res.json(); alert(`오류: ${d.error || '픽업완료 처리 실패'}`) }
+    setActionLoading(false)
+  }
+
   async function handleReject() {
     if (!order || !rejectReason.trim()) return
     setActionLoading(true)
@@ -77,6 +86,8 @@ export default function OrderDetailPage() {
     </div>
   )
 
+  const isPickup = order.delivery_address === '매장 픽업'
+
   return (
     <div className="p-5 max-w-3xl mx-auto space-y-4">
       {/* 헤더 */}
@@ -88,9 +99,12 @@ export default function OrderDetailPage() {
           ←
         </button>
         <div className="flex-1">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <h1 className="font-bold text-[#1a1c1c] text-[17px]">{order.kakao_nickname}</h1>
             <OrderStatusBadge status={order.status} />
+            {isPickup && (
+              <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#ede9fe] text-[#6d28d9] font-medium">🏪 매장픽업</span>
+            )}
           </div>
           <p className="text-[11px] text-[#a3a3a3] font-mono mt-0.5">{order.order_number}</p>
         </div>
@@ -118,14 +132,26 @@ export default function OrderDetailPage() {
         </div>
       </div>
 
-      {/* 배송 정보 */}
+      {/* 배송/픽업 정보 */}
       <div className="bg-white rounded-[8px] p-5" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-        <h2 className="text-[13px] font-semibold text-[#1a1c1c] mb-3">배송 정보</h2>
+        <h2 className="text-[13px] font-semibold text-[#1a1c1c] mb-3">{isPickup ? '픽업 정보' : '배송 정보'}</h2>
         <div className="space-y-2.5 text-[13px]">
           <div className="flex gap-3">
-            <span className="text-[#a3a3a3] w-14 flex-shrink-0">주소</span>
-            <span className="text-[#1a1c1c]">{order.delivery_address}</span>
+            <span className="text-[#a3a3a3] w-14 flex-shrink-0">유형</span>
+            <span className="text-[#1a1c1c]">{isPickup ? '🏪 매장 픽업' : '🚚 배달'}</span>
           </div>
+          {!isPickup && (
+            <div className="flex gap-3">
+              <span className="text-[#a3a3a3] w-14 flex-shrink-0">주소</span>
+              <span className="text-[#1a1c1c]">{order.delivery_address}</span>
+            </div>
+          )}
+          {(order as any).scheduled_at && (
+            <div className="flex gap-3">
+              <span className="text-[#a3a3a3] w-14 flex-shrink-0">수령시간</span>
+              <span className="text-[#1a1c1c] font-medium">{formatDateTime((order as any).scheduled_at)}</span>
+            </div>
+          )}
           {order.delivery_memo && (
             <div className="flex gap-3">
               <span className="text-[#a3a3a3] w-14 flex-shrink-0">메모</span>
@@ -204,9 +230,14 @@ export default function OrderDetailPage() {
       )}
       {order.status === 'paid' && (
         <div className="flex gap-3">
-          <Button className="flex-1 py-3" onClick={handleApprove} loading={actionLoading}>✅ 배달 승인</Button>
+          <Button className="flex-1 py-3" onClick={handleApprove} loading={actionLoading}>
+            {isPickup ? '✅ 픽업 승인' : '✅ 배달 승인'}
+          </Button>
           <Button className="flex-1 py-3" variant="danger" onClick={() => setRejectModal(true)} disabled={actionLoading}>❌ 거절</Button>
         </div>
+      )}
+      {order.status === 'approved' && isPickup && (
+        <Button className="w-full py-3" onClick={handlePickupComplete} loading={actionLoading}>🏪 픽업 완료</Button>
       )}
 
       {/* 거절 모달 */}

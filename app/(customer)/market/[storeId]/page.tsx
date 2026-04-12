@@ -85,6 +85,18 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
   const storeItemCount = cart.getStoreItemCount(storeId)
   const storeTotal = cart.getStoreTotal(storeId)
 
+  // 오늘 휴무 여부 체크
+  const DAY_KEYS = ['sun','mon','tue','wed','thu','fri','sat']
+  const DAY_LABEL_LOCAL: Record<string, string> = { sun: '일', mon: '월', tue: '화', wed: '수', thu: '목', fri: '금', sat: '토' }
+  const todayKey = DAY_KEYS[new Date().getDay()]
+  const todayStr = new Date().toISOString().slice(0, 10)
+  const weeklyC: string[] = (store as any).weekly_closed || []
+  const datesC: string[] = (store as any).closed_dates || []
+  const isClosedToday = weeklyC.includes(todayKey) || datesC.includes(todayStr)
+  const closedTodayReason = weeklyC.includes(todayKey)
+    ? `매주 ${DAY_LABEL_LOCAL[todayKey]}요일 휴무일`
+    : `${todayStr} 임시 휴무일`
+
   const subcats = useMemo(() => {
     const cats = Array.from(new Set(products.filter(p => p.subcategory).map(p => p.subcategory!)))
     return cats.length > 0 ? ['전체', ...cats] : store.subcategories ? ['전체', ...store.subcategories] : ['전체']
@@ -125,6 +137,13 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
           )}
         </button>
       </header>
+
+      {/* 오늘 휴무 배너 */}
+      {isClosedToday && (
+        <div className="bg-[#be123c] text-white text-center py-2.5 px-4 text-[13px] font-semibold">
+          🚫 오늘은 {closedTodayReason}입니다 — 주문이 불가합니다
+        </div>
+      )}
 
       {/* 히어로 */}
       <div className="relative overflow-hidden"
@@ -243,10 +262,11 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
                 )}
                 <p className="text-[15px] font-bold mb-2.5" style={{ color: store.accentColor }}>{product.price.toLocaleString()}원</p>
                 {qty === 0 ? (
-                  <button onClick={() => handleAdd(product)}
-                    className="w-full py-2 rounded-lg text-[13px] font-semibold text-white flex items-center justify-center gap-1.5 active:opacity-80"
-                    style={{ background: store.accentColor }}>
-                    <span>🛒</span><span>담기</span>
+                  <button onClick={() => !isClosedToday && handleAdd(product)}
+                    disabled={isClosedToday}
+                    className="w-full py-2 rounded-lg text-[13px] font-semibold text-white flex items-center justify-center gap-1.5 active:opacity-80 disabled:opacity-40"
+                    style={{ background: isClosedToday ? '#94a3b8' : store.accentColor }}>
+                    <span>{isClosedToday ? '🚫' : '🛒'}</span><span>{isClosedToday ? '오늘 휴무' : '담기'}</span>
                   </button>
                 ) : (
                   <div className="flex items-center justify-between rounded-lg overflow-hidden border" style={{ borderColor: store.accentColor }}>

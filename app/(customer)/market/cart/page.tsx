@@ -9,6 +9,29 @@ const MAX_QUANTITY = 10
 const PHONE_REGEX = /^01[0-9]-?\d{3,4}-?\d{4}$/
 const DEFAULT_MIN_ORDER = 5000
 
+const DAY_LABEL: Record<string, string> = { sun: '일', mon: '월', tue: '화', wed: '수', thu: '목', fri: '금', sat: '토' }
+const DAY_KEYS = ['sun','mon','tue','wed','thu','fri','sat']
+
+function isClosedToday(storeInfo: any): boolean {
+  const today = new Date()
+  const todayKey = DAY_KEYS[today.getDay()]
+  const todayStr = today.toISOString().slice(0, 10)
+  const weekly: string[] = storeInfo?.weekly_closed || []
+  const dates: string[] = storeInfo?.closed_dates || []
+  return weekly.includes(todayKey) || dates.includes(todayStr)
+}
+
+function closedReason(storeInfo: any): string {
+  const today = new Date()
+  const todayKey = DAY_KEYS[today.getDay()]
+  const todayStr = today.toISOString().slice(0, 10)
+  const weekly: string[] = storeInfo?.weekly_closed || []
+  const dates: string[] = storeInfo?.closed_dates || []
+  if (weekly.includes(todayKey)) return `매주 ${DAY_LABEL[todayKey]}요일 휴무`
+  if (dates.includes(todayStr)) return `${todayStr} 임시 휴무`
+  return '오늘 휴무'
+}
+
 // 가게 운영시간 '11:00~23:00' 파싱
 function parseHours(hours: string): [number, number] | null {
   const m = hours.match(/^(\d{1,2}):(\d{2})~(\d{1,2}):(\d{2})$/)
@@ -87,6 +110,9 @@ export default function CartPage() {
   const belowMinStores = storeIds.filter(sid => cart.getStoreTotal(sid) < getMinOrder(sid))
   const hasWarnings = belowMinStores.length > 0
 
+  // 오늘 휴무인 가게 목록 (동적 정보 기준)
+  const closedStores = storeIds.filter(sid => isClosedToday(dynamicStores[sid]))
+
   const totalDeliveryFee = storeIds.reduce((sum, sid) => {
     const fee = dynamicStores[sid]?.deliveryFee ?? getStore(sid)?.deliveryFee ?? 0
     return sum + fee
@@ -105,6 +131,11 @@ export default function CartPage() {
   const someStoreNoSlots = storeIds.some(sid => storeSlotsMap[sid]?.length === 0)
 
   function validateAndConfirm() {
+    if (closedStores.length > 0) {
+      const names = closedStores.map(sid => `${dynamicStores[sid]?.name || getStore(sid)?.name || sid}(${closedReason(dynamicStores[sid])})`).join(', ')
+      alert('휴무 중인 가게가 있어 주문할 수 없습니다:\n' + names)
+      return
+    }
     if (someStoreNoSlots) { alert('일부 가게의 운영시간이 종료되었습니다. 내일 다시 주문해주세요.'); return }
     if (!phone.trim()) { alert('전화번호를 입력해주세요'); return }
     if (!PHONE_REGEX.test(phone.replace(/\s/g, ''))) { alert('올바른 전화번호 형식을 입력해주세요\n예: 010-1234-5678'); return }
@@ -243,6 +274,7 @@ export default function CartPage() {
           const items = cart.storeGroups[sid]
           const storeTotal = cart.getStoreTotal(sid)
           const storeBelowMin = storeTotal < getMinOrder(sid)
+          const storeClosed = isClosedToday(dynamicStores[sid])
 
           return (
             <div key={sid} className="bg-white rounded-[8px] overflow-hidden" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
@@ -250,9 +282,17 @@ export default function CartPage() {
                 <div className="flex items-center gap-2">
                   <span className="text-lg">{store?.emoji || '\uD83C\uDFEA'}</span>
                   <span className="text-[14px] font-bold text-[#1a1c1c]">{store?.name || sid}</span>
+                  {storeClosed && (
+                    <span className="text-[10px] bg-[#fee2e2] text-[#dc2626] px-2 py-0.5 rounded-full font-bold">오늘 휴무</span>
+                  )}
                 </div>
                 <button onClick={() => cart.clearStore(sid)} className="text-[11px] text-[#a3a3a3]">{'\uAC00\uAC8C \uC0AD\uC81C'}</button>
               </div>
+              {storeClosed && (
+                <div className="mx-4 mt-3 bg-[#fff1f2] border border-[#fecdd3] rounded-xl px-4 py-3">
+                  <p className="text-[12px] text-[#be123c] font-medium">🚫 {closedReason(dynamicStores[sid])} — 현재 주문할 수 없습니다</p>
+                </div>
+              )}
 
               {items.map(item => (
                 <div key={item.product_id} className="px-4 py-3 flex items-center gap-3 border-b border-[#f9f9f9]">
@@ -450,12 +490,17 @@ export default function CartPage() {
           <span className="text-[12px] text-[#94a3b8]">{'\uAC1C\uC778\uC815\uBCF4(\uC774\uB984, \uC8FC\uC18C, \uC5F0\uB77D\uCC98) \uC218\uC9D1 \uBC0F \uC774\uC6A9\uC5D0 \uB3D9\uC758\uD569\uB2C8\uB2E4 (\uD544\uC218)'}</span>
         </label>
 
+        {closedStores.length > 0 && (
+          <div className="bg-[#fff1f2] border border-[#fecdd3] rounded-[8px] px-4 py-3">
+            <p className="text-[12px] text-[#be123c] font-medium">🚫 휴무 중인 가게가 있어 주문할 수 없습니다. 해당 가게 상품을 제거해주세요.</p>
+          </div>
+        )}
         <button
           type="button"
           onClick={validateAndConfirm}
-          disabled={loading || someStoreNoSlots}
+          disabled={loading || someStoreNoSlots || closedStores.length > 0}
           className="w-full py-4 rounded-2xl text-[15px] font-bold text-white disabled:opacity-50 active:opacity-80"
-          style={{ background: someStoreNoSlots ? '#94a3b8' : '#10b981' }}
+          style={{ background: (someStoreNoSlots || closedStores.length > 0) ? '#94a3b8' : '#10b981' }}
         >
           {loading ? '처리 중...' : storeIds.length > 1 ? `가게별 주문하기 (${storeIds.length}건)` : '주문하기'}
         </button>

@@ -190,7 +190,7 @@ function OwnerOrdersContent() {
                     {order.status === 'paid' && (
                       <div className="flex gap-2">
                         <Button size="sm" onClick={() => handleApprove(order.id)} loading={actionLoading === order.id}>
-                          ✅ 승인
+                          {order.delivery_address === '매장 픽업' ? '✅ 고객픽업승인' : '✅ 승인'}
                         </Button>
                         <Button size="sm" variant="danger"
                           onClick={() => setRejectModal({ orderId: order.id, orderNumber: order.order_number })}>
@@ -199,9 +199,12 @@ function OwnerOrdersContent() {
                       </div>
                     )}
                     {order.status === 'approved' && order.delivery_address === '매장 픽업' && (
-                      <Button size="sm" onClick={() => handlePickupComplete(order.id)} loading={actionLoading === order.id}>
-                        🏪 픽업완료
-                      </Button>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[11px] text-[#10b981] font-semibold">✅ 준비완료 · 픽업대기</span>
+                        <Button size="sm" onClick={() => handlePickupComplete(order.id)} loading={actionLoading === order.id}>
+                          🏪 고객픽업완료
+                        </Button>
+                      </div>
                     )}
                     {order.status === 'approved' && order.delivery_address !== '매장 픽업' && (
                       <span className="text-[11px] text-[#1d4ed8]">배달팀 대기</span>
@@ -255,7 +258,7 @@ function OwnerOrdersContent() {
             {order.status === 'paid' && (
               <div className="flex gap-2">
                 <Button className="flex-1" size="sm" onClick={() => handleApprove(order.id)} loading={actionLoading === order.id}>
-                  ✅ 배달 승인
+                  {order.delivery_address === '매장 픽업' ? '✅ 고객픽업승인' : '✅ 배달 승인'}
                 </Button>
                 <Button className="flex-1" size="sm" variant="danger"
                   onClick={() => setRejectModal({ orderId: order.id, orderNumber: order.order_number })}>
@@ -264,9 +267,12 @@ function OwnerOrdersContent() {
               </div>
             )}
             {order.status === 'approved' && order.delivery_address === '매장 픽업' && (
-              <Button className="w-full" size="sm" onClick={() => handlePickupComplete(order.id)} loading={actionLoading === order.id}>
-                🏪 픽업완료
-              </Button>
+              <div className="space-y-2">
+                <p className="text-[12px] text-center text-[#10b981] font-semibold">✅ 준비완료 · 픽업 대기중</p>
+                <Button className="w-full" size="sm" onClick={() => handlePickupComplete(order.id)} loading={actionLoading === order.id}>
+                  🏪 고객 픽업 완료
+                </Button>
+              </div>
             )}
             {order.status === 'approved' && order.delivery_address !== '매장 픽업' && (
               <p className="text-[12px] text-center text-[#1d4ed8]">배달팀 배정 대기중</p>

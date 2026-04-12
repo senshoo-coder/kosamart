@@ -221,7 +221,7 @@ export default function CartPage() {
         <button type="button" onClick={() => router.back()} className="text-xl w-14 text-right text-[#1a1c1c]">{'\u2715'}</button>
       </header>
 
-      <div className="px-4 pt-4 pb-6 space-y-4">
+      <div className="px-4 pt-4 pb-28 space-y-4">
         {storeIds.length > 1 && (
           <div className="flex items-center gap-2 px-4 py-3 rounded-[8px] bg-[#f0fdf8] border border-[#d1fae5]">
             <span>{'\uD83E\uDDFE'}</span>

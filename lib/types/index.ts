@@ -212,13 +212,13 @@ export interface StatusConfig {
 export const ORDER_STATUS_CONFIG: Record<OrderStatus, StatusConfig> = {
   pending:               { label: '입금대기',   color: 'gray',   icon: '⏳', description: '입금 확인 중' },
   paid:                  { label: '입금완료',   color: 'green',  icon: '💰', description: '입금 확인됨' },
-  approved:              { label: '승인완료',   color: 'blue',   icon: '✅', description: '사장님 승인' },
+  approved:              { label: '준비완료',   color: 'blue',   icon: '✅', description: '준비 완료' },
   rejected:              { label: '거절됨',    color: 'red',    icon: '❌', description: '주문 거절' },
   preparing:             { label: '준비중',    color: 'orange', icon: '📦', description: '상품 준비 중' },
   ready:                 { label: '픽업대기',  color: 'purple', icon: '🏪', description: '매장 픽업 대기' },
   delivering:            { label: '배달중',    color: 'yellow', icon: '🚚', description: '배달 중' },
   delivered:             { label: '배달완료',  color: 'green',  icon: '🎉', description: '배달 완료' },
-  picked_up_by_customer: { label: '픽업완료',  color: 'green',  icon: '🏪', description: '고객 픽업 완료' },
+  picked_up_by_customer: { label: '고객픽업완료', color: 'green',  icon: '🏪', description: '고객 픽업 완료' },
   cancelled:             { label: '취소됨',    color: 'red',    icon: '🚫', description: '주문 취소' },
 }
 

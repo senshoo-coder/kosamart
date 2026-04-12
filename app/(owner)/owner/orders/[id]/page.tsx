@@ -231,13 +231,18 @@ export default function OrderDetailPage() {
       {order.status === 'paid' && (
         <div className="flex gap-3">
           <Button className="flex-1 py-3" onClick={handleApprove} loading={actionLoading}>
-            {isPickup ? '✅ 픽업 승인' : '✅ 배달 승인'}
+            {isPickup ? '✅ 고객 픽업 승인' : '✅ 배달 승인'}
           </Button>
           <Button className="flex-1 py-3" variant="danger" onClick={() => setRejectModal(true)} disabled={actionLoading}>❌ 거절</Button>
         </div>
       )}
       {order.status === 'approved' && isPickup && (
-        <Button className="w-full py-3" onClick={handlePickupComplete} loading={actionLoading}>🏪 픽업 완료</Button>
+        <div className="space-y-2">
+          <div className="bg-[#d1fae5] rounded-[8px] p-3 text-center">
+            <p className="text-[13px] text-[#10b981] font-semibold">✅ 준비완료 · 고객 픽업 대기중</p>
+          </div>
+          <Button className="w-full py-3" onClick={handlePickupComplete} loading={actionLoading}>🏪 고객 픽업 완료</Button>
+        </div>
       )}
 
       {/* 거절 모달 */}

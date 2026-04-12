@@ -138,8 +138,8 @@ export default function OwnerDeliveryPage() {
           <p className="text-[#a3a3a3] text-[13px]">해당 상태의 배달이 없습니다</p>
         </div>
       ) : (
-        <div className="bg-white rounded-[8px] overflow-hidden" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-          <table className="w-full">
+        <div className="bg-white rounded-[8px] overflow-x-auto" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+          <table className="w-full min-w-[680px]">
             <thead>
               <tr className="border-b border-[#f5f5f5]">
                 {['주문번호', '고객명', '배달주소', '기사', '상태', '배정시간', '액션'].map(h => (

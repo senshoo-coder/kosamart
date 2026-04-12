@@ -193,8 +193,8 @@ export default function AdminUsersPage() {
           <p className="text-[#a3a3a3] text-[13px]">해당 유저가 없습니다</p>
         </div>
       ) : (
-        <div className="bg-white rounded-[8px] overflow-hidden" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-          <table className="w-full">
+        <div className="bg-white rounded-[8px] overflow-x-auto" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+          <table className="w-full min-w-[720px]">
             <thead>
               <tr className="border-b border-[#f5f5f5]">
                 {['닉네임', '역할', '담당가게', '상태', '연락처', '가입일', '액션'].map(h => (

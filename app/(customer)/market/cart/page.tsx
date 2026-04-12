@@ -1,9 +1,12 @@
 'use client'
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useMarketCart } from '@/lib/cart/MarketCartContext'
 import { getStore } from '@/lib/market-data'
 import { getLocalStorage, setLocalStorage, generateDeviceUUID } from '@/lib/utils'
+
+const MAX_QUANTITY = 10
+const PHONE_REGEX = /^01[0-9]-?\d{3,4}-?\d{4}$/
 
 // 가게 운영시간 '11:00~23:00' 파싱
 function parseHours(hours: string): [number, number] | null {
@@ -45,6 +48,9 @@ export default function CartPage() {
   const [memo, setMemo] = useState('')
   const [consent, setConsent] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // 동적 가게 정보 (bank_account 등) — /api/market/stores에서 로드
   const [dynamicStores, setDynamicStores] = useState<Record<string, any>>({})
 
@@ -93,33 +99,27 @@ export default function CartPage() {
 
   const someStoreNoSlots = storeIds.some(sid => storeSlotsMap[sid]?.length === 0)
 
+  function validateAndConfirm() {
+    if (someStoreNoSlots) { alert('일부 가게의 운영시간이 종료되었습니다. 내일 다시 주문해주세요.'); return }
+    if (!phone.trim()) { alert('전화번호를 입력해주세요'); return }
+    if (!PHONE_REGEX.test(phone.replace(/\s/g, ''))) { alert('올바른 전화번호 형식을 입력해주세요\n예: 010-1234-5678'); return }
+    if (pickupType === 'delivery' && !address.trim()) { alert('배송 주소를 입력해주세요'); return }
+    if (!consent) { alert('개인정보 동의가 필요합니다'); return }
+    if (!nickname) { alert('로그인이 필요합니다'); return }
+    if (hasWarnings) {
+      const names = belowMinStores.map(sid => getStore(sid)?.name || sid).join(', ')
+      alert('가게별 최소주문금액 ' + MIN_ORDER_PER_STORE.toLocaleString() + '원 미달: ' + names)
+      return
+    }
+    setShowConfirm(true)
+  }
+
   async function handleOrder() {
+    setShowConfirm(false)
     if (someStoreNoSlots) {
       alert('일부 가게의 운영시간이 종료되었습니다. 내일 다시 주문해주세요.')
       return
     }
-    if (!phone.trim()) {
-      alert('전화번호를 입력해주세요')
-      return
-    }
-    if (pickupType === 'delivery' && !address.trim()) {
-      alert('\uBC30\uC1A1 \uC8FC\uC18C\uB97C \uC785\uB825\uD574\uC8FC\uC138\uC694')
-      return
-    }
-    if (!consent) {
-      alert('\uAC1C\uC778\uC815\uBCF4 \uB3D9\uC758\uAC00 \uD544\uC694\uD569\uB2C8\uB2E4')
-      return
-    }
-    if (!nickname) {
-      alert('\uB85C\uADF8\uC778\uC774 \uD544\uC694\uD569\uB2C8\uB2E4')
-      return
-    }
-    if (hasWarnings) {
-      const names = belowMinStores.map(sid => getStore(sid)?.name || sid).join(', ')
-      alert('\uAC00\uAC8C\uBCC4 \uCD5C\uC18C\uC8FC\uBB38\uAE08\uC561 ' + MIN_ORDER_PER_STORE.toLocaleString() + '\uC6D0 \uBBF8\uB2EC: ' + names)
-      return
-    }
-
     setLoading(true)
 
     let deviceUuid = getLocalStorage('cosmart_device_uuid')
@@ -177,13 +177,15 @@ export default function CartPage() {
 
       const failed = results.filter(r => !r.ok)
       if (failed.length === 0) {
-        if (pickupType === 'delivery') {
-          setLocalStorage('cosmart_address', address)
-        }
+        if (pickupType === 'delivery') setLocalStorage('cosmart_address', address)
         cart.clearAll()
-        router.push('/orders')
+        setShowSuccess(true)
+        successTimerRef.current = setTimeout(() => {
+          setShowSuccess(false)
+          router.push('/orders')
+        }, 5000)
       } else {
-        alert('\uC77C\uBD80 \uC8FC\uBB38 \uC2E4\uD328: ' + failed.map(f => f.store).join(', '))
+        alert('일부 주문 실패: ' + failed.map(f => f.store).join(', '))
       }
     } catch {
       alert('\uC8FC\uBB38 \uC911 \uC624\uB958\uAC00 \uBC1C\uC0DD\uD588\uC2B5\uB2C8\uB2E4')
@@ -260,20 +262,28 @@ export default function CartPage() {
                     <p className="text-[13px] font-semibold text-[#1a1c1c] truncate">{item.product_name}</p>
                     <p className="text-[12px] text-[#a3a3a3]">{item.unit_price.toLocaleString()}{'\uC6D0'}/{item.unit}</p>
                   </div>
-                  <div className="flex items-center border border-[#e0e0e0] rounded-lg overflow-hidden">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center border border-[#e0e0e0] rounded-lg overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => cart.updateQuantity(item.product_id, sid, item.quantity - 1)}
+                        className="w-9 h-9 text-[16px] flex items-center justify-center text-[#3c4a42] active:bg-[#f0f0f0]"
+                      >−</button>
+                      <span className="w-7 text-center text-[13px] font-bold text-[#1a1c1c]">{item.quantity}</span>
+                      <button
+                        type="button"
+                        onClick={() => cart.updateQuantity(item.product_id, sid, Math.min(item.quantity + 1, MAX_QUANTITY))}
+                        className="w-9 h-9 text-[16px] flex items-center justify-center text-[#3c4a42] active:bg-[#f0f0f0]"
+                        disabled={item.quantity >= MAX_QUANTITY}
+                      >+</button>
+                    </div>
                     <button
                       type="button"
-                      onClick={() => cart.updateQuantity(item.product_id, sid, item.quantity - 1)}
-                      className="w-9 h-9 text-[16px] flex items-center justify-center text-[#3c4a42] active:bg-[#f0f0f0]"
-                    >{'\u2212'}</button>
-                    <span className="w-7 text-center text-[13px] font-bold text-[#1a1c1c]">{item.quantity}</span>
-                    <button
-                      type="button"
-                      onClick={() => cart.updateQuantity(item.product_id, sid, item.quantity + 1)}
-                      className="w-9 h-9 text-[16px] flex items-center justify-center text-[#3c4a42] active:bg-[#f0f0f0]"
-                    >+</button>
+                      onClick={() => cart.updateQuantity(item.product_id, sid, 0)}
+                      className="w-8 h-8 flex items-center justify-center text-[#dc2626] text-[14px] rounded-lg bg-[#fee2e2] active:bg-[#fecaca]"
+                    >🗑</button>
                   </div>
-                  <p className="text-[13px] font-bold text-[#1a1c1c] w-16 text-right">{(item.unit_price * item.quantity).toLocaleString()}{'\uC6D0'}</p>
+                  <p className="text-[13px] font-bold text-[#1a1c1c] w-16 text-right">{(item.unit_price * item.quantity).toLocaleString()}원</p>
                 </div>
               ))}
 
@@ -437,19 +447,72 @@ export default function CartPage() {
 
         <button
           type="button"
-          onClick={handleOrder}
+          onClick={validateAndConfirm}
           disabled={loading || someStoreNoSlots}
           className="w-full py-4 rounded-2xl text-[15px] font-bold text-white disabled:opacity-50 active:opacity-80"
           style={{ background: someStoreNoSlots ? '#94a3b8' : '#10b981' }}
         >
-          {loading
-            ? '\uCC98\uB9AC \uC911...'
-            : storeIds.length > 1
-              ? '\uAC00\uAC8C\uBCC4 \uC8FC\uBB38\uD558\uAE30 (' + storeIds.length + '\uAC74)'
-              : '\uC8FC\uBB38\uD558\uAE30'
-          }
+          {loading ? '처리 중...' : storeIds.length > 1 ? `가게별 주문하기 (${storeIds.length}건)` : '주문하기'}
         </button>
       </div>
+
+      {/* 주문 확인 모달 (2-7) */}
+      {showConfirm && (
+        <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center px-4 pb-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowConfirm(false)} />
+          <div className="relative w-full max-w-sm bg-white rounded-[20px] p-6">
+            <h3 className="text-[17px] font-bold text-[#1a1c1c] mb-1">주문을 확정할까요?</h3>
+            <p className="text-[13px] text-[#a3a3a3] mb-4">
+              {pickupType === 'delivery' ? `배송지: ${address}` : '매장 픽업'}
+            </p>
+            <div className="bg-[#f9f9f9] rounded-[12px] p-3 mb-4 space-y-1">
+              {storeIds.map(sid => (
+                <div key={sid} className="flex justify-between text-[13px]">
+                  <span className="text-[#3c4a42]">{getStore(sid)?.name || sid}</span>
+                  <span className="font-bold text-[#10b981]">{cart.getStoreTotal(sid).toLocaleString()}원</span>
+                </div>
+              ))}
+              <div className="flex justify-between text-[14px] font-bold pt-2 border-t border-[#eee] mt-1">
+                <span>합계</span>
+                <span className="text-[#10b981]">{cart.totalAmount.toLocaleString()}원</span>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setShowConfirm(false)}
+                className="flex-1 h-[48px] rounded-[12px] bg-[#f2f4f6] text-[#1a1c1c] text-[14px] font-medium">
+                취소
+              </button>
+              <button onClick={handleOrder}
+                className="flex-1 h-[48px] rounded-[12px] bg-[#10b981] text-white text-[14px] font-bold">
+                주문 확정
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 주문 성공 모달 (2-2) */}
+      {showSuccess && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+          <div className="relative w-full max-w-sm bg-white rounded-[24px] p-8 text-center">
+            <div className="text-6xl mb-4">🎉</div>
+            <h3 className="text-[20px] font-bold text-[#1a1c1c] mb-2">주문 완료!</h3>
+            <p className="text-[14px] text-[#a3a3a3] mb-1">입금 후 사장님 확인을 기다려주세요</p>
+            <p className="text-[12px] text-[#c0c0c0] mb-6">5초 후 자동으로 주문내역으로 이동합니다</p>
+            <button
+              onClick={() => {
+                if (successTimerRef.current) clearTimeout(successTimerRef.current)
+                setShowSuccess(false)
+                router.push('/orders')
+              }}
+              className="w-full h-[48px] rounded-[14px] bg-[#10b981] text-white text-[15px] font-bold"
+            >
+              주문내역 보기
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

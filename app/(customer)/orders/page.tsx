@@ -58,21 +58,6 @@ export default function MyOrdersPage() {
         <p className="text-[12px] text-[#a3a3a3]">총 {orders.length}건</p>
       </header>
 
-      {/* 배송 현황 섹션 (진행중 주문 있을 때만) */}
-      {!loading && activeOrders.length > 0 && (
-        <div className="px-5 pt-4">
-          <p className="text-[13px] font-bold text-[#1a1c1c] mb-3 flex items-center gap-2">
-            <span className="w-1.5 h-1.5 bg-[#10b981] rounded-full inline-block animate-pulse" />
-            진행중 배송
-          </p>
-          <div className="flex flex-col gap-3 mb-2">
-            {activeOrders.map(order => (
-              <DeliveryTracker key={order.id} order={order} />
-            ))}
-          </div>
-          <div className="h-px bg-[#eee] my-4" />
-        </div>
-      )}
 
       {/* 필터 칩 */}
       <div

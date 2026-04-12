@@ -9,6 +9,7 @@ async function fetchJSON(path: string) {
   try {
     const res = await fetch(`${SUPA_URL}/storage/v1/object/authenticated/config/${path}`, {
       headers: { Authorization: `Bearer ${SUPA_KEY}`, apikey: SUPA_KEY },
+      cache: 'no-store',
     })
     if (!res.ok) return null
     return await res.json()

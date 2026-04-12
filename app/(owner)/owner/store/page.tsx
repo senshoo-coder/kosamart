@@ -55,7 +55,7 @@ export default function OwnerStorePage() {
   const [loading, setLoading] = useState(true)
   const [products, setProducts] = useState<DBProduct[]>([])
   const [editingInfo, setEditingInfo] = useState(false)
-  const [infoForm, setInfoForm] = useState({ hours: '', minOrder: 0, deliveryFee: 0, bank_account: '', telegram_chat_id: '' })
+  const [infoForm, setInfoForm] = useState({ name: '', description: '', hours: '', minOrder: 0, deliveryFee: 0, bank_account: '', telegram_chat_id: '' })
   const [savingInfo, setSavingInfo] = useState(false)
   const [images, setImages] = useState<ImageMap>({})
   const [uploading, setUploading] = useState<string | null>(null)
@@ -99,6 +99,8 @@ export default function OwnerStorePage() {
 
   function startEditInfo() {
     setInfoForm({
+      name: store?.name || '',
+      description: store?.description || '',
       hours: store?.hours || '',
       minOrder: store?.minOrder || 0,
       deliveryFee: store?.deliveryFee || 0,
@@ -402,6 +404,24 @@ export default function OwnerStorePage() {
           {/* 영업정보 — 보기/편집 전환 */}
           {editingInfo ? (
             <div className="flex flex-col gap-3">
+              <div>
+                <label className="text-[11px] text-[#a3a3a3] font-medium block mb-1">가게 이름</label>
+                <input
+                  type="text"
+                  value={infoForm.name}
+                  onChange={e => setInfoForm(f => ({ ...f, name: e.target.value }))}
+                  className="w-full border border-[#e0e0e0] rounded-[8px] px-3 py-2 text-[13px] text-[#1a1c1c] focus:outline-none focus:border-[#0058be]"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] text-[#a3a3a3] font-medium block mb-1">가게 설명</label>
+                <textarea
+                  value={infoForm.description}
+                  onChange={e => setInfoForm(f => ({ ...f, description: e.target.value }))}
+                  rows={2}
+                  className="w-full border border-[#e0e0e0] rounded-[8px] px-3 py-2 text-[13px] text-[#1a1c1c] focus:outline-none focus:border-[#0058be] resize-none"
+                />
+              </div>
               <div>
                 <label className="text-[11px] text-[#a3a3a3] font-medium block mb-1">영업시간</label>
                 <div className="flex items-center gap-2">

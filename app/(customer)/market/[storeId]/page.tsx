@@ -11,7 +11,7 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
   const { storeId } = use(params)
   const router = useRouter()
   const staticStore = getStore(storeId)
-  const [dynamicInfo, setDynamicInfo] = useState<{ name?: string; emoji?: string; description?: string; bank_account?: string; hours?: string; minOrder?: number; deliveryFee?: number } | null>(null)
+  const [dynamicInfo, setDynamicInfo] = useState<{ name?: string; emoji?: string; description?: string; bank_account?: string; hours?: string; minOrder?: number; deliveryFee?: number; weekly_closed?: string[]; closed_dates?: string[] } | null>(null)
   const { products: dbProducts } = useStoreProducts(storeId)
   const cart = useMarketCart()
 
@@ -34,6 +34,8 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
             if (found.hours) info.hours = found.hours
             if (found.minOrder !== undefined && found.minOrder !== null) info.minOrder = found.minOrder
             if (found.deliveryFee !== undefined && found.deliveryFee !== null) info.deliveryFee = found.deliveryFee
+            if (found.weekly_closed) info.weekly_closed = found.weekly_closed
+            if (found.closed_dates) info.closed_dates = found.closed_dates
             setDynamicInfo(info)
           }
         }
@@ -176,6 +178,29 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
             <p className="text-[13px] font-semibold text-[#1a1c1c]">{(store as any).bank_account}</p>
           </div>
         )}
+        {(() => {
+          const DAY_LABEL: Record<string, string> = { sun: '일', mon: '월', tue: '화', wed: '수', thu: '목', fri: '금', sat: '토' }
+          const weekly: string[] = (store as any).weekly_closed || []
+          const dates: string[] = (store as any).closed_dates || []
+          if (weekly.length === 0 && dates.length === 0) return null
+          return (
+            <div className="mt-3 bg-[#fff1f2] border border-[#fecdd3] rounded-xl px-4 py-3">
+              <p className="text-[11px] text-[#be123c] mb-2 font-medium">🚫 휴무일 안내</p>
+              {weekly.length > 0 && (
+                <p className="text-[12px] text-[#1a1c1c] mb-1">
+                  정기 휴무: 매주 {weekly.map(d => DAY_LABEL[d] || d).join('·')}요일
+                </p>
+              )}
+              {dates.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {dates.map(d => (
+                    <span key={d} className="text-[11px] bg-[#fecdd3] text-[#be123c] px-2 py-0.5 rounded-full font-medium">{d}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )
+        })()}
       </div>
 
       {/* 카테고리 */}

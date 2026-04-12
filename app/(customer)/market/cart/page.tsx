@@ -7,6 +7,7 @@ import { getLocalStorage, setLocalStorage, generateDeviceUUID } from '@/lib/util
 
 const MAX_QUANTITY = 10
 const PHONE_REGEX = /^01[0-9]-?\d{3,4}-?\d{4}$/
+const DEFAULT_MIN_ORDER = 5000
 
 // 가게 운영시간 '11:00~23:00' 파싱
 function parseHours(hours: string): [number, number] | null {
@@ -78,8 +79,11 @@ export default function CartPage() {
       .catch(() => {})
   }, [storeIds.join(',')])
 
-  const MIN_ORDER_PER_STORE = 5000
-  const belowMinStores = storeIds.filter(sid => cart.getStoreTotal(sid) < MIN_ORDER_PER_STORE)
+  // 가게별 최소 주문금액 (동적 > 정적 > 기본값)
+  function getMinOrder(sid: string): number {
+    return dynamicStores[sid]?.minOrder ?? getStore(sid)?.minOrder ?? DEFAULT_MIN_ORDER
+  }
+  const belowMinStores = storeIds.filter(sid => cart.getStoreTotal(sid) < getMinOrder(sid))
   const hasWarnings = belowMinStores.length > 0
 
   const totalDeliveryFee = storeIds.reduce((sum, sid) => {
@@ -107,8 +111,8 @@ export default function CartPage() {
     if (!consent) { alert('개인정보 동의가 필요합니다'); return }
     if (!nickname) { alert('로그인이 필요합니다'); return }
     if (hasWarnings) {
-      const names = belowMinStores.map(sid => getStore(sid)?.name || sid).join(', ')
-      alert('가게별 최소주문금액 ' + MIN_ORDER_PER_STORE.toLocaleString() + '원 미달: ' + names)
+      const names = belowMinStores.map(sid => `${getStore(sid)?.name || sid}(최소 ${getMinOrder(sid).toLocaleString()}원)`).join(', ')
+      alert('최소 주문금액 미달: ' + names)
       return
     }
     setShowConfirm(true)
@@ -294,7 +298,7 @@ export default function CartPage() {
                 </div>
                 {storeBelowMin && (
                   <p className="text-[11px] text-[#b45309] mt-2 bg-[#fef3c7] rounded-[6px] px-3 py-1.5">
-                    {'\uCD5C\uC18C\uC8FC\uBB38\uAE08\uC561 ' + MIN_ORDER_PER_STORE.toLocaleString() + '\uC6D0 \uBBF8\uB2EC (' + (MIN_ORDER_PER_STORE - storeTotal).toLocaleString() + '\uC6D0 \uBD80\uC871)'}
+                    최소 주문금액 {getMinOrder(sid).toLocaleString()}원 미달 ({(getMinOrder(sid) - storeTotal).toLocaleString()}원 부족)
                   </p>
                 )}
               </div>
@@ -319,7 +323,7 @@ export default function CartPage() {
           </div>
           {hasWarnings && (
             <p className="text-[11px] text-[#b45309] mt-2 bg-[#fef3c7] rounded-[6px] px-3 py-1.5">
-              {'\uAC00\uAC8C\uBCC4 \uCD5C\uC18C\uC8FC\uBB38\uAE08\uC561 ' + MIN_ORDER_PER_STORE.toLocaleString() + '\uC6D0 \uBBF8\uB2EC \uAC00\uAC8C\uAC00 \uC788\uC2B5\uB2C8\uB2E4'}
+              가게별 최소 주문금액 미달 가게가 있습니다
             </p>
           )}
         </div>

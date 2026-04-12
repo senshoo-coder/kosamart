@@ -234,7 +234,7 @@ export default function OrderDetailPage() {
       {/* 액션 버튼 */}
       {order.status === 'pending' && (
         <div className="flex gap-3">
-          <Button className="flex-1 py-3" onClick={handleConfirmPayment} loading={actionLoading}>💰 입금확인</Button>
+          <Button className="flex-1 py-3" onClick={handleConfirmPayment} loading={actionLoading}>💰 입금확인·승인</Button>
           <Button className="flex-1 py-3" variant="danger" onClick={() => setRejectModal(true)} disabled={actionLoading}>❌ 거절</Button>
         </div>
       )}

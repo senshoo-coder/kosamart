@@ -183,7 +183,7 @@ function OwnerOrdersContent() {
                     {order.status === 'pending' && (
                       <div className="flex gap-2">
                         <Button size="sm" onClick={() => handleConfirmPayment(order.id)} loading={actionLoading === order.id}>
-                          💰 입금확인
+                          💰 입금확인·승인
                         </Button>
                         <Button size="sm" variant="danger"
                           onClick={() => setRejectModal({ orderId: order.id, orderNumber: order.order_number })}>
@@ -254,7 +254,7 @@ function OwnerOrdersContent() {
             {order.status === 'pending' && (
               <div className="flex gap-2" onClick={e => e.stopPropagation()}>
                 <Button className="flex-1" size="sm" onClick={() => handleConfirmPayment(order.id)} loading={actionLoading === order.id}>
-                  💰 입금확인
+                  💰 입금확인·승인
                 </Button>
                 <Button className="flex-1" size="sm" variant="danger"
                   onClick={() => setRejectModal({ orderId: order.id, orderNumber: order.order_number })}>

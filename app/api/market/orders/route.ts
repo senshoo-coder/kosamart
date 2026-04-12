@@ -31,6 +31,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ data: null, error: '필수 항목 누락' }, { status: 400 })
   }
 
+  // 서버사이드 최소 주문금액 검증
+  const { getStore } = await import('@/lib/market-data')
+  const storeData = getStore(store_id)
+  const minOrder = storeData?.minOrder ?? 0
+  if (minOrder > 0 && total_amount < minOrder) {
+    return NextResponse.json(
+      { data: null, error: `최소 주문금액은 ${minOrder.toLocaleString()}원입니다 (현재 ${total_amount?.toLocaleString()}원)` },
+      { status: 400 }
+    )
+  }
+
   const orderNumber = generateOrderNumber()
 
   // 데모 모드 — Supabase 없이 주문 처리

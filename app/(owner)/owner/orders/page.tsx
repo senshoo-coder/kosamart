@@ -1,6 +1,6 @@
 'use client'
 import { Suspense, useState, useEffect, useCallback } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { OrderStatusBadge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatPrice, timeAgo } from '@/lib/utils'
@@ -19,6 +19,7 @@ const FILTER_TABS: Array<{ key: 'all' | OrderStatus; label: string }> = [
 
 function OwnerOrdersContent() {
   const params = useSearchParams()
+  const router = useRouter()
   const [filter, setFilter] = useState<'all' | OrderStatus>((params.get('status') as OrderStatus) || 'all')
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
@@ -164,7 +165,7 @@ function OwnerOrdersContent() {
               <tr><td colSpan={7} className="text-center py-10 text-[#a3a3a3] text-[13px]">주문이 없습니다</td></tr>
             ) : (
               orders.map(order => (
-                <tr key={order.id} className="border-b border-[#f9f9f9] hover:bg-[#f9f9f9] transition-colors">
+                <tr key={order.id} className="border-b border-[#f9f9f9] hover:bg-[#f9f9f9] transition-colors cursor-pointer" onClick={() => router.push(`/owner/orders/${order.id}`)}>
                   <td className="px-4 py-3 text-[11px] text-[#a3a3a3] font-mono">{order.order_number}</td>
                   <td className="px-4 py-3">
                     <p className="text-[13px] text-[#1a1c1c] font-semibold">{order.kakao_nickname}</p>
@@ -178,7 +179,7 @@ function OwnerOrdersContent() {
                   <td className="px-4 py-3 text-[13px] text-[#10b981] font-bold">{formatPrice(order.total_amount)}</td>
                   <td className="px-4 py-3"><OrderStatusBadge status={order.status} /></td>
                   <td className="px-4 py-3 text-[11px] text-[#a3a3a3]">{timeAgo(order.created_at)}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
                     {order.status === 'pending' && (
                       <div className="flex gap-2">
                         <Button size="sm" onClick={() => handleConfirmPayment(order.id)} loading={actionLoading === order.id}>
@@ -232,7 +233,7 @@ function OwnerOrdersContent() {
             <p className="text-[14px] font-semibold text-[#1a1c1c]">주문이 없습니다</p>
           </div>
         ) : orders.map(order => (
-          <div key={order.id} className="bg-white rounded-[8px] p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+          <div key={order.id} className="bg-white rounded-[8px] p-4 cursor-pointer" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }} onClick={() => router.push(`/owner/orders/${order.id}`)}>
             <div className="flex justify-between items-start mb-2">
               <div>
                 <p className="font-semibold text-[#1a1c1c] text-[14px]">{order.kakao_nickname}</p>
@@ -251,7 +252,7 @@ function OwnerOrdersContent() {
               <span className="text-[11px] text-[#a3a3a3]">{timeAgo(order.created_at)}</span>
             </div>
             {order.status === 'pending' && (
-              <div className="flex gap-2">
+              <div className="flex gap-2" onClick={e => e.stopPropagation()}>
                 <Button className="flex-1" size="sm" onClick={() => handleConfirmPayment(order.id)} loading={actionLoading === order.id}>
                   💰 입금확인
                 </Button>
@@ -262,7 +263,7 @@ function OwnerOrdersContent() {
               </div>
             )}
             {order.status === 'paid' && (
-              <div className="flex gap-2">
+              <div className="flex gap-2" onClick={e => e.stopPropagation()}>
                 <Button className="flex-1" size="sm" onClick={() => handleApprove(order.id)} loading={actionLoading === order.id}>
                   {order.delivery_address === '매장 픽업' ? '✅ 고객픽업승인' : '✅ 배달 승인'}
                 </Button>
@@ -273,7 +274,7 @@ function OwnerOrdersContent() {
               </div>
             )}
             {order.status === 'approved' && order.delivery_address === '매장 픽업' && (
-              <div className="space-y-2">
+              <div className="space-y-2" onClick={e => e.stopPropagation()}>
                 <p className="text-[12px] text-center text-[#10b981] font-semibold">✅ 준비완료 · 픽업 대기중</p>
                 <Button className="w-full" size="sm" onClick={() => handlePickupComplete(order.id)} loading={actionLoading === order.id}>
                   🏪 고객 픽업 완료

@@ -45,19 +45,39 @@ export async function GET(req: NextRequest) {
 
   const supabase = await createAdminClient()
 
-  // 사장님 역할이면 본인 store_id로 필터
   const cookieStore = await cookies()
   const cookieRole = cookieStore.get('cosmart_role')?.value
   const cookieUserId = cookieStore.get('cosmart_user_id')?.value
 
-  let ownerStoreId: string | null = null
-  if (cookieRole === 'owner' && cookieUserId) {
-    const { data: ownerUser } = await supabase.from('users').select('store_id').eq('id', cookieUserId).single()
-    ownerStoreId = ownerUser?.store_id ?? null
+  // 인증되지 않은 요청 차단
+  const ALLOWED_ROLES = ['admin', 'owner', 'customer']
+  if (!cookieRole || !ALLOWED_ROLES.includes(cookieRole)) {
+    return NextResponse.json({ data: null, error: '인증이 필요합니다' }, { status: 401 })
   }
 
   // 관리자가 특정 가게 주문 조회 시 store_id 쿼리 파라미터 지원
   const adminStoreId = cookieRole === 'admin' ? searchParams.get('store_id') : null
+
+  // 사장님: 본인 store_id 확인 — 없으면 빈 배열 반환 (전체 노출 차단)
+  let ownerStoreId: string | null = null
+  if (cookieRole === 'owner') {
+    if (!cookieUserId) return NextResponse.json({ data: [], error: null })
+    const { data: ownerUser } = await supabase.from('users').select('store_id').eq('id', cookieUserId).single()
+    ownerStoreId = ownerUser?.store_id ?? null
+    if (!ownerStoreId) return NextResponse.json({ data: [], error: null })
+  }
+
+  // 고객: 본인 ID 확인 — 못 찾으면 빈 배열 반환 (전체 노출 차단)
+  let customerId: string | null = null
+  if (cookieRole === 'customer') {
+    if (cookieUserId) {
+      customerId = cookieUserId
+    } else if (deviceUuid) {
+      const { data: user } = await supabase.from('users').select('id').eq('device_uuid', deviceUuid).single()
+      customerId = user?.id ?? null
+    }
+    if (!customerId) return NextResponse.json({ data: [], error: null })
+  }
 
   let query = supabase
     .from('orders')
@@ -71,20 +91,13 @@ export async function GET(req: NextRequest) {
     .order('created_at', { ascending: false })
     .limit(limit)
 
-  // 사장님: 본인 가게 주문만
-  if (ownerStoreId) {
-    query = query.eq('store_id', ownerStoreId)
-  }
-
-  // 관리자: 특정 가게 필터
-  if (adminStoreId) {
+  // 역할별 필터 적용
+  if (cookieRole === 'owner') {
+    query = query.eq('store_id', ownerStoreId!)
+  } else if (cookieRole === 'customer') {
+    query = query.eq('customer_id', customerId!)
+  } else if (cookieRole === 'admin' && adminStoreId) {
     query = query.eq('store_id', adminStoreId)
-  }
-
-  // 고객: 본인 주문만
-  if (deviceUuid) {
-    const { data: user } = await supabase.from('users').select('id').eq('device_uuid', deviceUuid).single()
-    if (user) query = query.eq('customer_id', user.id)
   }
 
   // 상태 필터

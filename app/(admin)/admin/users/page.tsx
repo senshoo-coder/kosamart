@@ -193,83 +193,157 @@ export default function AdminUsersPage() {
           <p className="text-[#a3a3a3] text-[13px]">해당 유저가 없습니다</p>
         </div>
       ) : (
-        <div className="bg-white rounded-[8px] overflow-x-auto" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-          <table className="w-full min-w-[720px]">
-            <thead>
-              <tr className="border-b border-[#f5f5f5]">
-                {['닉네임', '역할', '담당가게', '상태', '연락처', '가입일', '액션'].map(h => (
-                  <th key={h} className="px-4 py-3 text-left text-[11px] text-[#a3a3a3] font-medium">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#f9f9f9]">
-              {users.map(user => {
-                const ss = STATUS_STYLE[user.status] ?? { bg: '#f2f4f6', text: '#3c4a42' }
-                const store = STORES.find(s => s.id === user.store_id)
-                return (
-                  <tr key={user.id} className="hover:bg-[#f9f9f9] transition-colors">
-                    <td className="px-4 py-3 text-[13px] text-[#1a1c1c] font-semibold">{user.nickname}</td>
-                    <td className="px-4 py-3 text-[12px] text-[#3c4a42]">{ROLE_LABELS[user.role] ?? user.role}</td>
-                    <td className="px-4 py-3 text-[12px] text-[#3c4a42]">{store?.name ?? (user.store_id || '—')}</td>
-                    <td className="px-4 py-3">
-                      <span className="text-[11px] font-semibold px-2 py-1 rounded-full" style={{ background: ss.bg, color: ss.text }}>
-                        {STATUS_LABELS[user.status] ?? user.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-[11px] text-[#a3a3a3]">{user.phone ?? '—'}</td>
-                    <td className="px-4 py-3 text-[11px] text-[#a3a3a3]">{new Date(user.created_at).toLocaleDateString('ko-KR')}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-1.5 flex-wrap">
-                        {user.status === 'pending' && (
-                          <>
+        <>
+          {/* 데스크탑 테이블 */}
+          <div className="bg-white rounded-[8px] overflow-hidden hidden md:block" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-[#f5f5f5]">
+                  {['닉네임', '역할', '담당가게', '상태', '연락처', '가입일', '액션'].map(h => (
+                    <th key={h} className="px-4 py-3 text-left text-[11px] text-[#a3a3a3] font-medium">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#f9f9f9]">
+                {users.map(user => {
+                  const ss = STATUS_STYLE[user.status] ?? { bg: '#f2f4f6', text: '#3c4a42' }
+                  const store = STORES.find(s => s.id === user.store_id)
+                  return (
+                    <tr key={user.id} className="hover:bg-[#f9f9f9] transition-colors">
+                      <td className="px-4 py-3 text-[13px] text-[#1a1c1c] font-semibold">{user.nickname}</td>
+                      <td className="px-4 py-3 text-[12px] text-[#3c4a42]">{ROLE_LABELS[user.role] ?? user.role}</td>
+                      <td className="px-4 py-3 text-[12px] text-[#3c4a42]">{store?.name ?? (user.store_id || '—')}</td>
+                      <td className="px-4 py-3">
+                        <span className="text-[11px] font-semibold px-2 py-1 rounded-full whitespace-nowrap" style={{ background: ss.bg, color: ss.text }}>
+                          {STATUS_LABELS[user.status] ?? user.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-[11px] text-[#a3a3a3]">{user.phone ?? '—'}</td>
+                      <td className="px-4 py-3 text-[11px] text-[#a3a3a3]">{new Date(user.created_at).toLocaleDateString('ko-KR')}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-1.5 flex-wrap">
+                          {user.status === 'pending' && (
+                            <>
+                              <button onClick={() => doAction(user.id, 'approve')} disabled={!!actionLoading}
+                                className="text-[11px] px-3 py-1.5 rounded-[8px] bg-[#d1fae5] text-[#065f46] font-medium disabled:opacity-50">
+                                {actionLoading === user.id + 'approve' ? '…' : '승인'}
+                              </button>
+                              <button onClick={() => doAction(user.id, 'reject')} disabled={!!actionLoading}
+                                className="text-[11px] px-3 py-1.5 rounded-[8px] bg-[#fee2e2] text-[#b91c1c] font-medium disabled:opacity-50">
+                                {actionLoading === user.id + 'reject' ? '…' : '거절'}
+                              </button>
+                            </>
+                          )}
+                          {user.status === 'active' && user.role !== 'admin' && (
+                            <button onClick={() => doAction(user.id, 'suspend')} disabled={!!actionLoading}
+                              className="text-[11px] px-3 py-1.5 rounded-[8px] bg-[#fee2e2] text-[#b91c1c] font-medium disabled:opacity-50">
+                              {actionLoading === user.id + 'suspend' ? '…' : '정지'}
+                            </button>
+                          )}
+                          {user.status === 'suspended' && (
                             <button onClick={() => doAction(user.id, 'approve')} disabled={!!actionLoading}
                               className="text-[11px] px-3 py-1.5 rounded-[8px] bg-[#d1fae5] text-[#065f46] font-medium disabled:opacity-50">
-                              {actionLoading === user.id + 'approve' ? '…' : '승인'}
+                              {actionLoading === user.id + 'approve' ? '…' : '활성화'}
                             </button>
-                            <button onClick={() => doAction(user.id, 'reject')} disabled={!!actionLoading}
-                              className="text-[11px] px-3 py-1.5 rounded-[8px] bg-[#fee2e2] text-[#b91c1c] font-medium disabled:opacity-50">
-                              {actionLoading === user.id + 'reject' ? '…' : '거절'}
-                            </button>
-                          </>
-                        )}
-                        {user.status === 'active' && user.role !== 'admin' && (
-                          <button onClick={() => doAction(user.id, 'suspend')} disabled={!!actionLoading}
-                            className="text-[11px] px-3 py-1.5 rounded-[8px] bg-[#fee2e2] text-[#b91c1c] font-medium disabled:opacity-50">
-                            {actionLoading === user.id + 'suspend' ? '…' : '정지'}
-                          </button>
-                        )}
-                        {user.status === 'suspended' && (
-                          <button onClick={() => doAction(user.id, 'approve')} disabled={!!actionLoading}
-                            className="text-[11px] px-3 py-1.5 rounded-[8px] bg-[#d1fae5] text-[#065f46] font-medium disabled:opacity-50">
-                            {actionLoading === user.id + 'approve' ? '…' : '활성화'}
-                          </button>
-                        )}
-                        <button
-                          onClick={() => { setEditModal(user); setEditForm({ nickname: user.nickname, phone: user.phone || '', role: user.role }); setEditError('') }}
-                          className="text-[11px] px-3 py-1.5 rounded-[8px] bg-[#eff6ff] text-[#1d4ed8] font-medium border border-[#dbeafe]">
-                          ✏️ 수정
-                        </button>
-                        {user.role === 'owner' && (
+                          )}
                           <button
-                            onClick={() => { setStoreModal(user); setSelectedStoreId(user.store_id || '') }}
-                            className="text-[11px] px-3 py-1.5 rounded-[8px] font-medium border"
-                            style={{ background: user.store_id ? '#ede9fe' : '#fef3c7', color: user.store_id ? '#6d28d9' : '#b45309', borderColor: user.store_id ? '#ddd6fe' : '#fde68a' }}
-                          >
-                            {user.store_id ? '🏪 가게변경' : '⚠️ 가게미배정'}
+                            onClick={() => { setEditModal(user); setEditForm({ nickname: user.nickname, phone: user.phone || '', role: user.role }); setEditError('') }}
+                            className="text-[11px] px-3 py-1.5 rounded-[8px] bg-[#eff6ff] text-[#1d4ed8] font-medium border border-[#dbeafe]">
+                            ✏️ 수정
                           </button>
-                        )}
-                        <button onClick={() => { setResetTarget(user); setNewPassword('') }}
-                          className="text-[11px] px-3 py-1.5 rounded-[8px] bg-[#f2f4f6] text-[#3c4a42] font-medium border border-[#e8e8e8]">
-                          PW초기화
+                          {user.role === 'owner' && (
+                            <button
+                              onClick={() => { setStoreModal(user); setSelectedStoreId(user.store_id || '') }}
+                              className="text-[11px] px-3 py-1.5 rounded-[8px] font-medium border"
+                              style={{ background: user.store_id ? '#ede9fe' : '#fef3c7', color: user.store_id ? '#6d28d9' : '#b45309', borderColor: user.store_id ? '#ddd6fe' : '#fde68a' }}>
+                              {user.store_id ? '🏪 가게변경' : '⚠️ 가게미배정'}
+                            </button>
+                          )}
+                          <button onClick={() => { setResetTarget(user); setNewPassword('') }}
+                            className="text-[11px] px-3 py-1.5 rounded-[8px] bg-[#f2f4f6] text-[#3c4a42] font-medium border border-[#e8e8e8]">
+                            PW초기화
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 모바일 카드 */}
+          <div className="md:hidden space-y-3">
+            {users.map(user => {
+              const ss = STATUS_STYLE[user.status] ?? { bg: '#f2f4f6', text: '#3c4a42' }
+              const store = STORES.find(s => s.id === user.store_id)
+              return (
+                <div key={user.id} className="bg-white rounded-[12px] p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+                  {/* 상단: 닉네임 + 상태 */}
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <p className="text-[15px] font-bold text-[#1a1c1c]">{user.nickname}</p>
+                      <p className="text-[12px] text-[#a3a3a3]">{ROLE_LABELS[user.role] ?? user.role}</p>
+                    </div>
+                    <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full whitespace-nowrap" style={{ background: ss.bg, color: ss.text }}>
+                      {STATUS_LABELS[user.status] ?? user.status}
+                    </span>
+                  </div>
+                  {/* 세부 정보 */}
+                  <div className="space-y-1 mb-3">
+                    {store && <p className="text-[12px] text-[#3c4a42]">🏪 {store.name}</p>}
+                    {user.phone && <p className="text-[12px] text-[#3c4a42]">📞 {user.phone}</p>}
+                    <p className="text-[11px] text-[#a3a3a3]">가입일 {new Date(user.created_at).toLocaleDateString('ko-KR')}</p>
+                  </div>
+                  {/* 액션 버튼 */}
+                  <div className="flex gap-1.5 flex-wrap">
+                    {user.status === 'pending' && (
+                      <>
+                        <button onClick={() => doAction(user.id, 'approve')} disabled={!!actionLoading}
+                          className="text-[12px] px-3 py-1.5 rounded-[8px] bg-[#d1fae5] text-[#065f46] font-medium disabled:opacity-50">
+                          {actionLoading === user.id + 'approve' ? '…' : '승인'}
                         </button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+                        <button onClick={() => doAction(user.id, 'reject')} disabled={!!actionLoading}
+                          className="text-[12px] px-3 py-1.5 rounded-[8px] bg-[#fee2e2] text-[#b91c1c] font-medium disabled:opacity-50">
+                          {actionLoading === user.id + 'reject' ? '…' : '거절'}
+                        </button>
+                      </>
+                    )}
+                    {user.status === 'active' && user.role !== 'admin' && (
+                      <button onClick={() => doAction(user.id, 'suspend')} disabled={!!actionLoading}
+                        className="text-[12px] px-3 py-1.5 rounded-[8px] bg-[#fee2e2] text-[#b91c1c] font-medium disabled:opacity-50">
+                        {actionLoading === user.id + 'suspend' ? '…' : '정지'}
+                      </button>
+                    )}
+                    {user.status === 'suspended' && (
+                      <button onClick={() => doAction(user.id, 'approve')} disabled={!!actionLoading}
+                        className="text-[12px] px-3 py-1.5 rounded-[8px] bg-[#d1fae5] text-[#065f46] font-medium disabled:opacity-50">
+                        {actionLoading === user.id + 'approve' ? '…' : '활성화'}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => { setEditModal(user); setEditForm({ nickname: user.nickname, phone: user.phone || '', role: user.role }); setEditError('') }}
+                      className="text-[12px] px-3 py-1.5 rounded-[8px] bg-[#eff6ff] text-[#1d4ed8] font-medium border border-[#dbeafe]">
+                      ✏️ 수정
+                    </button>
+                    {user.role === 'owner' && (
+                      <button
+                        onClick={() => { setStoreModal(user); setSelectedStoreId(user.store_id || '') }}
+                        className="text-[12px] px-3 py-1.5 rounded-[8px] font-medium border"
+                        style={{ background: user.store_id ? '#ede9fe' : '#fef3c7', color: user.store_id ? '#6d28d9' : '#b45309', borderColor: user.store_id ? '#ddd6fe' : '#fde68a' }}>
+                        {user.store_id ? '🏪 가게변경' : '⚠️ 가게미배정'}
+                      </button>
+                    )}
+                    <button onClick={() => { setResetTarget(user); setNewPassword('') }}
+                      className="text-[12px] px-3 py-1.5 rounded-[8px] bg-[#f2f4f6] text-[#3c4a42] font-medium border border-[#e8e8e8]">
+                      PW초기화
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </>
       )}
 
       {/* 계정 생성 모달 */}

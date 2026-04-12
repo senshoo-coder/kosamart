@@ -138,51 +138,77 @@ export default function OwnerDeliveryPage() {
           <p className="text-[#a3a3a3] text-[13px]">해당 상태의 배달이 없습니다</p>
         </div>
       ) : (
-        <div className="bg-white rounded-[8px] overflow-x-auto" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-          <table className="w-full min-w-[680px]">
-            <thead>
-              <tr className="border-b border-[#f5f5f5]">
-                {['주문번호', '고객명', '배달주소', '기사', '상태', '배정시간', '액션'].map(h => (
-                  <th key={h} className="px-4 py-3 text-left text-[11px] text-[#a3a3a3] font-medium">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#f9f9f9]">
-              {deliveries.map(delivery => (
-                <tr key={delivery.id} className="hover:bg-[#f9f9f9] transition-colors">
-                  <td className="px-4 py-3 text-[11px] text-[#a3a3a3] font-mono">
-                    {delivery.order?.order_number ?? '—'}
-                  </td>
-                  <td className="px-4 py-3 text-[13px] text-[#1a1c1c] font-semibold">
-                    {delivery.order?.kakao_nickname ?? '—'}
-                  </td>
-                  <td className="px-4 py-3 text-[12px] text-[#3c4a42] max-w-[180px] truncate">
-                    {delivery.order?.delivery_address ?? '—'}
-                  </td>
-                  <td className="px-4 py-3 text-[13px] text-[#3c4a42]">
-                    {delivery.driver?.nickname ?? <span className="text-[#a3a3a3]">미배정</span>}
-                  </td>
-                  <td className="px-4 py-3">
-                    <DeliveryStatusBadge status={delivery.status} />
-                  </td>
-                  <td className="px-4 py-3 text-[11px] text-[#a3a3a3]">
-                    {delivery.assigned_at ? formatDateTime(delivery.assigned_at) : '—'}
-                  </td>
-                  <td className="px-4 py-3">
-                    {delivery.status === 'pending' && (
-                      <Button size="sm" onClick={() => openAssignModal(delivery.id, delivery.order?.order_number ?? delivery.id)}>
-                        기사 배정
-                      </Button>
-                    )}
-                    {delivery.status === 'failed' && (
-                      <span className="text-[11px] text-[#b91c1c]">{delivery.failed_reason ?? '실패'}</span>
-                    )}
-                  </td>
+        <>
+          {/* 데스크탑 테이블 */}
+          <div className="bg-white rounded-[8px] overflow-hidden hidden md:block" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-[#f5f5f5]">
+                  {['주문번호', '고객명', '배달주소', '기사', '상태', '배정시간', '액션'].map(h => (
+                    <th key={h} className="px-4 py-3 text-left text-[11px] text-[#a3a3a3] font-medium">{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-[#f9f9f9]">
+                {deliveries.map(delivery => (
+                  <tr key={delivery.id} className="hover:bg-[#f9f9f9] transition-colors">
+                    <td className="px-4 py-3 text-[11px] text-[#a3a3a3] font-mono">{delivery.order?.order_number ?? '—'}</td>
+                    <td className="px-4 py-3 text-[13px] text-[#1a1c1c] font-semibold">{delivery.order?.kakao_nickname ?? '—'}</td>
+                    <td className="px-4 py-3 text-[12px] text-[#3c4a42] max-w-[180px] truncate">{delivery.order?.delivery_address ?? '—'}</td>
+                    <td className="px-4 py-3 text-[13px] text-[#3c4a42]">{delivery.driver?.nickname ?? <span className="text-[#a3a3a3]">미배정</span>}</td>
+                    <td className="px-4 py-3"><DeliveryStatusBadge status={delivery.status} /></td>
+                    <td className="px-4 py-3 text-[11px] text-[#a3a3a3]">{delivery.assigned_at ? formatDateTime(delivery.assigned_at) : '—'}</td>
+                    <td className="px-4 py-3">
+                      {delivery.status === 'pending' && (
+                        <Button size="sm" onClick={() => openAssignModal(delivery.id, delivery.order?.order_number ?? delivery.id)}>기사 배정</Button>
+                      )}
+                      {delivery.status === 'failed' && (
+                        <span className="text-[11px] text-[#b91c1c]">{delivery.failed_reason ?? '실패'}</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 모바일 카드 */}
+          <div className="md:hidden space-y-3">
+            {deliveries.map(delivery => (
+              <div key={delivery.id} className="bg-white rounded-[12px] p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+                {/* 상단: 주문번호 + 상태 */}
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <p className="text-[11px] text-[#a3a3a3] font-mono mb-0.5">{delivery.order?.order_number ?? '—'}</p>
+                    <p className="text-[15px] font-bold text-[#1a1c1c]">{delivery.order?.kakao_nickname ?? '—'}</p>
+                  </div>
+                  <DeliveryStatusBadge status={delivery.status} />
+                </div>
+                {/* 세부 정보 */}
+                <div className="space-y-1 mb-3">
+                  {delivery.order?.delivery_address && (
+                    <p className="text-[13px] text-[#3c4a42]">📍 {delivery.order.delivery_address}</p>
+                  )}
+                  <p className="text-[12px] text-[#a3a3a3]">
+                    기사: <span className="text-[#1a1c1c] font-medium">{delivery.driver?.nickname ?? '미배정'}</span>
+                  </p>
+                  {delivery.assigned_at && (
+                    <p className="text-[11px] text-[#a3a3a3]">배정: {formatDateTime(delivery.assigned_at)}</p>
+                  )}
+                  {delivery.status === 'failed' && delivery.failed_reason && (
+                    <p className="text-[12px] text-[#b91c1c]">실패: {delivery.failed_reason}</p>
+                  )}
+                </div>
+                {/* 액션 */}
+                {delivery.status === 'pending' && (
+                  <Button size="sm" onClick={() => openAssignModal(delivery.id, delivery.order?.order_number ?? delivery.id)}>
+                    기사 배정
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
       {/* 기사 선택 모달 */}

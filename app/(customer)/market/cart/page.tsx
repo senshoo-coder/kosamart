@@ -290,8 +290,8 @@ export default function CartPage() {
             <div key={sid} className="bg-white rounded-[8px] overflow-hidden" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
               <div className="px-4 py-3 border-b border-[#f5f5f5] flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">{store?.emoji || '\uD83C\uDFEA'}</span>
-                  <span className="text-[14px] font-bold text-[#1a1c1c]">{store?.name || sid}</span>
+                  <span className="text-lg">{dynamicStores[sid]?.emoji || store?.emoji || '\uD83C\uDFEA'}</span>
+                  <span className="text-[14px] font-bold text-[#1a1c1c]">{dynamicStores[sid]?.name || store?.name || sid}</span>
                   {storeClosed && (
                     <span className="text-[10px] bg-[#fee2e2] text-[#dc2626] px-2 py-0.5 rounded-full font-bold">오늘 휴무</span>
                   )}

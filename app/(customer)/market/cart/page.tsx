@@ -55,9 +55,15 @@ function buildSlotsForStore(hours: string | undefined): { value: string; label: 
   return slots
 }
 
+const ALLOWED_DONGS = ['신영동', '홍지동', '부암동', '평창동', '구기동']
+
 export default function CartPage() {
   const router = useRouter()
   const cart = useMarketCart()
+  const [dong, setDong] = useState(() => {
+    if (typeof window === 'undefined') return ''
+    return getLocalStorage('cosmart_dong') || ''
+  })
   const [address, setAddress] = useState(() => {
     if (typeof window === 'undefined') return ''
     return getLocalStorage('cosmart_address') || ''
@@ -139,7 +145,8 @@ export default function CartPage() {
     if (someStoreNoSlots) { alert('일부 가게의 운영시간이 종료되었습니다. 내일 다시 주문해주세요.'); return }
     if (!phone.trim()) { alert('전화번호를 입력해주세요'); return }
     if (!PHONE_REGEX.test(phone.replace(/\s/g, ''))) { alert('올바른 전화번호 형식을 입력해주세요\n예: 010-1234-5678'); return }
-    if (pickupType === 'delivery' && !address.trim()) { alert('배송 주소를 입력해주세요'); return }
+    if (pickupType === 'delivery' && !dong) { alert('배송 동을 선택해주세요'); return }
+    if (pickupType === 'delivery' && !address.trim()) { alert('상세 주소를 입력해주세요'); return }
     if (!consent) { alert('개인정보 동의가 필요합니다'); return }
     if (!nickname) { alert('로그인이 필요합니다'); return }
     if (hasWarnings) {
@@ -201,7 +208,7 @@ export default function CartPage() {
             nickname,
             customer_phone: phone.trim(),
             pickup_type: pickupType,
-            delivery_address: pickupType === 'delivery' ? address : '매장 픽업',
+            delivery_address: pickupType === 'delivery' ? `종로구 ${dong} ${address}` : '매장 픽업',
             delivery_memo: `희망시간 ${slotLabel}${memo ? ' / ' + memo : ''}`,
             scheduled_at,
             items,
@@ -213,7 +220,10 @@ export default function CartPage() {
 
       const failed = results.filter(r => !r.ok)
       if (failed.length === 0) {
-        if (pickupType === 'delivery') setLocalStorage('cosmart_address', address)
+        if (pickupType === 'delivery') {
+          setLocalStorage('cosmart_dong', dong)
+          setLocalStorage('cosmart_address', address)
+        }
         cart.clearAll()
         setShowSuccess(true)
         successTimerRef.current = setTimeout(() => {
@@ -404,16 +414,35 @@ export default function CartPage() {
           </div>
 
           {pickupType === 'delivery' && (
-            <div>
-              <label className="text-[12px] text-[#a3a3a3] mb-1.5 block">상세 주소 <span className="text-[#dc2626]">*</span></label>
-              <input
-                type="text"
-                value={address}
-                onChange={e => setAddress(e.target.value)}
-                placeholder="동, 호수까지 정확히"
-                className="w-full border border-[#e0e0e0] rounded-xl px-4 py-3 text-[#1a1c1c] placeholder-[#c0c0c0] text-[14px] outline-none focus:border-[#10b981]"
-              />
-            </div>
+            <>
+              <div>
+                <label className="text-[12px] text-[#a3a3a3] mb-1.5 block">
+                  동 선택 <span className="text-[#dc2626]">*</span>
+                  <span className="ml-1 text-[11px] text-[#10b981]">종로구</span>
+                </label>
+                <select
+                  value={dong}
+                  onChange={e => setDong(e.target.value)}
+                  className="w-full border border-[#e0e0e0] rounded-xl px-4 py-3 text-[14px] outline-none bg-white focus:border-[#10b981] appearance-none"
+                  style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 16px center', color: dong ? '#1a1c1c' : '#c0c0c0' }}
+                >
+                  <option value="" disabled>배달 가능 동을 선택하세요</option>
+                  {ALLOWED_DONGS.map(d => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-[12px] text-[#a3a3a3] mb-1.5 block">상세 주소 <span className="text-[#dc2626]">*</span></label>
+                <input
+                  type="text"
+                  value={address}
+                  onChange={e => setAddress(e.target.value)}
+                  placeholder="건물명, 동·호수까지 정확히"
+                  className="w-full border border-[#e0e0e0] rounded-xl px-4 py-3 text-[#1a1c1c] placeholder-[#c0c0c0] text-[14px] outline-none focus:border-[#10b981]"
+                />
+              </div>
+            </>
           )}
 
           {/* 가게별 희망 수령 시간 (배송·픽업 공통) */}
@@ -567,7 +596,7 @@ export default function CartPage() {
           <div className="relative w-full max-w-sm bg-white rounded-[20px] p-6">
             <h3 className="text-[17px] font-bold text-[#1a1c1c] mb-1">주문을 확정할까요?</h3>
             <p className="text-[13px] text-[#a3a3a3] mb-4">
-              {pickupType === 'delivery' ? `배송지: ${address}` : '매장 픽업'}
+              {pickupType === 'delivery' ? `배송지: 종로구 ${dong} ${address}` : '매장 픽업'}
             </p>
             <div className="bg-[#f9f9f9] rounded-[12px] p-3 mb-4 space-y-1">
               {storeIds.map(sid => (

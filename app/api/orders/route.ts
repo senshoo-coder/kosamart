@@ -58,12 +58,21 @@ export async function GET(req: NextRequest) {
   // 관리자가 특정 가게 주문 조회 시 store_id 쿼리 파라미터 지원
   const adminStoreId = cookieRole === 'admin' ? searchParams.get('store_id') : null
 
+  const DEMO_OWNER_STORE_MAP: Record<string, string> = {
+    'demo-owner-001': 'central-super',
+    'demo-owner-002': 'banchan',
+    'demo-owner-003': 'butcher',
+    'demo-owner-004': 'bonjuk',
+    'demo-owner-005': 'chicken',
+    'demo-owner-006': 'bakery',
+  }
+
   // 사장님: 본인 store_id 확인 — 없으면 빈 배열 반환 (전체 노출 차단)
   let ownerStoreId: string | null = null
   if (cookieRole === 'owner') {
     if (!cookieUserId) return NextResponse.json({ data: [], error: null })
     const { data: ownerUser } = await supabase.from('users').select('store_id').eq('id', cookieUserId).single()
-    ownerStoreId = ownerUser?.store_id ?? null
+    ownerStoreId = ownerUser?.store_id ?? DEMO_OWNER_STORE_MAP[cookieUserId] ?? null
     if (!ownerStoreId) return NextResponse.json({ data: [], error: null })
   }
 

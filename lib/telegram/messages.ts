@@ -2,6 +2,20 @@ import type { Order, Delivery } from '@/lib/types'
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!
 
+// 전화번호 마스킹: 010-1234-5678 → 010-****-5678
+function maskPhone(phone?: string | null): string {
+  if (!phone) return '-'
+  return phone.replace(/(\d{3})-?(\d{3,4})-?(\d{4})/, '$1-****-$3')
+}
+
+// 주소 마스킹: 상세 호수 제거 (동 이름까지만 표시)
+function maskAddress(address?: string | null): string {
+  if (!address) return '-'
+  if (address === '매장 픽업') return address
+  // "종로구 신영동 302동 101호" → "종로구 신영동 302동 ***"
+  return address.replace(/(\d+호|\d+층).*$/, '***')
+}
+
 // =============================================
 // 텔레그램 메시지 발송
 // =============================================
@@ -145,13 +159,13 @@ ${memo ? `기사 메모: ${memo}` : ''}
 주문번호: <code>${order.order_number}</code>
 주문자: <b>${order.kakao_nickname}</b>
 유형: ${order.pickup_type === 'bopis' ? '🏪 매장 픽업' : '🚚 문앞 배송 O2O'}
-${order.delivery_address ? `주소: ${order.delivery_address}` : ''}
+${order.delivery_address ? `주소: ${maskAddress(order.delivery_address)}` : ''}
 금액: <b>₩${order.total_amount.toLocaleString()}</b>
 
 상품:
 ${order.items.map(i => `• ${i.product_name} x${i.quantity} (₩${i.subtotal.toLocaleString()})`).join('\n')}`,
 
-  // 픽업/배달 시간 알림 (T-60, T-30)
+  // 픽업/배달 시간 알림 (T-60, T-30) — 전화번호는 마스킹하여 단체방 노출 최소화
   scheduleAlert: (order: {
     order_number: string
     kakao_nickname: string
@@ -169,9 +183,9 @@ ${order.items.map(i => `• ${i.product_name} x${i.quantity} (₩${i.subtotal.to
       ``,
       `주문번호: <code>${order.order_number}</code>`,
       `주문자: <b>${order.kakao_nickname}</b>`,
-      `전화번호: ${order.customer_phone ?? '-'}`,
+      `전화번호: ${maskPhone(order.customer_phone)}`,
       `매장: ${order.store_name}`,
-      isPickup ? `유형: 🏪 매장 픽업` : `유형: 🚚 배달\n주소: ${order.delivery_address}`,
+      isPickup ? `유형: 🏪 매장 픽업` : `유형: 🚚 배달\n주소: ${maskAddress(order.delivery_address)}`,
       `예정시간: <b>${scheduledTime}</b>`,
       `금액: ₩${order.total_amount?.toLocaleString() ?? ''}`,
     ].join('\n')

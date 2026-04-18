@@ -568,18 +568,30 @@ export default function CartPage() {
           )
         })}
 
-        {/* [개선2] 인라인 에러 — 개인정보 동의 */}
-        <div id="field-consent">
+        {/* 개인정보 수집 동의 */}
+        <div id="field-consent" className="bg-[#f7f9fb] rounded-[12px] p-4 border border-[#e8e8e8]">
           <label className="flex items-start gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={consent}
               onChange={e => { setConsent(e.target.checked); setErrors(prev => ({ ...prev, consent: undefined })) }}
-              className="mt-0.5 accent-emerald-500"
+              className="mt-0.5 accent-emerald-500 w-4 h-4 flex-shrink-0"
             />
-            <span className="text-[12px] text-[#94a3b8]">개인정보(이름, 주소, 연락처) 수집 및 이용에 동의합니다 (필수)</span>
+            <div>
+              <p className="text-[13px] text-[#1a1c1c] font-medium">개인정보 수집·이용·제3자 제공 동의 <span className="text-[#dc2626]">(필수)</span></p>
+              <p className="text-[11px] text-[#94a3b8] mt-1 leading-relaxed">
+                주문 처리를 위해 닉네임·연락처·배달주소를 수집하며, 배달 서비스 제공을 위해 배달 기사 및 가게 사장님에게 제공됩니다.
+              </p>
+              <a
+                href="/market/privacy"
+                target="_blank"
+                className="text-[11px] text-[#10b981] underline mt-1 inline-block"
+              >
+                개인정보처리방침 전문 보기
+              </a>
+            </div>
           </label>
-          {errors.consent && <p className="text-[11px] text-[#dc2626] mt-1 ml-6">{errors.consent}</p>}
+          {errors.consent && <p className="text-[11px] text-[#dc2626] mt-2 ml-7">{errors.consent}</p>}
         </div>
 
         {closedStores.length > 0 && (

@@ -32,14 +32,12 @@ function closedReason(storeInfo: any): string {
   return '오늘 휴무'
 }
 
-// 가게 운영시간 '11:00~23:00' 파싱
 function parseHours(hours: string): [number, number] | null {
   const m = hours.match(/^(\d{1,2}):(\d{2})~(\d{1,2}):(\d{2})$/)
   if (!m) return null
   return [parseInt(m[1]), parseInt(m[3])]
 }
 
-// 가게 한 곳의 운영시간 기반 슬롯 생성
 function buildSlotsForStore(hours: string | undefined): { value: string; label: string }[] {
   const parsed = hours ? parseHours(hours) : null
   const start = parsed ? parsed[0] : 9
@@ -57,6 +55,13 @@ function buildSlotsForStore(hours: string | undefined): { value: string; label: 
 
 const ALLOWED_DONGS = ['신영동', '홍지동', '부암동', '평창동', '구기동']
 
+interface FormErrors {
+  phone?: string
+  dong?: string
+  address?: string
+  consent?: string
+}
+
 export default function CartPage() {
   const router = useRouter()
   const cart = useMarketCart()
@@ -72,8 +77,11 @@ export default function CartPage() {
     if (typeof window === 'undefined') return ''
     return getLocalStorage('cosmart_phone') || ''
   })
-  const [pickupType, setPickupType] = useState<'delivery' | 'pickup'>('delivery')
-  // 가게별 희망 수령 시간 { storeId: slotValue }
+  // [개선3] pickupType을 localStorage에서 복원
+  const [pickupType, setPickupTypeState] = useState<'delivery' | 'pickup'>(() => {
+    if (typeof window === 'undefined') return 'delivery'
+    return (getLocalStorage('cosmart_pickup_type') as 'delivery' | 'pickup') || 'delivery'
+  })
   const [timeSlots, setTimeSlots] = useState<Record<string, string>>({})
   const [memo, setMemo] = useState('')
   const [consent, setConsent] = useState(false)
@@ -81,14 +89,20 @@ export default function CartPage() {
   const [showBankConfirm, setShowBankConfirm] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  // [개선2] 인라인 에러 상태
+  const [errors, setErrors] = useState<FormErrors>({})
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  // 동적 가게 정보 (bank_account 등) — /api/market/stores에서 로드
   const [dynamicStores, setDynamicStores] = useState<Record<string, any>>({})
 
   const nickname = typeof window !== 'undefined' ? getLocalStorage('cosmart_nickname') : null
   const storeIds = Object.keys(cart.storeGroups)
 
-  // 동적 가게 정보 로드
+  // [개선3] pickupType 변경 시 localStorage 저장
+  function setPickupType(type: 'delivery' | 'pickup') {
+    setPickupTypeState(type)
+    setLocalStorage('cosmart_pickup_type', type)
+  }
+
   useEffect(() => {
     fetch('/api/market/stores')
       .then(r => r.json())
@@ -97,7 +111,6 @@ export default function CartPage() {
         const map: Record<string, any> = {}
         data.forEach((s: any) => { map[s.id] = s })
         setDynamicStores(map)
-        // 가게별 첫 번째 유효 슬롯으로 초기화
         const initial: Record<string, string> = {}
         storeIds.forEach(sid => {
           const hours = map[sid]?.hours || getStore(sid)?.hours
@@ -109,14 +122,12 @@ export default function CartPage() {
       .catch(() => {})
   }, [storeIds.join(',')])
 
-  // 가게별 최소 주문금액 (동적 > 정적 > 기본값)
   function getMinOrder(sid: string): number {
     return dynamicStores[sid]?.minOrder ?? getStore(sid)?.minOrder ?? DEFAULT_MIN_ORDER
   }
   const belowMinStores = storeIds.filter(sid => cart.getStoreTotal(sid) < getMinOrder(sid))
   const hasWarnings = belowMinStores.length > 0
 
-  // 오늘 휴무인 가게 목록 (동적 정보 기준)
   const closedStores = storeIds.filter(sid => isClosedToday(dynamicStores[sid]))
 
   const totalDeliveryFee = storeIds.reduce((sum, sid) => {
@@ -124,7 +135,6 @@ export default function CartPage() {
     return sum + fee
   }, 0)
 
-  // 가게별 슬롯 계산
   const storeSlotsMap = useMemo(() => {
     const map: Record<string, { value: string; label: string }[]> = {}
     storeIds.forEach(sid => {
@@ -136,24 +146,48 @@ export default function CartPage() {
 
   const someStoreNoSlots = storeIds.some(sid => storeSlotsMap[sid]?.length === 0)
 
+  // [개선2] alert() 대신 인라인 에러로 전환
   function validateAndConfirm() {
     if (closedStores.length > 0) {
       const names = closedStores.map(sid => `${dynamicStores[sid]?.name || getStore(sid)?.name || sid}(${closedReason(dynamicStores[sid])})`).join(', ')
       alert('휴무 중인 가게가 있어 주문할 수 없습니다:\n' + names)
       return
     }
-    if (someStoreNoSlots) { alert('일부 가게의 운영시간이 종료되었습니다. 내일 다시 주문해주세요.'); return }
-    if (!phone.trim()) { alert('전화번호를 입력해주세요'); return }
-    if (!PHONE_REGEX.test(phone.replace(/\s/g, ''))) { alert('올바른 전화번호 형식을 입력해주세요\n예: 010-1234-5678'); return }
-    if (pickupType === 'delivery' && !dong) { alert('배송 동을 선택해주세요'); return }
-    if (pickupType === 'delivery' && !address.trim()) { alert('상세 주소를 입력해주세요'); return }
-    if (!consent) { alert('개인정보 동의가 필요합니다'); return }
-    if (!nickname) { alert('로그인이 필요합니다'); return }
-    if (hasWarnings) {
-      const names = belowMinStores.map(sid => `${getStore(sid)?.name || sid}(최소 ${getMinOrder(sid).toLocaleString()}원)`).join(', ')
-      alert('최소 주문금액 미달: ' + names)
+    if (someStoreNoSlots) {
+      alert('일부 가게의 운영시간이 종료되었습니다. 내일 다시 주문해주세요.')
       return
     }
+
+    const newErrors: FormErrors = {}
+
+    if (!phone.trim()) {
+      newErrors.phone = '전화번호를 입력해주세요'
+    } else if (!PHONE_REGEX.test(phone.replace(/\s/g, ''))) {
+      newErrors.phone = '올바른 형식으로 입력해주세요 (예: 010-1234-5678)'
+    }
+
+    if (pickupType === 'delivery' && !dong) {
+      newErrors.dong = '배송 동을 선택해주세요'
+    }
+
+    if (pickupType === 'delivery' && !address.trim()) {
+      newErrors.address = '상세 주소를 입력해주세요'
+    }
+
+    if (!consent) {
+      newErrors.consent = '개인정보 수집 및 이용에 동의해주세요'
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      // 첫 번째 에러 필드로 스크롤
+      const firstErrorKey = Object.keys(newErrors)[0]
+      document.getElementById(`field-${firstErrorKey}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      return
+    }
+
+    if (!nickname) { alert('로그인이 필요합니다'); return }
+    setErrors({})
     setShowBankConfirm(true)
   }
 
@@ -187,7 +221,6 @@ export default function CartPage() {
         const slotValue = timeSlots[sid] ?? ''
         const slotLabel = storeSlotsMap[sid]?.find(t => t.value === slotValue)?.label || slotValue
 
-        // Build scheduled_at: today's date at the slot start hour (local time)
         let scheduled_at: string | undefined
         if (slotValue) {
           const startH = parseInt(slotValue.split('-')[0], 10)
@@ -234,7 +267,7 @@ export default function CartPage() {
         alert('일부 주문 실패: ' + failed.map(f => f.store).join(', '))
       }
     } catch {
-      alert('\uC8FC\uBB38 \uC911 \uC624\uB958\uAC00 \uBC1C\uC0DD\uD588\uC2B5\uB2C8\uB2E4')
+      alert('주문 중 오류가 발생했습니다')
     }
     setLoading(false)
   }
@@ -243,38 +276,43 @@ export default function CartPage() {
     return (
       <div className="min-h-screen bg-[#f9f9f9]">
         <header className="sticky top-0 z-40 bg-white border-b border-[#eee] flex items-center px-4 h-[56px]">
-          <button type="button" onClick={() => router.push('/market')} className="text-xl w-8">{'\u2190'}</button>
-          <h1 className="flex-1 text-center text-[15px] font-bold text-[#1a1c1c]">{'\uC7A5\uBC14\uAD6C\uB2C8'}</h1>
+          <button type="button" onClick={() => router.push('/market')} className="text-xl w-8">←</button>
+          <h1 className="flex-1 text-center text-[15px] font-bold text-[#1a1c1c]">장바구니</h1>
           <div className="w-8" />
         </header>
         <div className="flex flex-col items-center justify-center pt-32 gap-3">
-          <span className="text-6xl">{'\uD83D\uDED2'}</span>
-          <p className="text-[16px] font-bold text-[#1a1c1c]">{'\uC7A5\uBC14\uAD6C\uB2C8\uAC00 \uBE44\uC5B4 \uC788\uC5B4\uC694'}</p>
-          <p className="text-[13px] text-[#a3a3a3]">{'\uC0C1\uC810\uAC00\uC5D0\uC11C \uC0C1\uD488\uC744 \uB2F4\uC544\uBCF4\uC138\uC694'}</p>
+          <span className="text-6xl">🛒</span>
+          <p className="text-[16px] font-bold text-[#1a1c1c]">장바구니가 비어 있어요</p>
+          <p className="text-[13px] text-[#a3a3a3]">상점가에서 상품을 담아보세요</p>
           <button onClick={() => router.push('/market')}
             className="mt-4 px-6 py-2.5 rounded-xl text-[14px] font-semibold text-white bg-[#10b981]">
-            {'\uC0C1\uC810\uAC00 \uB458\uB7EC\uBCF4\uAE30'}
+            상점가 둘러보기
           </button>
         </div>
       </div>
     )
   }
 
+  // [개선4] 버튼 비활성화 조건: 영업종료·휴무·최소금액 미달 모두 포함
+  const isOrderDisabled = loading || someStoreNoSlots || closedStores.length > 0 || hasWarnings
+  const orderBtnColor = (someStoreNoSlots || closedStores.length > 0 || hasWarnings) ? '#94a3b8' : '#10b981'
+
   return (
     <div className="min-h-screen bg-[#f9f9f9]">
       <header className="sticky top-0 z-40 bg-white border-b border-[#eee] flex items-center px-4 h-[56px]">
-        <button type="button" onClick={() => { if (confirm('\uC7A5\uBC14\uAD6C\uB2C8\uB97C \uBE44\uC6B0\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?')) cart.clearAll() }}
-          className="text-[12px] text-[#a3a3a3] w-14 text-left">{'\uC804\uCCB4\uC0AD\uC81C'}</button>
-        <h1 className="flex-1 text-center text-[15px] font-bold text-[#1a1c1c]">{'\uC7A5\uBC14\uAD6C\uB2C8'}</h1>
-        <button type="button" onClick={() => router.back()} className="text-xl w-14 text-right text-[#1a1c1c]">{'\u2715'}</button>
+        <button type="button" onClick={() => { if (confirm('장바구니를 비우시겠습니까?')) cart.clearAll() }}
+          className="text-[12px] text-[#a3a3a3] w-14 text-left">전체삭제</button>
+        <h1 className="flex-1 text-center text-[15px] font-bold text-[#1a1c1c]">장바구니</h1>
+        <button type="button" onClick={() => router.back()} className="text-xl w-14 text-right text-[#1a1c1c]">✕</button>
       </header>
 
-      <div className="px-4 pt-4 pb-28 space-y-4">
+      {/* [개선1] pb-40으로 늘려서 하단 네비에 가려지는 문제 해결 */}
+      <div className="px-4 pt-4 pb-40 space-y-4">
         {storeIds.length > 1 && (
           <div className="flex items-center gap-2 px-4 py-3 rounded-[8px] bg-[#f0fdf8] border border-[#d1fae5]">
-            <span>{'\uD83E\uDDFE'}</span>
+            <span>🧾</span>
             <p className="text-[12px] text-[#3c4a42]">
-              <b className="text-[#10b981]">{storeIds.length}{'\uAC1C \uAC00\uAC8C'}</b>{'\uAC00 \uAC01\uAC01 \uB530\uB85C \uC8FC\uBB38\u00B7\uACB0\uC81C\uB429\uB2C8\uB2E4'}
+              <b className="text-[#10b981]">{storeIds.length}개 가게</b>가 각각 따로 주문·결제됩니다
             </p>
           </div>
         )}
@@ -290,13 +328,13 @@ export default function CartPage() {
             <div key={sid} className="bg-white rounded-[8px] overflow-hidden" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
               <div className="px-4 py-3 border-b border-[#f5f5f5] flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">{dynamicStores[sid]?.emoji || store?.emoji || '\uD83C\uDFEA'}</span>
+                  <span className="text-lg">{dynamicStores[sid]?.emoji || store?.emoji || '🏪'}</span>
                   <span className="text-[14px] font-bold text-[#1a1c1c]">{dynamicStores[sid]?.name || store?.name || sid}</span>
                   {storeClosed && (
                     <span className="text-[10px] bg-[#fee2e2] text-[#dc2626] px-2 py-0.5 rounded-full font-bold">오늘 휴무</span>
                   )}
                 </div>
-                <button onClick={() => cart.clearStore(sid)} className="text-[11px] text-[#a3a3a3]">{'\uAC00\uAC8C \uC0AD\uC81C'}</button>
+                <button onClick={() => cart.clearStore(sid)} className="text-[11px] text-[#a3a3a3]">가게 삭제</button>
               </div>
               {storeClosed && (
                 <div className="mx-4 mt-3 bg-[#fff1f2] border border-[#fecdd3] rounded-xl px-4 py-3">
@@ -315,7 +353,7 @@ export default function CartPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-semibold text-[#1a1c1c] truncate">{item.product_name}</p>
-                    <p className="text-[12px] text-[#a3a3a3]">{item.unit_price.toLocaleString()}{'\uC6D0'}/{item.unit}</p>
+                    <p className="text-[12px] text-[#a3a3a3]">{item.unit_price.toLocaleString()}원/{item.unit}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex items-center border border-[#e0e0e0] rounded-lg overflow-hidden">
@@ -344,8 +382,8 @@ export default function CartPage() {
 
               <div className="px-4 py-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-[12px] text-[#a3a3a3]">{'\uC18C\uACC4'}</span>
-                  <span className="text-[14px] font-bold text-[#10b981]">{storeTotal.toLocaleString()}{'\uC6D0'}</span>
+                  <span className="text-[12px] text-[#a3a3a3]">소계</span>
+                  <span className="text-[14px] font-bold text-[#10b981]">{storeTotal.toLocaleString()}원</span>
                 </div>
                 {storeBelowMin && (
                   <p className="text-[11px] text-[#b45309] mt-2 bg-[#fef3c7] rounded-[6px] px-3 py-1.5">
@@ -359,22 +397,28 @@ export default function CartPage() {
 
         <div className="bg-white rounded-[8px] p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
           <div className="flex justify-between text-[13px] text-[#3c4a42] mb-2">
-            <span>{'\uC0C1\uD488 \uD569\uACC4'}</span>
-            <span className="font-semibold">{cart.totalAmount.toLocaleString()}{'\uC6D0'}</span>
+            <span>상품 합계</span>
+            <span className="font-semibold">{cart.totalAmount.toLocaleString()}원</span>
           </div>
           {totalDeliveryFee > 0 && (
             <div className="flex justify-between text-[13px] text-[#3c4a42] mb-2">
-              <span>{'\uBC30\uB2EC\uBE44'}</span>
-              <span className="font-semibold">{totalDeliveryFee.toLocaleString()}{'\uC6D0'}</span>
+              <span>배달비</span>
+              <span className="font-semibold">{totalDeliveryFee.toLocaleString()}원</span>
             </div>
           )}
           <div className="flex justify-between text-[15px] font-bold pt-2 border-t border-[#f0f0f0]">
-            <span className="text-[#1a1c1c]">{'\uCD1D \uACB0\uC81C\uAE08\uC561'}</span>
-            <span className="text-[#10b981]">{(cart.totalAmount + totalDeliveryFee).toLocaleString()}{'\uC6D0'}</span>
+            <span className="text-[#1a1c1c]">총 결제금액</span>
+            <span className="text-[#10b981]">{(cart.totalAmount + totalDeliveryFee).toLocaleString()}원</span>
           </div>
+          {/* [개선4] 최소금액 미달 안내 메시지 */}
           {hasWarnings && (
             <p className="text-[11px] text-[#b45309] mt-2 bg-[#fef3c7] rounded-[6px] px-3 py-1.5">
-              가게별 최소 주문금액 미달 가게가 있습니다
+              ⚠️ 최소 주문금액 미달 가게가 있어 주문할 수 없습니다
+            </p>
+          )}
+          {someStoreNoSlots && (
+            <p className="text-[11px] text-[#dc2626] mt-2 bg-[#fff1f1] rounded-[6px] px-3 py-1.5">
+              🕐 운영시간이 종료된 가게가 있어 주문할 수 없습니다
             </p>
           )}
         </div>
@@ -399,31 +443,33 @@ export default function CartPage() {
             </button>
           </div>
 
-          {/* 전화번호 — 항상 필수 */}
-          <div>
+          {/* [개선2] 인라인 에러 — 전화번호 */}
+          <div id="field-phone">
             <label className="text-[12px] text-[#a3a3a3] mb-1.5 block">
               전화번호 <span className="text-[#dc2626]">*</span>
             </label>
             <input
               type="tel"
               value={phone}
-              onChange={e => setPhone(e.target.value)}
+              onChange={e => { setPhone(e.target.value); setErrors(prev => ({ ...prev, phone: undefined })) }}
               placeholder="010-0000-0000"
-              className="w-full border border-[#e0e0e0] rounded-xl px-4 py-3 text-[#1a1c1c] placeholder-[#c0c0c0] text-[14px] outline-none focus:border-[#10b981]"
+              className={`w-full border rounded-xl px-4 py-3 text-[#1a1c1c] placeholder-[#c0c0c0] text-[14px] outline-none focus:border-[#10b981] ${errors.phone ? 'border-[#dc2626]' : 'border-[#e0e0e0]'}`}
             />
+            {errors.phone && <p className="text-[11px] text-[#dc2626] mt-1">{errors.phone}</p>}
           </div>
 
           {pickupType === 'delivery' && (
             <>
-              <div>
+              {/* [개선2] 인라인 에러 — 동 선택 */}
+              <div id="field-dong">
                 <label className="text-[12px] text-[#a3a3a3] mb-1.5 block">
                   동 선택 <span className="text-[#dc2626]">*</span>
                   <span className="ml-1 text-[11px] text-[#10b981]">종로구</span>
                 </label>
                 <select
                   value={dong}
-                  onChange={e => setDong(e.target.value)}
-                  className="w-full border border-[#e0e0e0] rounded-xl px-4 py-3 text-[14px] outline-none bg-white focus:border-[#10b981] appearance-none"
+                  onChange={e => { setDong(e.target.value); setErrors(prev => ({ ...prev, dong: undefined })) }}
+                  className={`w-full border rounded-xl px-4 py-3 text-[14px] outline-none bg-white focus:border-[#10b981] appearance-none ${errors.dong ? 'border-[#dc2626]' : 'border-[#e0e0e0]'}`}
                   style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 16px center', color: dong ? '#1a1c1c' : '#c0c0c0' }}
                 >
                   <option value="" disabled>배달 가능 동을 선택하세요</option>
@@ -431,21 +477,25 @@ export default function CartPage() {
                     <option key={d} value={d}>{d}</option>
                   ))}
                 </select>
+                {errors.dong && <p className="text-[11px] text-[#dc2626] mt-1">{errors.dong}</p>}
               </div>
-              <div>
+
+              {/* [개선2] 인라인 에러 — 상세 주소 */}
+              <div id="field-address">
                 <label className="text-[12px] text-[#a3a3a3] mb-1.5 block">상세 주소 <span className="text-[#dc2626]">*</span></label>
                 <input
                   type="text"
                   value={address}
-                  onChange={e => setAddress(e.target.value)}
+                  onChange={e => { setAddress(e.target.value); setErrors(prev => ({ ...prev, address: undefined })) }}
                   placeholder="건물명, 동·호수까지 정확히"
-                  className="w-full border border-[#e0e0e0] rounded-xl px-4 py-3 text-[#1a1c1c] placeholder-[#c0c0c0] text-[14px] outline-none focus:border-[#10b981]"
+                  className={`w-full border rounded-xl px-4 py-3 text-[#1a1c1c] placeholder-[#c0c0c0] text-[14px] outline-none focus:border-[#10b981] ${errors.address ? 'border-[#dc2626]' : 'border-[#e0e0e0]'}`}
                 />
+                {errors.address && <p className="text-[11px] text-[#dc2626] mt-1">{errors.address}</p>}
               </div>
             </>
           )}
 
-          {/* 가게별 희망 수령 시간 (배송·픽업 공통) */}
+          {/* 가게별 희망 수령 시간 */}
           {storeIds.map(sid => {
             const storeInfo = dynamicStores[sid] || getStore(sid)
             const slots = storeSlotsMap[sid] || []
@@ -460,9 +510,14 @@ export default function CartPage() {
                     <span className="text-[11px] text-[#10b981] font-medium">운영 {storeInfo.hours}</span>
                   )}
                 </div>
+                {/* [개선5] 타임슬롯 없을 때 명확한 안내 */}
                 {slots.length === 0 ? (
-                  <div className="w-full border border-[#fca5a5] bg-[#fff1f1] rounded-xl px-4 py-3 text-[13px] text-[#dc2626]">
-                    현재 운영시간이 종료되었습니다
+                  <div className="w-full border border-[#fca5a5] bg-[#fff1f1] rounded-xl px-4 py-3 flex items-center gap-2">
+                    <span className="text-[16px]">🕐</span>
+                    <div>
+                      <p className="text-[13px] text-[#dc2626] font-medium">오늘 영업이 종료되었습니다</p>
+                      <p className="text-[11px] text-[#f87171] mt-0.5">내일 다시 주문해주세요</p>
+                    </div>
                   </div>
                 ) : (
                   <select
@@ -494,7 +549,6 @@ export default function CartPage() {
           </div>
         </div>
 
-        {/* 가게별 계좌이체 정보 */}
         {storeIds.map(sid => {
           const storeInfo = dynamicStores[sid]
           const bankAccount = storeInfo?.bank_account
@@ -514,24 +568,35 @@ export default function CartPage() {
           )
         })}
 
-        <label className="flex items-start gap-3 cursor-pointer">
-          <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} className="mt-0.5 accent-emerald-500" />
-          <span className="text-[12px] text-[#94a3b8]">{'\uAC1C\uC778\uC815\uBCF4(\uC774\uB984, \uC8FC\uC18C, \uC5F0\uB77D\uCC98) \uC218\uC9D1 \uBC0F \uC774\uC6A9\uC5D0 \uB3D9\uC758\uD569\uB2C8\uB2E4 (\uD544\uC218)'}</span>
-        </label>
+        {/* [개선2] 인라인 에러 — 개인정보 동의 */}
+        <div id="field-consent">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={consent}
+              onChange={e => { setConsent(e.target.checked); setErrors(prev => ({ ...prev, consent: undefined })) }}
+              className="mt-0.5 accent-emerald-500"
+            />
+            <span className="text-[12px] text-[#94a3b8]">개인정보(이름, 주소, 연락처) 수집 및 이용에 동의합니다 (필수)</span>
+          </label>
+          {errors.consent && <p className="text-[11px] text-[#dc2626] mt-1 ml-6">{errors.consent}</p>}
+        </div>
 
         {closedStores.length > 0 && (
           <div className="bg-[#fff1f2] border border-[#fecdd3] rounded-[8px] px-4 py-3">
             <p className="text-[12px] text-[#be123c] font-medium">🚫 휴무 중인 가게가 있어 주문할 수 없습니다. 해당 가게 상품을 제거해주세요.</p>
           </div>
         )}
+
+        {/* [개선4] hasWarnings 포함하여 버튼 비활성화 */}
         <button
           type="button"
           onClick={validateAndConfirm}
-          disabled={loading || someStoreNoSlots || closedStores.length > 0}
-          className="w-full py-4 rounded-2xl text-[15px] font-bold text-white disabled:opacity-50 active:opacity-80"
-          style={{ background: (someStoreNoSlots || closedStores.length > 0) ? '#94a3b8' : '#10b981' }}
+          disabled={isOrderDisabled}
+          className="w-full py-4 rounded-2xl text-[15px] font-bold text-white disabled:opacity-60 active:opacity-80 transition-opacity"
+          style={{ background: orderBtnColor }}
         >
-          {loading ? '처리 중...' : storeIds.length > 1 ? `가게별 주문하기 (${storeIds.length}건)` : '주문하기'}
+          {loading ? '처리 중...' : hasWarnings ? '최소 주문금액을 채워주세요' : someStoreNoSlots ? '영업시간 종료' : storeIds.length > 1 ? `가게별 주문하기 (${storeIds.length}건)` : '주문하기'}
         </button>
       </div>
 
@@ -589,7 +654,7 @@ export default function CartPage() {
         </div>
       )}
 
-      {/* 주문 확인 모달 (2-7) */}
+      {/* 주문 확인 모달 */}
       {showConfirm && (
         <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center px-4 pb-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowConfirm(false)} />
@@ -624,7 +689,7 @@ export default function CartPage() {
         </div>
       )}
 
-      {/* 주문 성공 모달 (2-2) */}
+      {/* 주문 성공 모달 */}
       {showSuccess && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center px-4">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />

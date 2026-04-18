@@ -17,6 +17,7 @@ export type OrderStatus =
   | 'delivering'            // 배달중
   | 'delivered'             // 배달완료
   | 'picked_up_by_customer' // 고객 픽업 완료 (매장 픽업)
+  | 'delivery_failed'       // 배달 실패
   | 'cancelled'             // 취소
 
 export type DeliveryStatus =
@@ -220,6 +221,7 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatus, StatusConfig> = {
   delivering:            { label: '배달중',    color: 'yellow', icon: '🚚', description: '배달 중' },
   delivered:             { label: '배달완료',  color: 'green',  icon: '🎉', description: '배달 완료' },
   picked_up_by_customer: { label: '고객픽업완료', color: 'green',  icon: '🏪', description: '고객 픽업 완료' },
+  delivery_failed:       { label: '배달실패',   color: 'red',    icon: '⚠️', description: '배달 실패' },
   cancelled:             { label: '취소됨',    color: 'red',    icon: '🚫', description: '주문 취소' },
 }
 

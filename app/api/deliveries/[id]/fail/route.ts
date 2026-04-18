@@ -21,7 +21,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   if (error) return NextResponse.json({ data: null, error: error.message }, { status: 500 })
 
-  // 주문 상태도 delivery_failed로 업데이트
   if (data.order_id) {
     await supabase.from('orders').update({ status: 'delivery_failed' }).eq('id', data.order_id)
   }

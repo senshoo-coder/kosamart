@@ -14,6 +14,7 @@ const FILTER_TABS: Array<{ key: 'all' | OrderStatus; label: string }> = [
   { key: 'delivering',             label: '배달중' },
   { key: 'delivered',              label: '완료' },
   { key: 'picked_up_by_customer',  label: '픽업완료' },
+  { key: 'delivery_failed',        label: '배달실패' },
   { key: 'cancelled',              label: '취소/거절' },
 ]
 

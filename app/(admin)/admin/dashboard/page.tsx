@@ -16,8 +16,10 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats>({ todayOrders: 0, todayRevenue: 0, pendingCount: 0, deliveringCount: 0 })
   const [recentOrders, setRecentOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
+  const [today, setToday] = useState('')
 
   useEffect(() => {
+    setToday(new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }))
     Promise.all([
       fetch('/api/orders?limit=5').then(r => r.json()),
       fetch('/api/orders/stats').then(r => r.json()),
@@ -40,7 +42,7 @@ export default function AdminDashboard() {
       <div>
         <h1 className="text-[20px] font-bold text-[#1a1c1c]">관리자 대시보드</h1>
         <p className="text-[12px] text-[#a3a3a3] mt-0.5">
-          {new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })}
+          {today}
         </p>
       </div>
 

@@ -5,6 +5,16 @@ import { DeliveryStatusBadge } from '@/components/ui/badge'
 import { formatPrice, getLocalStorage, setLocalStorage, generateDeviceUUID } from '@/lib/utils'
 import type { Delivery } from '@/lib/types'
 
+// 수락 전: 동 이름까지만 표시, 상세 주소 숨김
+function maskDeliveryAddress(address?: string | null): string {
+  if (!address || address === '매장 픽업') return address ?? ''
+  // "신영동 302동 101호" → "신영동 302동 ***"
+  // "종로구 신영동 302동 101호" → "종로구 신영동 302동 ***"
+  const masked = address.replace(/(\d+동)\s*\d+호.*$/, '$1 ***')
+  // 동 번호 없이 상세주소만 있는 경우 (예: "신영동 빌라 101호")
+  return masked === address ? address.replace(/\d+호.*$/, '***') : masked
+}
+
 export default function DriverDeliveriesPage() {
   const router = useRouter()
   const [available, setAvailable] = useState<Delivery[]>([])
@@ -433,7 +443,10 @@ function AvailableCard({ delivery, onClaim, onHold, onDelete, loading, held = fa
         <div className="space-y-1.5 mb-3">
           <div className="flex items-start gap-2">
             <span className="text-[13px] mt-0.5 flex-shrink-0">📍</span>
-            <p className="text-[13px] text-[#1a1c1c] font-medium">{order?.delivery_address}</p>
+            <div>
+              <p className="text-[13px] text-[#1a1c1c] font-medium">{maskDeliveryAddress(order?.delivery_address)}</p>
+              <p className="text-[10px] text-[#94a3b8] mt-0.5">수락 후 전체 주소 및 연락처 공개</p>
+            </div>
           </div>
           {order?.delivery_memo && (
             <p className="text-[11px] text-[#b45309] ml-5">⚠️ {order.delivery_memo}</p>

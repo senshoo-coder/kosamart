@@ -16,10 +16,19 @@ export async function GET(_req: NextRequest) {
   const cookieRole = cookieStore.get('cosmart_role')?.value
   const cookieUserId = cookieStore.get('cosmart_user_id')?.value
 
+  const DEMO_OWNER_STORE_MAP: Record<string, string> = {
+    'demo-owner-001': 'central-super',
+    'demo-owner-002': 'banchan',
+    'demo-owner-003': 'butcher',
+    'demo-owner-004': 'bonjuk',
+    'demo-owner-005': 'chicken',
+    'demo-owner-006': 'bakery',
+  }
+
   let storeId: string | null = null
   if (cookieRole === 'owner' && cookieUserId) {
     const { data: ownerUser } = await supabase.from('users').select('store_id').eq('id', cookieUserId).single()
-    storeId = ownerUser?.store_id ?? null
+    storeId = ownerUser?.store_id ?? DEMO_OWNER_STORE_MAP[cookieUserId] ?? null
   }
 
   const today = new Date()

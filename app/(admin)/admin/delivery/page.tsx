@@ -165,6 +165,11 @@ export default function OwnerDeliveryPage() {
                       {delivery.status === 'failed' && (
                         <span className="text-[11px] text-[#b91c1c]">{delivery.failed_reason ?? '실패'}</span>
                       )}
+                      {delivery.status === 'delivered' && (delivery as any).driver_memo && (
+                        <span className="text-[11px] text-[#b45309] bg-[#fef3c7] px-2 py-0.5 rounded">
+                          📝 {(delivery as any).driver_memo}
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -194,6 +199,11 @@ export default function OwnerDeliveryPage() {
                   </p>
                   {delivery.assigned_at && (
                     <p className="text-[11px] text-[#a3a3a3]">배정: {formatDateTime(delivery.assigned_at)}</p>
+                  )}
+                  {delivery.status === 'delivered' && (delivery as any).driver_memo && (
+                    <p className="text-[12px] text-[#b45309] bg-[#fef3c7] rounded px-2 py-1 mt-1">
+                      📝 기사 메모: {(delivery as any).driver_memo}
+                    </p>
                   )}
                   {delivery.status === 'failed' && delivery.failed_reason && (
                     <p className="text-[12px] text-[#b91c1c]">실패: {delivery.failed_reason}</p>

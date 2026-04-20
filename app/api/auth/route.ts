@@ -52,14 +52,16 @@ export async function POST(req: NextRequest) {
     .eq('nickname', nickname.trim())
     .single()
 
-  // DB에 없으면 데모 계정 fallback (개발/초기 세팅용)
+  // DB에 없으면 데모 계정 fallback (개발 환경 전용)
   if (error || !user) {
-    const demoUser = DEMO_ACCOUNTS.find(u => u.nickname === nickname.trim() && u.password === password)
-    if (demoUser) {
-      const cookieStore = await cookies()
-      cookieStore.set('cosmart_user_id', demoUser.id, { httpOnly: true, sameSite: 'lax', maxAge: 60 * 60 * 24 * 30 })
-      cookieStore.set('cosmart_role', demoUser.role, { httpOnly: true, sameSite: 'lax', maxAge: 60 * 60 * 24 * 30 })
-      return NextResponse.json({ data: { id: demoUser.id, nickname: demoUser.nickname, device_uuid: device_uuid || demoUser.device_uuid, role: demoUser.role, store_id: (demoUser as any).store_id || null }, error: null })
+    if (process.env.NODE_ENV !== 'production') {
+      const demoUser = DEMO_ACCOUNTS.find(u => u.nickname === nickname.trim() && u.password === password)
+      if (demoUser) {
+        const cookieStore = await cookies()
+        cookieStore.set('cosmart_user_id', demoUser.id, { httpOnly: true, sameSite: 'lax', maxAge: 60 * 60 * 24 * 30 })
+        cookieStore.set('cosmart_role', demoUser.role, { httpOnly: true, sameSite: 'lax', maxAge: 60 * 60 * 24 * 30 })
+        return NextResponse.json({ data: { id: demoUser.id, nickname: demoUser.nickname, device_uuid: device_uuid || demoUser.device_uuid, role: demoUser.role, store_id: (demoUser as any).store_id || null }, error: null })
+      }
     }
     return NextResponse.json({ data: null, error: '닉네임 또는 비밀번호가 올바르지 않습니다' }, { status: 401 })
   }
@@ -70,14 +72,13 @@ export async function POST(req: NextRequest) {
   }
 
   let passwordMatch = await bcrypt.compare(password, user.password_hash)
-  // pgcrypto uses $2a$ prefix; bcryptjs may reject it — fall back to demo account check
-  if (!passwordMatch) {
+  // pgcrypto uses $2a$ prefix; bcryptjs may reject it — fall back to demo account check (dev only)
+  if (!passwordMatch && process.env.NODE_ENV !== 'production') {
     const demoUser = DEMO_ACCOUNTS.find(u => u.nickname === nickname.trim() && u.password === password)
-    if (!demoUser) {
-      return NextResponse.json({ data: null, error: '닉네임 또는 비밀번호가 올바르지 않습니다' }, { status: 401 })
-    }
-    // Demo password matched — allow login using the real DB user record
-    passwordMatch = true
+    if (demoUser) passwordMatch = true
+  }
+  if (!passwordMatch) {
+    return NextResponse.json({ data: null, error: '닉네임 또는 비밀번호가 올바르지 않습니다' }, { status: 401 })
   }
 
   // 계정 상태 확인

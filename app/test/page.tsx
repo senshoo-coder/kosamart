@@ -27,13 +27,12 @@ const ROLES = [
     dest: '/owner/dashboard',
     gradient: 'from-blue-500/20 to-indigo-500/20',
     border: 'border-blue-500/30',
-    badge: 'PW: cosmart2024!',
+    badge: '로그인 필요',
     badgeColor: 'text-blue-400 bg-blue-500/10',
     pages: [
       { path: '/owner/dashboard', label: '📊 대시보드' },
       { path: '/owner/orders', label: '📋 주문 관리' },
-      { path: '/owner/products', label: '🏷️ 상품 관리' },
-      { path: '/owner/delivery', label: '🚚 배달 관리' },
+      { path: '/owner/store', label: '🏪 가게 관리' },
       { path: '/owner/analytics', label: '📈 매출 분석' },
     ],
   },
@@ -45,7 +44,7 @@ const ROLES = [
     dest: '/driver/deliveries',
     gradient: 'from-amber-500/20 to-orange-500/20',
     border: 'border-amber-500/30',
-    badge: 'PW: driver2024!',
+    badge: '로그인 필요',
     badgeColor: 'text-amber-400 bg-amber-500/10',
     pages: [
       { path: '/driver/deliveries', label: '📦 배달 목록' },
@@ -78,7 +77,6 @@ export default function TestPage() {
   return (
     <div className="gradient-bg min-h-screen px-4 py-10">
       <div className="max-w-2xl mx-auto">
-        {/* 헤더 */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-1.5 mb-4">
             <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
@@ -88,7 +86,6 @@ export default function TestPage() {
           <p className="text-sm text-slate-400">Supabase 연결 없이 목(mock) 데이터로 UI를 테스트합니다</p>
         </div>
 
-        {/* 역할 카드 */}
         <div className="space-y-4">
           {ROLES.map(({ role, label, icon, desc, dest, gradient, border, badge, badgeColor, pages }) => (
             <div key={role} className={`card-3d rounded-2xl p-5 bg-gradient-to-br ${gradient} border ${border}`}>
@@ -103,7 +100,6 @@ export default function TestPage() {
                 <span className={`text-xs px-2 py-1 rounded-full font-600 ${badgeColor}`}>{badge}</span>
               </div>
 
-              {/* 바로가기 페이지 목록 */}
               <div className="flex flex-wrap gap-2 mb-4">
                 {pages.map(p => (
                   <button
@@ -139,7 +135,6 @@ export default function TestPage() {
           ))}
         </div>
 
-        {/* 데모 데이터 안내 */}
         <div className="mt-6 glass rounded-2xl p-4">
           <p className="text-xs text-slate-500 font-600 mb-2">📦 포함된 목(mock) 데이터</p>
           <div className="grid grid-cols-2 gap-2 text-xs text-slate-500">

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
-// 데모/테스트용 — Supabase 없이 바로 로그인
 const DEMO_USERS = {
   customer: {
     id: 'demo-customer-001',
@@ -24,6 +23,10 @@ const DEMO_USERS = {
 }
 
 export async function POST(req: NextRequest) {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ data: null, error: 'Not found' }, { status: 404 })
+  }
+
   const { role = 'customer' } = await req.json().catch(() => ({}))
   const user = DEMO_USERS[role as keyof typeof DEMO_USERS] ?? DEMO_USERS.customer
 

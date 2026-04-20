@@ -133,6 +133,7 @@ export async function POST(req: NextRequest) {
       unit_price: i.unit_price,
       quantity: i.quantity,
       subtotal: i.subtotal ?? i.unit_price * i.quantity,
+      item_memo: i.item_memo || null,
     }))
     const { error: itemsErr } = await supabase.from('order_items').insert(orderItems)
     if (itemsErr) {

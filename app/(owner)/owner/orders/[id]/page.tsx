@@ -121,6 +121,11 @@ export default function OrderDetailPage() {
               <div>
                 <p className="text-[13px] text-[#1a1c1c]">{item.product_name}</p>
                 <p className="text-[11px] text-[#a3a3a3] mt-0.5">{formatPrice(item.unit_price)} × {item.quantity}</p>
+                {(item as any).item_memo && (
+                  <p className="text-[11px] text-[#b45309] mt-1 bg-[#fef3c7] rounded px-2 py-0.5 inline-block">
+                    💬 {(item as any).item_memo}
+                  </p>
+                )}
               </div>
               <p className="text-[13px] text-[#10b981] font-bold">{formatPrice(item.subtotal)}</p>
             </div>

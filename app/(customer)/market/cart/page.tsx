@@ -83,6 +83,7 @@ export default function CartPage() {
     return (getLocalStorage('cosmart_pickup_type') as 'delivery' | 'pickup') || 'delivery'
   })
   const [timeSlots, setTimeSlots] = useState<Record<string, string>>({})
+  const [itemMemos, setItemMemos] = useState<Record<string, string>>({})
   const [memo, setMemo] = useState('')
   const [consent, setConsent] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -216,6 +217,7 @@ export default function CartPage() {
           unit_price: i.unit_price,
           quantity: i.quantity,
           subtotal: i.unit_price * i.quantity,
+          item_memo: itemMemos[i.product_id] || null,
         }))
         const total_amount = items.reduce((s, i) => s + i.subtotal, 0)
         const slotValue = timeSlots[sid] ?? ''
@@ -343,40 +345,51 @@ export default function CartPage() {
               )}
 
               {items.map(item => (
-                <div key={item.product_id} className="px-4 py-3 flex items-center gap-3 border-b border-[#f9f9f9]">
-                  <div className="w-10 h-10 rounded-[6px] bg-[#f2f4f6] flex items-center justify-center text-lg flex-shrink-0 overflow-hidden">
-                    {item.image_url ? (
-                      <img src={item.image_url} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      item.emoji
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold text-[#1a1c1c] truncate">{item.product_name}</p>
-                    <p className="text-[12px] text-[#a3a3a3]">{item.unit_price.toLocaleString()}원/{item.unit}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center border border-[#e0e0e0] rounded-lg overflow-hidden">
-                      <button
-                        type="button"
-                        onClick={() => cart.updateQuantity(item.product_id, sid, item.quantity - 1)}
-                        className="w-9 h-9 text-[16px] flex items-center justify-center text-[#3c4a42] active:bg-[#f0f0f0]"
-                      >−</button>
-                      <span className="w-7 text-center text-[13px] font-bold text-[#1a1c1c]">{item.quantity}</span>
-                      <button
-                        type="button"
-                        onClick={() => cart.updateQuantity(item.product_id, sid, Math.min(item.quantity + 1, MAX_QUANTITY))}
-                        className="w-9 h-9 text-[16px] flex items-center justify-center text-[#3c4a42] active:bg-[#f0f0f0]"
-                        disabled={item.quantity >= MAX_QUANTITY}
-                      >+</button>
+                <div key={item.product_id} className="border-b border-[#f9f9f9]">
+                  <div className="px-4 pt-3 pb-2 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-[6px] bg-[#f2f4f6] flex items-center justify-center text-lg flex-shrink-0 overflow-hidden">
+                      {item.image_url ? (
+                        <img src={item.image_url} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        item.emoji
+                      )}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => cart.updateQuantity(item.product_id, sid, 0)}
-                      className="w-8 h-8 flex items-center justify-center text-[#dc2626] text-[14px] rounded-lg bg-[#fee2e2] active:bg-[#fecaca]"
-                    >🗑</button>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-semibold text-[#1a1c1c] truncate">{item.product_name}</p>
+                      <p className="text-[12px] text-[#a3a3a3]">{item.unit_price.toLocaleString()}원/{item.unit}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center border border-[#e0e0e0] rounded-lg overflow-hidden">
+                        <button
+                          type="button"
+                          onClick={() => cart.updateQuantity(item.product_id, sid, item.quantity - 1)}
+                          className="w-9 h-9 text-[16px] flex items-center justify-center text-[#3c4a42] active:bg-[#f0f0f0]"
+                        >−</button>
+                        <span className="w-7 text-center text-[13px] font-bold text-[#1a1c1c]">{item.quantity}</span>
+                        <button
+                          type="button"
+                          onClick={() => cart.updateQuantity(item.product_id, sid, Math.min(item.quantity + 1, MAX_QUANTITY))}
+                          className="w-9 h-9 text-[16px] flex items-center justify-center text-[#3c4a42] active:bg-[#f0f0f0]"
+                          disabled={item.quantity >= MAX_QUANTITY}
+                        >+</button>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => cart.updateQuantity(item.product_id, sid, 0)}
+                        className="w-8 h-8 flex items-center justify-center text-[#dc2626] text-[14px] rounded-lg bg-[#fee2e2] active:bg-[#fecaca]"
+                      >🗑</button>
+                    </div>
+                    <p className="text-[13px] font-bold text-[#1a1c1c] w-16 text-right">{(item.unit_price * item.quantity).toLocaleString()}원</p>
                   </div>
-                  <p className="text-[13px] font-bold text-[#1a1c1c] w-16 text-right">{(item.unit_price * item.quantity).toLocaleString()}원</p>
+                  <div className="px-4 pb-3">
+                    <input
+                      type="text"
+                      value={itemMemos[item.product_id] || ''}
+                      onChange={e => setItemMemos(prev => ({ ...prev, [item.product_id]: e.target.value }))}
+                      placeholder="상품 메모 (선택) — 예: 덜 맵게, 소스 별도"
+                      className="w-full border border-[#e8e8e8] rounded-lg px-3 py-2 text-[12px] text-[#3c4a42] placeholder-[#c0c0c0] outline-none focus:border-[#10b981] bg-[#fafafa]"
+                    />
+                  </div>
                 </div>
               ))}
 

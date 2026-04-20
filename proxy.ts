@@ -24,6 +24,13 @@ const MODE_CONFIG: Record<string, { allowedRoles: string[]; loginRole: string; h
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
+
+  // 프로덕션에서 개발 전용 경로 차단
+  if (process.env.NODE_ENV === 'production') {
+    if (pathname === '/test' || pathname.startsWith('/api/auth/demo')) {
+      return NextResponse.rewrite(new URL('/login', request.url))
+    }
+  }
   const role = request.cookies.get('cosmart_role')?.value
   const userId = request.cookies.get('cosmart_user_id')?.value
   const isLoggedIn = !!userId && !!role

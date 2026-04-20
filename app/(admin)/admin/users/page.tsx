@@ -207,7 +207,7 @@ export default function AdminUsersPage() {
               <tbody className="divide-y divide-[#f9f9f9]">
                 {users.map(user => {
                   const ss = STATUS_STYLE[user.status] ?? { bg: '#f2f4f6', text: '#3c4a42' }
-                  const store = STORES.find(s => s.id === user.store_id)
+                  const store = storeOptions.find(s => s.id === user.store_id)
                   return (
                     <tr key={user.id} className="hover:bg-[#f9f9f9] transition-colors">
                       <td className="px-4 py-3 text-[13px] text-[#1a1c1c] font-semibold">{user.nickname}</td>
@@ -276,7 +276,7 @@ export default function AdminUsersPage() {
           <div className="md:hidden space-y-3">
             {users.map(user => {
               const ss = STATUS_STYLE[user.status] ?? { bg: '#f2f4f6', text: '#3c4a42' }
-              const store = STORES.find(s => s.id === user.store_id)
+              const store = storeOptions.find(s => s.id === user.store_id)
               return (
                 <div key={user.id} className="bg-white rounded-[12px] p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
                   {/* 상단: 닉네임 + 상태 */}
@@ -375,14 +375,14 @@ export default function AdminUsersPage() {
               <div>
                 <p className="text-[11px] text-[#3c4a42] tracking-[0.5px] uppercase mb-2 font-medium">담당 가게</p>
                 <div className="grid grid-cols-2 gap-2">
-                  {STORES.map(s => (
+                  {storeOptions.map(s => (
                     <button key={s.id} onClick={() => setForm(f => ({ ...f, store_id: s.id }))}
                       className="py-2 px-3 rounded-[10px] text-[12px] font-medium text-left transition-colors"
                       style={form.store_id === s.id
                         ? { background: '#10b981', color: '#fff' }
                         : { background: '#f2f4f6', color: '#1a1c1c' }
                       }>
-                      {s.name}
+                      {s.emoji} {s.name}
                     </button>
                   ))}
                 </div>

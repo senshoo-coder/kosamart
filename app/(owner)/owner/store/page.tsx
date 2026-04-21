@@ -510,17 +510,6 @@ export default function OwnerStorePage() {
                 />
                 <p className="text-[11px] text-[#a3a3a3] mt-1">주문 결제 화면에 표시됩니다</p>
               </div>
-              <div>
-                <label className="text-[11px] text-[#a3a3a3] font-medium block mb-1">텔레그램 가게방 Chat ID</label>
-                <input
-                  type="text"
-                  value={infoForm.telegram_chat_id}
-                  onChange={e => setInfoForm(f => ({ ...f, telegram_chat_id: e.target.value }))}
-                  placeholder="예) -1001234567890"
-                  className="w-full border border-[#e0e0e0] rounded-[8px] px-3 py-2 text-[13px] text-[#1a1c1c] focus:outline-none focus:border-[#0058be] font-mono"
-                />
-                <p className="text-[11px] text-[#a3a3a3] mt-1">주문 발생 시 가게방으로 알림이 발송됩니다</p>
-              </div>
 
               {/* 정기 휴무 요일 */}
               <div>

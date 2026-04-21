@@ -35,7 +35,7 @@ function RegisterForm() {
     setLoading(true); setError('')
 
     try {
-      const device_uuid = getLocalStorage('cosmart_device_uuid') || generateDeviceUUID()
+      const device_uuid = generateDeviceUUID()
       setLocalStorage('cosmart_device_uuid', device_uuid)
 
       const res = await fetch('/api/auth/register', {

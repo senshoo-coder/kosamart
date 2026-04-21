@@ -16,6 +16,23 @@ async function fetchJSON(path: string) {
   } catch { return null }
 }
 
+function computeIsOpen(store: any): boolean {
+  if (!store.isOpen) return false
+  if (!store.hours) return true
+  const now = new Date()
+  const h = now.getHours()
+  const m = (store.hours as string).match(/^(\d{1,2}):\d{2}~(\d{1,2}):\d{2}$/)
+  if (!m) return true
+  const start = parseInt(m[1]), end = parseInt(m[2])
+  if (h < start || h >= end) return false
+  const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+  const today = dayKeys[now.getDay()]
+  if (store.weekly_closed?.includes(today)) return false
+  const todayStr = now.toISOString().slice(0, 10)
+  if (store.closed_dates?.includes(todayStr)) return false
+  return true
+}
+
 // GET /api/market/stores — 고객용 머지된 가게 목록
 export async function GET() {
   const [storeSettings, storesConfig] = await Promise.all([
@@ -51,6 +68,7 @@ export async function GET() {
       isCustom: false,
       ...overrides[s.id],
     }))
+    .map(s => ({ ...s, isOpen: computeIsOpen(s) }))
 
   // 커스텀 가게 추가
   const customStores = custom
@@ -60,6 +78,7 @@ export async function GET() {
       is_active: activeMap[s.id] !== undefined ? activeMap[s.id] : true,
       isCustom: true,
     }))
+    .map(s => ({ ...s, isOpen: computeIsOpen(s) }))
 
   return NextResponse.json({ data: [...baseStores, ...customStores], error: null })
 }

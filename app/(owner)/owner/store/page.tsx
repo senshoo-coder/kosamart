@@ -14,6 +14,22 @@ function parseHoursRange(hours: string): { start: number; end: number } {
   const m = (hours || '').match(/^(\d{1,2}):\d{2}~(\d{1,2}):\d{2}$/)
   return { start: parseInt(m?.[1] || '9'), end: parseInt(m?.[2] || '22') }
 }
+
+function computeIsOpen(store: any): boolean {
+  if (!store) return false
+  if (!store.isOpen) return false
+  if (!store.hours) return true
+  const now = new Date()
+  const h = now.getHours()
+  const { start, end } = parseHoursRange(store.hours)
+  if (h < start || h >= end) return false
+  const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+  const today = dayKeys[now.getDay()]
+  if (store.weekly_closed?.includes(today)) return false
+  const todayStr = now.toISOString().slice(0, 10)
+  if (store.closed_dates?.includes(todayStr)) return false
+  return true
+}
 function buildHours(start: number, end: number): string {
   return `${String(start).padStart(2, '0')}:00~${String(end).padStart(2, '0')}:00`
 }
@@ -403,8 +419,8 @@ export default function OwnerStorePage() {
               </div>
               <p className="text-[12px] text-[#a3a3a3]">{store?.category}</p>
             </div>
-            <div className={`px-3 py-1.5 rounded-full text-[11px] font-semibold ${store?.isOpen ? 'bg-[#d1fae5] text-[#065f46]' : 'bg-[#fee2e2] text-[#b91c1c]'}`}>
-              {store?.isOpen ? '영업중' : '영업종료'}
+            <div className={`px-3 py-1.5 rounded-full text-[11px] font-semibold ${computeIsOpen(store) ? 'bg-[#d1fae5] text-[#065f46]' : 'bg-[#fee2e2] text-[#b91c1c]'}`}>
+              {computeIsOpen(store) ? '영업중' : '영업종료'}
             </div>
           </div>
 

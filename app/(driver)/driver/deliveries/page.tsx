@@ -441,6 +441,9 @@ function AvailableCard({ delivery, onClaim, onHold, onDelete, loading, held = fa
           )}
         </div>
         <div className="space-y-1.5 mb-3">
+          {order?.store_name && (
+            <p className="text-[12px] font-semibold text-[#1d4ed8] ml-0">🏪 {order.store_name}</p>
+          )}
           <div className="flex items-start gap-2">
             <span className="text-[13px] mt-0.5 flex-shrink-0">📍</span>
             <div>
@@ -523,6 +526,9 @@ function DeliveryCard({ delivery, onPickup, onComplete, onIssue, loading }: {
         </div>
 
         <div className="space-y-1.5 mb-3">
+          {order?.store_name && (
+            <p className="text-[12px] font-semibold text-[#1d4ed8]">🏪 {order.store_name}</p>
+          )}
           <div className="flex items-start gap-2">
             <span className="text-[13px] mt-0.5 flex-shrink-0">📍</span>
             <p className="text-[13px] text-[#1a1c1c] font-medium">{order?.delivery_address}</p>

@@ -16,6 +16,7 @@ function RegisterForm() {
   const router = useRouter()
   const params = useSearchParams()
   const defaultRole = params.get('role') || 'customer'
+  const roleLocked = !!params.get('role')
 
   const [role, setRole] = useState(defaultRole)
   const [nickname, setNickname] = useState('')
@@ -66,11 +67,11 @@ function RegisterForm() {
 
   if (success) {
     return (
-      <main className="min-h-screen gradient-bg flex items-center justify-center px-6">
-        <div className="w-full max-w-sm text-center card-3d rounded-2xl p-8">
+      <main className="min-h-screen bg-[#f7f9fb] flex items-center justify-center px-6">
+        <div className="w-full max-w-sm text-center bg-white rounded-2xl p-8" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
           <div className="text-5xl mb-4">✅</div>
-          <h2 className="text-lg font-700 text-white mb-2">신청 완료</h2>
-          <p className="text-sm text-slate-400 whitespace-pre-line mb-6">{success}</p>
+          <h2 className="text-lg font-bold text-[#1a1c1c] mb-2">신청 완료</h2>
+          <p className="text-sm text-[#a3a3a3] whitespace-pre-line mb-6">{success}</p>
           <Link href="/login" className="block">
             <Button className="w-full">로그인 페이지로</Button>
           </Link>
@@ -79,36 +80,38 @@ function RegisterForm() {
     )
   }
 
+  const selectedRole = ROLES.find(r => r.value === role)!
+
   return (
-    <main className="min-h-screen gradient-bg flex items-center justify-center px-6 py-10">
+    <main className="min-h-screen bg-[#f7f9fb] flex items-center justify-center px-6 py-10">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="inline-flex w-16 h-16 items-center justify-center rounded-2xl text-3xl mb-4 card-3d">📝</div>
-          <h1 className="text-xl font-800 text-white">회원가입</h1>
-          <p className="text-slate-400 text-sm mt-1">코사마트 상점가</p>
+          <div className="inline-flex w-16 h-16 items-center justify-center rounded-2xl text-3xl mb-4 bg-white shadow-sm">📝</div>
+          <h1 className="text-xl font-bold text-[#1a1c1c]">회원가입</h1>
+          <p className="text-[#a3a3a3] text-sm mt-1">코사마트 상점가</p>
         </div>
 
-        <div className="card-3d rounded-2xl p-6 space-y-5">
-          {/* 역할 선택 */}
+        <div className="bg-white rounded-2xl p-6 space-y-5" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+          {/* 역할 선택 — URL로 role이 지정된 경우 선택된 항목만 표시 */}
           <div>
-            <p className="text-xs text-slate-500 mb-2 font-600">역할 선택</p>
+            <p className="text-xs text-[#a3a3a3] mb-2 font-semibold">역할 선택</p>
             <div className="space-y-2">
-              {ROLES.map(r => (
+              {(roleLocked ? [selectedRole] : ROLES).map(r => (
                 <button
                   key={r.value}
-                  onClick={() => setRole(r.value)}
+                  onClick={() => !roleLocked && setRole(r.value)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all text-left ${
                     role === r.value
-                      ? 'border-emerald-500/50 bg-emerald-500/10'
-                      : 'border-white/5 glass hover:border-white/10'
-                  }`}
+                      ? 'border-emerald-500/50 bg-emerald-50'
+                      : 'border-[#e8e8e8] hover:border-[#c8c8c8]'
+                  } ${roleLocked ? 'cursor-default' : ''}`}
                 >
                   <span className="text-xl">{r.icon}</span>
                   <div>
-                    <p className="text-sm font-600 text-white">{r.label}</p>
-                    <p className="text-xs text-slate-500">{r.desc}</p>
+                    <p className="text-sm font-semibold text-[#1a1c1c]">{r.label}</p>
+                    <p className="text-xs text-[#a3a3a3]">{r.desc}</p>
                   </div>
-                  {role === r.value && <span className="ml-auto text-emerald-400 text-sm">✓</span>}
+                  {role === r.value && <span className="ml-auto text-emerald-500 text-sm">✓</span>}
                 </button>
               ))}
             </div>
@@ -144,8 +147,8 @@ function RegisterForm() {
           />
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-2.5">
-              <p className="text-red-400 text-sm">{error}</p>
+            <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
+              <p className="text-red-600 text-sm">{error}</p>
             </div>
           )}
 
@@ -155,8 +158,8 @@ function RegisterForm() {
         </div>
 
         <div className="mt-4 text-center">
-          <span className="text-xs text-slate-500">이미 계정이 있으신가요? </span>
-          <Link href={`/login?role=${role}`} className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors">
+          <span className="text-xs text-[#a3a3a3]">이미 계정이 있으신가요? </span>
+          <Link href={`/login?role=${role}`} className="text-xs text-[#006c49] font-semibold hover:underline underline-offset-4">
             로그인
           </Link>
         </div>

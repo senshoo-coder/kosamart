@@ -221,6 +221,22 @@ function LoginForm() {
             </Link>
           </p>
         )}
+        {role === 'owner' && (
+          <p className="mt-8 text-center text-sm text-[#3c4a42]">
+            입점 신청하시겠어요?{' '}
+            <Link href="/register?role=owner" className="font-bold hover:underline underline-offset-4" style={{ color: cfg.accent }}>
+              사장님 가입 신청
+            </Link>
+          </p>
+        )}
+        {role === 'driver' && (
+          <p className="mt-8 text-center text-sm text-[#3c4a42]">
+            배달기사로 합류하시겠어요?{' '}
+            <Link href="/register?role=driver" className="font-bold hover:underline underline-offset-4" style={{ color: cfg.accent }}>
+              기사 가입 신청
+            </Link>
+          </p>
+        )}
 
         <p className="mt-8 text-center text-[10px] text-[#6c7a71]">
           © 2024 평창동 상점가. ALL RIGHTS RESERVED.

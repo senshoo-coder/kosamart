@@ -1,6 +1,24 @@
 import type { Order, Delivery } from '@/lib/types'
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!
+const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const SUPA_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+
+export async function getStoreChatId(storeId: string): Promise<string | null> {
+  if (!SUPA_URL || !SUPA_KEY) return null
+  try {
+    const res = await fetch(`${SUPA_URL}/storage/v1/object/authenticated/config/stores-config.json`, {
+      headers: { Authorization: `Bearer ${SUPA_KEY}`, apikey: SUPA_KEY },
+      cache: 'no-store',
+    })
+    if (!res.ok) return null
+    const config = await res.json()
+    const override = config?.overrides?.[storeId]
+    if (override?.telegram_chat_id) return override.telegram_chat_id
+    const custom = config?.custom?.find((s: any) => s.id === storeId)
+    return custom?.telegram_chat_id ?? null
+  } catch { return null }
+}
 
 // 전화번호 마스킹: 010-1234-5678 → 010-****-5678
 function maskPhone(phone?: string | null): string {

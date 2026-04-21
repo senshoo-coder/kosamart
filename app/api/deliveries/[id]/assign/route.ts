@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createAdminClient } from '@/lib/supabase/server'
-import { notifyDriver } from '@/lib/telegram/messages'
+import { notifyAdmin, notifyDriver, notifyStore, getStoreChatId } from '@/lib/telegram/messages'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -47,14 +47,20 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     .update({ driver_id: driver.id, status: 'assigned', assigned_at: new Date().toISOString() })
     .eq('id', id)
     .eq('status', 'pending')   // 이미 다른 기사가 수락한 경우 업데이트 안 됨
-    .select(`*, order:orders(kakao_nickname, delivery_address)`)
+    .select(`*, order:orders(store_id, kakao_nickname, delivery_address)`)
     .single()
 
   if (error || !data) {
     return NextResponse.json({ data: null, error: '이미 다른 기사가 수락한 배달입니다' }, { status: 409 })
   }
 
-  await notifyDriver(`📋 배달 배정: ${data.order?.kakao_nickname}\n주소: ${data.order?.delivery_address}`)
+  const msg = `📋 <b>[배달 배정]</b>\n기사: ${driver.nickname}\n주문자: ${data.order?.kakao_nickname}\n주소: ${data.order?.delivery_address}`
+  const storeChatId = data.order?.store_id ? await getStoreChatId(data.order.store_id) : null
+  await Promise.all([
+    notifyAdmin(msg),
+    notifyDriver(msg),
+    notifyStore(storeChatId, msg),
+  ])
 
   return NextResponse.json({ data, error: null })
 }

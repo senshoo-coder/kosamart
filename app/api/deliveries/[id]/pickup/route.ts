@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { notifyAdmin } from '@/lib/telegram/messages'
+import { notifyAdmin, notifyStore, getStoreChatId } from '@/lib/telegram/messages'
 
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -10,7 +10,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     .from('deliveries')
     .update({ status: 'picked_up', picked_up_at: new Date().toISOString() })
     .eq('id', id)
-    .select(`*, order:orders(kakao_nickname, delivery_address)`)
+    .select(`*, order:orders(store_id, kakao_nickname, delivery_address)`)
     .single()
 
   if (error) return NextResponse.json({ data: null, error: error.message }, { status: 500 })
@@ -20,7 +20,9 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     await supabase.from('orders').update({ status: 'delivering' }).eq('id', data.order_id)
   }
 
-  await notifyAdmin(`🚚 [픽업 완료] ${data.order?.kakao_nickname} → 배달 출발`)
+  const msg = `🚚 <b>[배달 출발]</b>\n주문자: ${data.order?.kakao_nickname}\n주소: ${data.order?.delivery_address}`
+  const storeChatId = data.order?.store_id ? await getStoreChatId(data.order.store_id) : null
+  await Promise.all([notifyAdmin(msg), notifyStore(storeChatId, msg)])
 
   return NextResponse.json({ data, error: null })
 }

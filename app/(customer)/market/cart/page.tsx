@@ -244,7 +244,7 @@ export default function CartPage() {
             customer_phone: phone.trim(),
             pickup_type: pickupType,
             delivery_address: pickupType === 'delivery' ? `종로구 ${dong} ${address}` : '매장 픽업',
-            delivery_memo: `희망시간 ${slotLabel}${memo ? ' / ' + memo : ''}`,
+            delivery_memo: [slotLabel ? `희망시간 ${slotLabel}` : '', memo].filter(Boolean).join(' / ') || null,
             scheduled_at,
             items,
             total_amount,

@@ -10,7 +10,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     .from('deliveries')
     .update({ status: 'picked_up', picked_up_at: new Date().toISOString() })
     .eq('id', id)
-    .select(`*, order:orders(store_id, kakao_nickname, delivery_address)`)
+    .select(`*, order:orders(store_id, order_number, kakao_nickname, delivery_address)`)
     .single()
 
   if (error) return NextResponse.json({ data: null, error: error.message }, { status: 500 })

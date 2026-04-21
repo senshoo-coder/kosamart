@@ -16,7 +16,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       delivery_photo_url: body.driver_photo_url ?? null,
     })
     .eq('id', id)
-    .select(`*, order:orders(id, store_id, kakao_nickname, delivery_address, total_amount)`)
+    .select(`*, order:orders(id, store_id, order_number, kakao_nickname, delivery_address, total_amount)`)
     .single()
 
   if (error) return NextResponse.json({ data: null, error: error.message }, { status: 500 })

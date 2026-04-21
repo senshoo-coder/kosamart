@@ -47,7 +47,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     .update({ driver_id: driver.id, status: 'assigned', assigned_at: new Date().toISOString() })
     .eq('id', id)
     .eq('status', 'pending')   // 이미 다른 기사가 수락한 경우 업데이트 안 됨
-    .select(`*, order:orders(store_id, kakao_nickname, delivery_address)`)
+    .select(`*, order:orders(store_id, order_number, kakao_nickname, delivery_address)`)
     .single()
 
   if (error || !data) {

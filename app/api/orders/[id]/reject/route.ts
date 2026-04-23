@@ -13,11 +13,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const supabase = await createAdminClient()
 
-  // 1단계: status 업데이트 (단순하게 select 없이)
   const { error: updateError } = await supabase
     .from('orders')
-    .update({ status: 'cancelled' })
+    .update({ status: 'rejected', rejected_reason })
     .eq('id', id)
+    .in('status', ['pending', 'paid'])
 
   if (updateError) {
     return NextResponse.json({ data: null, error: updateError.message }, { status: 500 })
@@ -46,5 +46,5 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   ].join('\n')
   await notifyAdmin(cancelMsg).catch(() => {})
 
-  return NextResponse.json({ data: order ?? { id, status: 'cancelled' }, error: null })
+  return NextResponse.json({ data: order ?? { id, status: 'rejected' }, error: null })
 }

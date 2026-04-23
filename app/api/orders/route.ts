@@ -185,8 +185,10 @@ export async function POST(req: NextRequest) {
   // 주문 상품 저장
   await supabase.from('order_items').insert(orderItems.map((i: any) => ({ ...i, order_id: order.id })))
 
-  // 배달 레코드 생성
-  await supabase.from('deliveries').insert({ order_id: order.id })
+  // 배달 레코드 생성 (픽업 주문 제외)
+  if (delivery_address !== '매장 픽업') {
+    await supabase.from('deliveries').insert({ order_id: order.id })
+  }
 
   // 텔레그램 신규 주문 알림
   await notifyAdmin(TelegramMessages.newOrder({ ...order, items: orderItems }))

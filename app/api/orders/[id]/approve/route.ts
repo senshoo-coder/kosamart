@@ -17,6 +17,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     .from('orders')
     .update(updatePayload)
     .eq('id', id)
+    .in('status', ['pending', 'paid'])
 
   if (updateError) return NextResponse.json({ data: null, error: updateError.message }, { status: 500 })
 

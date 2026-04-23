@@ -35,12 +35,14 @@ export async function GET(_req: NextRequest) {
   today.setHours(0, 0, 0, 0)
   const todayISO = today.toISOString()
 
+  let todayQ      = supabase.from('orders').select('*', { count: 'exact', head: true }).gte('created_at', todayISO)
   let pendingQ    = supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'pending')
   let paidQ       = supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'paid')
   let deliveringQ = supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'delivering')
-  let revenueQ    = supabase.from('orders').select('total_amount').eq('status', 'delivered').gte('created_at', todayISO)
+  let revenueQ    = supabase.from('orders').select('total_amount').gte('created_at', todayISO)
 
   if (storeId) {
+    todayQ      = todayQ.eq('store_id', storeId)
     pendingQ    = pendingQ.eq('store_id', storeId)
     paidQ       = paidQ.eq('store_id', storeId)
     deliveringQ = deliveringQ.eq('store_id', storeId)
@@ -48,11 +50,13 @@ export async function GET(_req: NextRequest) {
   }
 
   const [
+    { count: todayOrders },
     { count: newOrders },
     { count: paidOrders },
     { count: delivering },
     { data: revenueData },
   ] = await Promise.all([
+    todayQ,
     pendingQ,
     paidQ,
     deliveringQ,
@@ -63,7 +67,7 @@ export async function GET(_req: NextRequest) {
 
   return NextResponse.json({
     data: {
-      todayOrders: newOrders ?? 0,
+      todayOrders: todayOrders ?? 0,
       pendingCount: newOrders ?? 0,
       paidCount: paidOrders ?? 0,
       deliveringCount: delivering ?? 0,

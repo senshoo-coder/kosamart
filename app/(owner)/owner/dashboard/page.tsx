@@ -13,10 +13,10 @@ interface Stats {
 }
 
 const STAT_CARDS = (stats: Stats, loading: boolean) => [
-  { label: '오늘 신규 주문', value: stats.todayOrders + '건', icon: '📦', accent: '#10b981', bg: '#f0fdf4', href: '/owner/orders?status=pending' },
-  { label: '입금 확인 대기', value: stats.pendingCount + '건', icon: '⏳', accent: '#b45309', bg: '#fef3c7', href: '/owner/orders?status=pending' },
-  { label: '배달 진행중',    value: stats.deliveringCount + '건', icon: '🚚', accent: '#1d4ed8', bg: '#dbeafe', href: '/owner/orders?status=delivering' },
+  { label: '오늘 신규 주문', value: stats.todayOrders + '건',       icon: '📦', accent: '#10b981', bg: '#f0fdf4', href: '/owner/orders' },
   { label: '오늘 매출',     value: formatPrice(stats.todayRevenue), icon: '💰', accent: '#6d28d9', bg: '#ede9fe', href: '/owner/analytics' },
+  { label: '입금 확인 대기', value: stats.pendingCount + '건',       icon: '⏳', accent: '#b45309', bg: '#fef3c7', href: '/owner/orders?status=pending' },
+  { label: '배달 진행중',    value: stats.deliveringCount + '건',    icon: '🚚', accent: '#1d4ed8', bg: '#dbeafe', href: '/owner/orders?status=delivering' },
 ]
 
 export default function OwnerDashboard() {

@@ -35,14 +35,16 @@ export async function GET(_req: NextRequest) {
   today.setHours(0, 0, 0, 0)
   const todayISO = today.toISOString()
 
-  let pendingQ = supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'pending')
-  let paidQ = supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'paid')
-  let revenueQ = supabase.from('orders').select('total_amount').eq('status', 'delivered').gte('created_at', todayISO)
+  let pendingQ    = supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'pending')
+  let paidQ       = supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'paid')
+  let deliveringQ = supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'delivering')
+  let revenueQ    = supabase.from('orders').select('total_amount').eq('status', 'delivered').gte('created_at', todayISO)
 
   if (storeId) {
-    pendingQ = pendingQ.eq('store_id', storeId)
-    paidQ = paidQ.eq('store_id', storeId)
-    revenueQ = revenueQ.eq('store_id', storeId)
+    pendingQ    = pendingQ.eq('store_id', storeId)
+    paidQ       = paidQ.eq('store_id', storeId)
+    deliveringQ = deliveringQ.eq('store_id', storeId)
+    revenueQ    = revenueQ.eq('store_id', storeId)
   }
 
   const [
@@ -53,7 +55,7 @@ export async function GET(_req: NextRequest) {
   ] = await Promise.all([
     pendingQ,
     paidQ,
-    supabase.from('deliveries').select('*', { count: 'exact', head: true }).in('status', ['picked_up', 'delivering']),
+    deliveringQ,
     revenueQ,
   ])
 

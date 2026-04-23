@@ -13,10 +13,10 @@ interface Stats {
 }
 
 const STAT_CARDS = (stats: Stats, loading: boolean) => [
-  { label: '오늘 신규 주문', value: stats.todayOrders + '건', icon: '📦', accent: '#10b981', bg: '#f0fdf4' },
-  { label: '입금 확인 대기', value: stats.pendingCount + '건', icon: '⏳', accent: '#b45309', bg: '#fef3c7' },
-  { label: '배달 진행중',    value: stats.deliveringCount + '건', icon: '🚚', accent: '#1d4ed8', bg: '#dbeafe' },
-  { label: '오늘 매출',     value: formatPrice(stats.todayRevenue), icon: '💰', accent: '#6d28d9', bg: '#ede9fe' },
+  { label: '오늘 신규 주문', value: stats.todayOrders + '건', icon: '📦', accent: '#10b981', bg: '#f0fdf4', href: '/owner/orders' },
+  { label: '입금 확인 대기', value: stats.pendingCount + '건', icon: '⏳', accent: '#b45309', bg: '#fef3c7', href: '/owner/orders?status=pending' },
+  { label: '배달 진행중',    value: stats.deliveringCount + '건', icon: '🚚', accent: '#1d4ed8', bg: '#dbeafe', href: '/owner/orders?status=delivering' },
+  { label: '오늘 매출',     value: formatPrice(stats.todayRevenue), icon: '💰', accent: '#6d28d9', bg: '#ede9fe', href: '/owner/analytics' },
 ]
 
 export default function OwnerDashboard() {
@@ -49,16 +49,18 @@ export default function OwnerDashboard() {
       {/* 통계 카드 */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {STAT_CARDS(stats, loading).map((card) => (
-          <div key={card.label} className="bg-white rounded-[8px] p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-9 h-9 rounded-[8px] flex items-center justify-center text-lg" style={{ background: card.bg }}>
-                {card.icon}
+          <Link key={card.label} href={card.href}>
+            <div className="bg-white rounded-[8px] p-4 hover:shadow-md transition-shadow cursor-pointer active:scale-[0.98]" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-9 h-9 rounded-[8px] flex items-center justify-center text-lg" style={{ background: card.bg }}>
+                  {card.icon}
+                </div>
+                {loading && <div className="w-4 h-4 border-2 border-[#10b981]/30 border-t-[#10b981] rounded-full animate-spin" />}
               </div>
-              {loading && <div className="w-4 h-4 border-2 border-[#10b981]/30 border-t-[#10b981] rounded-full animate-spin" />}
+              <p className="text-[11px] text-[#a3a3a3] mb-1">{card.label}</p>
+              <p className="text-[22px] font-bold" style={{ color: card.accent }}>{loading ? '—' : card.value}</p>
             </div>
-            <p className="text-[11px] text-[#a3a3a3] mb-1">{card.label}</p>
-            <p className="text-[22px] font-bold" style={{ color: card.accent }}>{loading ? '—' : card.value}</p>
-          </div>
+          </Link>
         ))}
       </div>
 

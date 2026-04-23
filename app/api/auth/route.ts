@@ -38,8 +38,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ data: null, error: '닉네임 또는 비밀번호가 올바르지 않습니다' }, { status: 401 })
     }
     const cookieStore = await cookies()
-    cookieStore.set('cosmart_user_id', demoUser.id, { httpOnly: true, sameSite: 'lax', maxAge: 60 * 60 * 24 * 30 })
-    cookieStore.set('cosmart_role', demoUser.role, { httpOnly: true, sameSite: 'lax', maxAge: 60 * 60 * 24 * 30 })
+    const secure = process.env.NODE_ENV === 'production'
+    cookieStore.set('cosmart_user_id', demoUser.id, { httpOnly: true, sameSite: 'lax', secure, maxAge: 60 * 60 * 24 * 30 })
+    cookieStore.set('cosmart_role', demoUser.role, { httpOnly: true, sameSite: 'lax', secure, maxAge: 60 * 60 * 24 * 30 })
     return NextResponse.json({ data: { id: demoUser.id, nickname: demoUser.nickname, device_uuid: device_uuid || demoUser.device_uuid, role: demoUser.role, store_id: (demoUser as any).store_id || null }, error: null })
   }
 
@@ -95,9 +96,10 @@ export async function POST(req: NextRequest) {
   }
 
   // 쿠키 설정
+  const secure = process.env.NODE_ENV === 'production'
   const cookieStore = await cookies()
-  cookieStore.set('cosmart_user_id', user.id, { httpOnly: true, sameSite: 'lax', maxAge: 60 * 60 * 24 * 30 })
-  cookieStore.set('cosmart_role', user.role, { httpOnly: true, sameSite: 'lax', maxAge: 60 * 60 * 24 * 30 })
+  cookieStore.set('cosmart_user_id', user.id, { httpOnly: true, sameSite: 'lax', secure, maxAge: 60 * 60 * 24 * 30 })
+  cookieStore.set('cosmart_role', user.role, { httpOnly: true, sameSite: 'lax', secure, maxAge: 60 * 60 * 24 * 30 })
 
   return NextResponse.json({
     data: {

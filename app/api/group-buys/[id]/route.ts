@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
+import { cookies } from 'next/headers'
+
+async function requireAdmin() {
+  const cookieStore = await cookies()
+  const role = cookieStore.get('cosmart_role')?.value
+  if (role !== 'admin') {
+    return NextResponse.json({ data: null, error: '관리자만 접근 가능합니다' }, { status: 403 })
+  }
+  return null
+}
 
 // GET /api/group-buys/[id]
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -19,6 +29,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
 // PATCH /api/group-buys/[id]
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const denied = await requireAdmin()
+  if (denied) return denied
+
   const { id } = await params
   const body = await req.json()
 
@@ -37,6 +50,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
 // DELETE /api/group-buys/[id]
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const denied = await requireAdmin()
+  if (denied) return denied
+
   const { id } = await params
   const supabase = await createAdminClient()
 

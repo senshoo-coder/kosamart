@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 
 export async function GET() {
+  const cookieStore = await cookies()
+  if (cookieStore.get('cosmart_role')?.value !== 'admin') {
+    return NextResponse.json({ ok: false, error: '관리자만 접근 가능합니다' }, { status: 403 })
+  }
+
   const token = process.env.TELEGRAM_BOT_TOKEN
   const chatId = process.env.TELEGRAM_ADMIN_CHAT_ID
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL

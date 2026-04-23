@@ -3,6 +3,15 @@ import { notifyAdmin, notifyDriver, TelegramMessages } from '@/lib/telegram/mess
 
 // POST /api/webhooks/order-status — pg_net DB 트리거에서 호출
 export async function POST(req: NextRequest) {
+  // WEBHOOK_SECRET이 설정된 경우 검증
+  const webhookSecret = process.env.WEBHOOK_SECRET
+  if (webhookSecret) {
+    const provided = req.headers.get('x-webhook-secret')
+    if (provided !== webhookSecret) {
+      return NextResponse.json({ ok: false }, { status: 401 })
+    }
+  }
+
   const body = await req.json().catch(() => null)
   if (!body) return NextResponse.json({ ok: false }, { status: 400 })
 

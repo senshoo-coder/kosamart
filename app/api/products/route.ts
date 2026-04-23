@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
+import { cookies } from 'next/headers'
 
 // GET /api/products
 export async function GET(req: NextRequest) {
@@ -25,6 +26,12 @@ export async function GET(req: NextRequest) {
 
 // POST /api/products
 export async function POST(req: NextRequest) {
+  const cookieStore = await cookies()
+  const role = cookieStore.get('cosmart_role')?.value
+  if (role !== 'admin' && role !== 'owner') {
+    return NextResponse.json({ data: null, error: '권한이 없습니다' }, { status: 403 })
+  }
+
   const body = await req.json()
   const { group_buy_id, name, description, price, unit, stock_limit, image_url } = body
 

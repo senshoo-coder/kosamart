@@ -74,6 +74,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ data: null, error: '필수 항목 누락 (file, store_id, target_type)' }, { status: 400 })
   }
 
+  const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+  const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+  if (file.size > MAX_FILE_SIZE) {
+    return NextResponse.json({ data: null, error: '파일 크기는 10MB 이하여야 합니다' }, { status: 413 })
+  }
+  if (!ALLOWED_MIME.includes(file.type)) {
+    return NextResponse.json({ data: null, error: '이미지 파일만 업로드 가능합니다 (JPEG, PNG, WebP, GIF)' }, { status: 415 })
+  }
+
   const bytes = await file.arrayBuffer()
   const ext = file.name.split('.').pop() || 'jpg'
   const filename = `${storeId}/${targetType}-${targetId || 'main'}-${Date.now()}.${ext}`

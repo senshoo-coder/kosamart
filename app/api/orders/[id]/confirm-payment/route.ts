@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { notifyAdmin, notifyDriver } from '@/lib/telegram/messages'
+import { cookies } from 'next/headers'
 
 // POST /api/orders/[id]/confirm-payment
 // 입금확인 + 자동 승인 (pending → approved 한 번에)
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const cookieStore = await cookies()
+  const role = cookieStore.get('cosmart_role')?.value
+  if (role !== 'admin' && role !== 'owner') {
+    return NextResponse.json({ data: null, error: '권한이 없습니다' }, { status: 403 })
+  }
+
   const { id } = await params
   const supabase = await createAdminClient()
 
@@ -12,7 +19,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     .from('orders')
     .update({ status: 'approved', approved_at: new Date().toISOString() })
     .eq('id', id)
-    .in('status', ['pending', 'paid']) // 혹시 paid 상태도 처리 가능하도록
+    .in('status', ['pending', 'paid'])
 
   if (updateError) return NextResponse.json({ data: null, error: updateError.message }, { status: 500 })
 

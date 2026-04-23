@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { notifyAdmin } from '@/lib/telegram/messages'
+import { cookies } from 'next/headers'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const cookieStore = await cookies()
+  const role = cookieStore.get('cosmart_role')?.value
+  if (role !== 'admin' && role !== 'owner') {
+    return NextResponse.json({ data: null, error: '권한이 없습니다' }, { status: 403 })
+  }
+
   const { id } = await params
   const body = await req.json().catch(() => ({}))
   const rejected_reason = body.rejected_reason || ''
@@ -23,7 +30,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ data: null, error: updateError.message }, { status: 500 })
   }
 
-  // 2단계: 업데이트된 order 조회 (단순 select, 조인 없음)
   const { data: order } = await supabase
     .from('orders')
     .select('*')

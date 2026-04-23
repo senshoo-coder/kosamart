@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { notifyAdmin, notifyStore, getStoreChatId, TelegramMessages } from '@/lib/telegram/messages'
+import { cookies } from 'next/headers'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const cookieStore = await cookies()
+  const role = cookieStore.get('cosmart_role')?.value
+  if (role !== 'driver' && role !== 'admin') {
+    return NextResponse.json({ data: null, error: '권한이 없습니다' }, { status: 403 })
+  }
+
   const { id } = await params
   const { failed_reason } = await req.json()
 

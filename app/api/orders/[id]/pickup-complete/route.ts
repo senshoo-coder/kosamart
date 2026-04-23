@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { notifyAdmin, notifyStore } from '@/lib/telegram/messages'
+import { cookies } from 'next/headers'
 
 const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 const SUPA_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
@@ -21,6 +22,12 @@ async function getStoreChatId(storeId: string): Promise<string | null> {
 
 // POST /api/orders/[id]/pickup-complete — 고객 픽업 완료 처리
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const cookieStore = await cookies()
+  const role = cookieStore.get('cosmart_role')?.value
+  if (role !== 'admin' && role !== 'owner') {
+    return NextResponse.json({ data: null, error: '권한이 없습니다' }, { status: 403 })
+  }
+
   const { id } = await params
   const supabase = await createAdminClient()
 

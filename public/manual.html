@@ -701,9 +701,10 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
               </div>
             </div>
             <div class="s-bottom-nav">
-              <div class="s-nav-item active"><span class="s-nav-icon">🏠</span>마켓</div>
-              <div class="s-nav-item"><span class="s-nav-icon">📋</span>주문내역</div>
-              <div class="s-nav-item"><span class="s-nav-icon">👤</span>내 정보</div>
+              <div class="s-nav-item active"><span class="s-nav-icon">🏠</span>홈</div>
+              <div class="s-nav-item"><span class="s-nav-icon">🤝</span>공구</div>
+              <div class="s-nav-item"><span class="s-nav-icon">🛍️</span>주문</div>
+              <div class="s-nav-item"><span class="s-nav-icon">👤</span>프로필</div>
             </div>
           </div>
         </div>
@@ -779,11 +780,13 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
         <div class="flow-item">상품 담기</div><span class="flow-arrow">→</span>
         <div class="flow-item">장바구니</div><span class="flow-arrow">→</span>
         <div class="flow-item">배달 정보</div><span class="flow-arrow">→</span>
+        <div class="flow-item">계좌이체</div><span class="flow-arrow">→</span>
         <div class="flow-item">주문 완료</div>
       </div>
+      <div class="tip">💡 여러 가게의 상품을 동시에 담아서 한 번에 주문할 수 있어요. 가게별로 각각 결제돼요!</div>
       <ul class="steps">
-        <li><div class="step-num">1</div><div class="step-text"><strong>상품에서 <kbd>+</kbd> 버튼 탭</strong><p>원하는 만큼 담고, 상품별 메모(요청사항)도 입력할 수 있어요.</p></div></li>
-        <li><div class="step-num">2</div><div class="step-text"><strong>장바구니 확인 → 배달 정보 입력</strong></div></li>
+        <li><div class="step-num">1</div><div class="step-text"><strong>상품에서 <kbd>+</kbd> 버튼 탭</strong><p>원하는 만큼 담고, 상품별 메모(요청사항)도 입력할 수 있어요.<br>가게별 최소 주문금액(기본 5,000원)을 채워야 주문할 수 있어요.</p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>배달 또는 매장 픽업 선택</strong><p>배달을 받거나, 직접 가게에 방문해서 픽업할 수도 있어요.</p></div></li>
       </ul>
 
       <!-- 📱 장바구니 화면 -->
@@ -809,16 +812,23 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
               </div>
               <div class="s-cart-price">13,000원</div>
             </div>
-            <div class="s-section-title">배달 주소</div>
-            <div class="s-input" style="margin:0 10px 4px;font-size:11px;">수원시 영통구 ○○아파트 101동 202호</div>
+            <div class="s-section-title">배달 방식</div>
+            <div style="display:flex;gap:6px;margin:0 10px 6px;">
+              <div style="flex:1;text-align:center;background:#e8f5e9;border:2px solid #2d6a4f;border-radius:8px;padding:6px 4px;font-size:10px;font-weight:700;color:#2d6a4f;">🚚 배달</div>
+              <div style="flex:1;text-align:center;background:#f9f9f9;border:1px solid #eee;border-radius:8px;padding:6px 4px;font-size:10px;color:#999;">🏪 매장 픽업</div>
+            </div>
+            <div class="s-section-title">배달 지역 선택 <span style="color:#c62828">*</span></div>
+            <div style="margin:0 10px 4px;background:#f4f6f8;border-radius:8px;padding:7px 10px;font-size:11px;color:#333;">종로구 &nbsp;<b>평창동</b> ▾</div>
+            <div class="s-label" style="padding:0 10px;">상세 주소</div>
+            <div class="s-input" style="margin:2px 10px 4px;font-size:11px;">○○아파트 101동 202호</div>
             <div class="s-section-title">희망 배달 시간</div>
             <div class="s-slots">
               <div class="s-slot active">12:00 ~ 13:00</div>
               <div class="s-slot">13:00 ~ 14:00</div>
               <div class="s-slot">14:00 ~ 15:00</div>
             </div>
-            <div class="s-section-title">전체 요청사항</div>
-            <div class="s-memo">문 앞에 놔주세요</div>
+            <div class="s-section-title">배송 메모 (선택)</div>
+            <div class="s-memo">초인종 금지, 문 앞에 놔주세요</div>
             <hr style="margin:4px 10px;">
             <div class="s-amount-row"><span class="s-amount-label">상품 합계</span><span class="s-amount-value">16,500원</span></div>
             <div class="s-amount-row"><span class="s-amount-label">배달비</span><span class="s-amount-value">2,000원</span></div>
@@ -829,11 +839,38 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
       </div>
 
       <ul class="steps">
-        <li><div class="step-num">3</div><div class="step-text"><strong>배달 주소 입력</strong><p>정확한 주소를 입력해 주세요. 아파트는 동·호수까지!</p></div></li>
-        <li><div class="step-num">4</div><div class="step-text"><strong>희망 배달 시간 선택 (선택사항)</strong><p>원하는 시간대를 탭하면 파란색으로 선택돼요. 선택 안 해도 주문 가능해요.</p></div></li>
-        <li><div class="step-num">5</div><div class="step-text"><strong>요청사항 입력 후 <kbd>주문하기</kbd></strong><p>버튼을 누르면 주문이 완료되고 주문번호가 생성돼요!</p></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>배달 지역 선택</strong><p>종로구 내 배달 가능 지역(신영동·홍지동·부암동·평창동·구기동)을 선택하고, 상세 주소를 입력해요.</p></div></li>
+        <li><div class="step-num">4</div><div class="step-text"><strong>희망 배달 시간 선택 (선택사항)</strong><p>원하는 시간대를 탭해 선택해요. 선택 안 해도 주문 가능해요.</p></div></li>
+        <li><div class="step-num">5</div><div class="step-text"><strong>개인정보 수집·이용 동의 (필수)</strong><p>주문하려면 반드시 동의 체크를 해야 해요.</p></div></li>
+        <li><div class="step-num">6</div><div class="step-text"><strong><kbd>주문하기</kbd> 탭 → 계좌이체 팝업 확인</strong><p>주문 완료 후 가게 계좌번호가 안내돼요. 입금자명은 <b>닉네임</b>으로 해주세요!</p></div></li>
       </ul>
-      <div class="warn">⚠️ 한 번에 한 가게에서만 주문할 수 있어요.</div>
+
+      <!-- 📱 계좌이체 안내 팝업 -->
+      <div class="mockup-wrap">
+        <div class="mockup-label">📱 계좌이체 안내 팝업</div>
+        <div class="phone">
+          <div class="phone-screen" style="display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.3);min-height:380px;">
+            <div style="background:white;border-radius:16px;margin:16px;padding:16px;width:100%;">
+              <div style="font-size:13px;font-weight:700;text-align:center;margin-bottom:4px;">계좌이체 완료 하셨나요?</div>
+              <div style="font-size:10px;color:#aaa;text-align:center;margin-bottom:10px;">아래 계좌로 입금 후 주문을 완료해주세요</div>
+              <div style="background:#f4f6f8;border-radius:10px;padding:12px;margin-bottom:8px;">
+                <div style="font-size:10px;color:#888;margin-bottom:4px;">🥗 반찬가게</div>
+                <div style="font-size:13px;font-weight:700;color:#1a1c1c;">국민은행 123-456-789012</div>
+                <div style="font-size:10px;color:#10b981;margin-top:4px;">예금주: 홍길동</div>
+                <div style="font-size:10px;color:#f59e0b;margin-top:4px;">입금자명: <b>내닉네임</b></div>
+              </div>
+              <div style="font-size:10px;color:#aaa;text-align:center;margin-bottom:10px;">입금 후 사장님 확인을 기다려주세요</div>
+              <div style="display:flex;gap:8px;">
+                <div style="flex:1;border:1px solid #ddd;border-radius:8px;padding:8px;text-align:center;font-size:11px;color:#666;">취소</div>
+                <div style="flex:1;background:#2d6a4f;border-radius:8px;padding:8px;text-align:center;font-size:11px;color:white;font-weight:700;">입금 완료!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="warn">⚠️ 결제는 <b>계좌이체(무통장입금)</b>만 가능해요. 카드 결제는 지원하지 않아요.</div>
+      <div class="info">ℹ️ 배달 가능 지역: 종로구 신영동·홍지동·부암동·평창동·구기동</div>
     </div>
   </div>
 
@@ -846,7 +883,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
     </div>
     <div class="section-body">
       <ul class="steps">
-        <li><div class="step-num">1</div><div class="step-text"><strong>하단 메뉴 <kbd>주문내역</kbd> 탭</strong><p>내 모든 주문이 목록으로 보여요.</p></div></li>
+        <li><div class="step-num">1</div><div class="step-text"><strong>하단 메뉴 <kbd>주문</kbd> 탭</strong><p>내 모든 주문이 목록으로 보여요.</p></div></li>
       </ul>
 
       <!-- 📱 주문내역 화면 -->
@@ -882,9 +919,10 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
               </div>
             </div>
             <div class="s-bottom-nav">
-              <div class="s-nav-item"><span class="s-nav-icon">🏠</span>마켓</div>
-              <div class="s-nav-item active"><span class="s-nav-icon">📋</span>주문내역</div>
-              <div class="s-nav-item"><span class="s-nav-icon">👤</span>내 정보</div>
+              <div class="s-nav-item"><span class="s-nav-icon">🏠</span>홈</div>
+              <div class="s-nav-item"><span class="s-nav-icon">🤝</span>공구</div>
+              <div class="s-nav-item active"><span class="s-nav-icon">🛍️</span>주문</div>
+              <div class="s-nav-item"><span class="s-nav-icon">👤</span>프로필</div>
             </div>
           </div>
         </div>
@@ -909,8 +947,10 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
     </div>
     <div class="section-body">
       <div class="faq-item"><div class="faq-q">회원가입 없이 주문할 수 있나요?</div><div class="faq-a">아니요, 주문하려면 반드시 회원가입이 필요해요. 가입은 무료이고 1분이면 완료돼요!</div></div>
-      <div class="faq-item"><div class="faq-q">영업중인데 주문이 안 돼요</div><div class="faq-a">페이지를 새로고침 해 보세요. 그래도 안 되면 가게에 직접 문의해 주세요.</div></div>
-      <div class="faq-item"><div class="faq-q">주문 취소는 어떻게 하나요?</div><div class="faq-a">현재 앱 내 취소 기능은 없어요. 가게에 직접 연락해서 취소 요청해 주세요.</div></div>
+      <div class="faq-item"><div class="faq-q">결제는 어떻게 하나요?</div><div class="faq-a">계좌이체(무통장입금)만 가능해요. 주문 완료 후 가게 계좌번호가 안내되며, 입금자명은 닉네임으로 해주세요.</div></div>
+      <div class="faq-item"><div class="faq-q">배달 안 되는 지역인가요?</div><div class="faq-a">현재 종로구 신영동·홍지동·부암동·평창동·구기동만 배달 가능해요. 해당 지역 외에는 매장 픽업을 이용해 주세요.</div></div>
+      <div class="faq-item"><div class="faq-q">여러 가게에서 동시에 주문할 수 있나요?</div><div class="faq-a">네! 여러 가게 상품을 동시에 담아 주문할 수 있어요. 단, 가게별로 각각 계좌이체 결제가 필요해요.</div></div>
+      <div class="faq-item"><div class="faq-q">주문 취소는 어떻게 하나요?</div><div class="faq-a">앱 내 취소 기능은 없어요. 가게에 직접 연락해서 취소 요청해 주세요.</div></div>
       <div class="faq-item"><div class="faq-q">희망 시간 선택을 안 해도 되나요?</div><div class="faq-a">네, 선택하지 않으면 시간 제약 없이 빠르게 배달돼요.</div></div>
       <div class="faq-item"><div class="faq-q">비밀번호를 잊어버렸어요</div><div class="faq-a">관리자에게 문의해 주세요. 비밀번호 재설정을 도와드릴게요.</div></div>
     </div>
@@ -1019,8 +1059,10 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
       <ul class="steps">
         <li><div class="step-num">1</div><div class="step-text"><strong>주문 목록에서 새 주문 확인</strong><p><span class="badge badge-orange">주문접수</span> 상태인 주문을 확인하세요.</p></div></li>
         <li><div class="step-num">2</div><div class="step-text"><strong>주문 탭 → 상세 내용 확인</strong><p>주문 상품, 수량, 고객 메모, 배달 주소를 확인해요.</p></div></li>
-        <li><div class="step-num">3</div><div class="step-text"><strong>상품 준비 완료 후 상태 업데이트</strong><p>기사님이 픽업하러 올 수 있도록 준비 완료 처리해요.</p></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>입금 확인 후 <kbd>💰 입금확인·승인</kbd> 버튼 탭</strong><p>고객이 계좌이체를 완료하면 입금을 확인하고 승인해요. 승인해야 배달 배정이 시작돼요.</p></div></li>
+        <li><div class="step-num">4</div><div class="step-text"><strong>주문 거부가 필요한 경우</strong><p>재고 소진 등 사유가 있으면 거부 처리할 수 있어요. 사유를 입력해야 해요.</p></div></li>
       </ul>
+      <div class="warn">⚠️ 고객이 입금했어도 <b>입금확인·승인</b> 버튼을 눌러야 배달이 진행돼요!</div>
       <div class="info">ℹ️ 텔레그램 알림이 설정되면 새 배달 이벤트마다 알림을 받을 수 있어요.</div>
     </div>
   </div>
@@ -1356,6 +1398,57 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
         <li><div class="step-num">3</div><div class="step-text"><strong>처리 후 관리자에게 연락</strong></div></li>
       </ul>
       <div class="warn">⚠️ 실패 사유를 입력해야 처리돼요. 빈 칸으로는 불가해요.</div>
+    </div>
+  </div>
+
+  <!-- 완료 내역 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#e8f5e9">📜</div>
+      <div class="section-title"><h2>완료 내역 보기</h2><p>내가 배달한 이력을 확인해요</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <div class="mockup-wrap">
+        <div class="mockup-label">📱 완료 내역 화면</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="s-topbar" style="background:linear-gradient(135deg,#e65100,#f57c00);">
+              <div style="font-size:13px;font-weight:700">📜 완료 내역</div>
+              <div class="s-topbar-sub">배달 완료: 5건 · 실패: 1건</div>
+            </div>
+            <div style="padding:4px 0;">
+              <div class="s-order" style="border-left:3px solid #2d6a4f;">
+                <div class="s-order-top">
+                  <div class="s-order-num">주문 #2025-0042</div>
+                  <span class="s-badge s-badge-green">배달완료</span>
+                </div>
+                <div class="s-order-addr">🏪 반찬가게 → 종로구 평창동</div>
+                <div class="s-order-items">오후 3:05 완료 · 18,500원</div>
+              </div>
+              <div class="s-order" style="border-left:3px solid #2d6a4f;">
+                <div class="s-order-top">
+                  <div class="s-order-num">주문 #2025-0039</div>
+                  <span class="s-badge s-badge-green">배달완료</span>
+                </div>
+                <div class="s-order-addr">🏪 홈앤미트 → 종로구 신영동</div>
+                <div class="s-order-items">오후 1:22 완료 · 23,000원</div>
+              </div>
+              <div class="s-order" style="border-left:3px solid #c62828;">
+                <div class="s-order-top">
+                  <div class="s-order-num">주문 #2025-0035</div>
+                  <span class="s-badge s-badge-red">배달실패</span>
+                </div>
+                <div class="s-order-addr">🏪 반찬가게 → 종로구 구기동</div>
+                <div class="s-order-items">고객 부재 — 오전 11:40</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>배달 목록 화면 하단에서 완료 내역 탭</strong><p>내가 완료하거나 실패한 모든 배달 이력이 표시돼요.</p></div></li>
+      </ul>
     </div>
   </div>
 

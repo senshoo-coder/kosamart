@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>코사마트 이용 안내</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f4f6f8;
+  color: #1a1c1c;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* ── Header ── */
+.header {
+  background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+  color: white;
+  padding: 18px 16px 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.header h1 { font-size: 19px; font-weight: 700; }
+.header p  { font-size: 12px; opacity: 0.85; margin-top: 2px; }
+.btn-pdf {
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.4);
+  color: white;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.btn-pdf:active { background: rgba(255,255,255,0.35); }
+.btn-pdf.loading { opacity: 0.6; pointer-events: none; }
+
+/* ── Tab bar ── */
+.tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex: 0 0 auto;
+  padding: 9px 16px;
+  border: none;
+  background: rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.8);
+  border-radius: 10px 10px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.tab.active { background: #f4f6f8; color: #2d6a4f; }
+
+/* ── Content ── */
+.content { display: none; padding-bottom: 80px; }
+.content.active { display: block; }
+
+/* ── Section card ── */
+.section {
+  background: white;
+  margin: 12px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.section-header {
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+.section-header:active { background: #f9f9f9; }
+.section-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.section-title { flex: 1; }
+.section-title h2 { font-size: 15px; font-weight: 700; }
+.section-title p  { font-size: 12px; color: #888; margin-top: 1px; }
+.chevron { font-size: 12px; color: #bbb; transition: transform 0.2s; }
+.section-header.open .chevron { transform: rotate(90deg); }
+.section-body {
+  display: none;
+  padding: 0 16px 18px;
+  border-top: 1px solid #f0f0f0;
+}
+.section-body.open { display: block; }
+
+/* ── Steps ── */
+.steps { list-style: none; padding: 12px 0 0; }
+.steps li { display: flex; gap: 12px; margin-bottom: 14px; }
+.step-num {
+  flex-shrink: 0;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: #2d6a4f;
+  color: white;
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 1px;
+}
+.step-text { flex: 1; }
+.step-text strong { color: #1a1c1c; font-weight: 700; display: block; }
+.step-text p { color: #555; font-size: 14px; margin-top: 2px; }
+
+/* ── Tips ── */
+.tip  { background: #e8f5e9; border-left: 3px solid #40916c; color: #1b5e20; border-radius: 10px; padding: 11px 13px; margin: 10px 0; font-size: 14px; line-height: 1.55; }
+.warn { background: #fff3e0; border-left: 3px solid #fb8c00; color: #7f3f00; border-radius: 10px; padding: 11px 13px; margin: 10px 0; font-size: 14px; line-height: 1.55; }
+.info { background: #e3f2fd; border-left: 3px solid #1976d2; color: #0d3c70; border-radius: 10px; padding: 11px 13px; margin: 10px 0; font-size: 14px; line-height: 1.55; }
+
+/* ── Badge ── */
+.badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; margin: 2px 2px; }
+.badge-green  { background: #d4edda; color: #155724; }
+.badge-blue   { background: #cce5ff; color: #004085; }
+.badge-orange { background: #fff3cd; color: #856404; }
+.badge-red    { background: #f8d7da; color: #721c24; }
+.badge-gray   { background: #e2e3e5; color: #383d41; }
+
+kbd { background: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; padding: 1px 6px; font-size: 13px; font-family: monospace; }
+hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
+
+/* ── Welcome card ── */
+.welcome-card {
+  background: linear-gradient(135deg, #2d6a4f, #52b788);
+  color: white;
+  border-radius: 14px;
+  padding: 20px 18px;
+  margin: 12px;
+  box-shadow: 0 4px 12px rgba(45,106,79,0.25);
+}
+.welcome-card h2 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+.welcome-card p  { font-size: 14px; opacity: 0.9; line-height: 1.5; }
+
+/* ── Quick grid ── */
+.quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px; }
+.quick-card {
+  background: white; border-radius: 12px; padding: 14px;
+  text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.06); cursor: pointer;
+}
+.quick-card .icon  { font-size: 28px; margin-bottom: 6px; }
+.quick-card .label { font-size: 13px; font-weight: 600; }
+.quick-card .sub   { font-size: 11px; color: #888; margin-top: 2px; }
+
+/* ── Flow ── */
+.flow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 12px 0; }
+.flow-item { background: #e8f5e9; border-radius: 8px; padding: 6px 12px; font-size: 13px; font-weight: 600; color: #2d6a4f; white-space: nowrap; }
+.flow-arrow { color: #bbb; font-size: 16px; }
+
+/* ── Notif rows ── */
+.notif-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+.notif-row:last-child { border-bottom: none; }
+.notif-emoji { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.notif-text strong { font-size: 14px; color: #1a1c1c; display: block; }
+.notif-text span   { font-size: 13px; color: #666; }
+
+/* ── FAQ ── */
+.faq-item { padding: 12px 0; border-bottom: 1px solid #f5f5f5; }
+.faq-item:last-child { border-bottom: none; }
+.faq-q { font-weight: 700; color: #2d6a4f; margin-bottom: 5px; font-size: 14px; }
+.faq-q::before { content: "Q. "; }
+.faq-a { font-size: 14px; color: #555; }
+.faq-a::before { content: "A. "; color: #999; }
+
+/* ══════════════════════════════════════
+   PHONE MOCKUP SYSTEM
+══════════════════════════════════════ */
+.mockup-wrap {
+  margin: 16px 0 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.mockup-label {
+  font-size: 11px;
+  color: #999;
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+}
+.phone {
+  width: 240px;
+  background: #1a1a1a;
+  border-radius: 30px;
+  padding: 10px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.22), 0 0 0 1px #333;
+  position: relative;
+}
+.phone::before {
+  content: '';
+  display: block;
+  width: 60px; height: 6px;
+  background: #333;
+  border-radius: 3px;
+  margin: 0 auto 8px;
+}
+.phone-screen {
+  background: #f7f9fb;
+  border-radius: 20px;
+  overflow: hidden;
+  min-height: 380px;
+}
+
+/* ── Screen: top bar ── */
+.s-topbar {
+  background: #2d6a4f;
+  color: white;
+  padding: 10px 12px 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.s-topbar-row { display: flex; align-items: center; justify-content: space-between; }
+.s-topbar-sub { font-size: 10px; opacity: 0.8; font-weight: 400; margin-top: 1px; }
+
+/* ── Screen: tab row ── */
+.s-tabs {
+  display: flex;
+  background: white;
+  border-bottom: 1px solid #eee;
+}
+.s-tab {
+  flex: 1;
+  text-align: center;
+  padding: 7px 2px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #999;
+  border-bottom: 2px solid transparent;
+}
+.s-tab.active { color: #2d6a4f; border-bottom-color: #2d6a4f; }
+
+/* ── Screen: input field ── */
+.s-input-group { padding: 8px 10px 0; }
+.s-label { font-size: 9px; color: #888; margin-bottom: 2px; }
+.s-input {
+  background: #f4f6f8;
+  border-radius: 7px;
+  padding: 7px 10px;
+  font-size: 11px;
+  color: #333;
+  margin-bottom: 6px;
+  border: 1px solid #eee;
+}
+.s-input.placeholder { color: #bbb; }
+
+/* ── Screen: button ── */
+.s-btn {
+  margin: 6px 10px;
+  background: #2d6a4f;
+  color: white;
+  border-radius: 10px;
+  padding: 9px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+.s-btn-outline {
+  margin: 4px 10px;
+  border: 1px solid #2d6a4f;
+  color: #2d6a4f;
+  border-radius: 10px;
+  padding: 8px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+.s-btn-orange {
+  background: #e65100;
+}
+.s-btn-red {
+  background: #c62828;
+}
+.s-btn-blue {
+  background: #1565c0;
+}
+
+/* ── Screen: card ── */
+.s-card {
+  background: white;
+  margin: 6px 8px;
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.s-card-title { font-size: 12px; font-weight: 700; color: #1a1c1c; }
+.s-card-sub   { font-size: 10px; color: #888; margin-top: 2px; }
+.s-card-row   { display: flex; align-items: center; justify-content: space-between; }
+
+/* ── Screen: badge ── */
+.s-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-size: 9px;
+  font-weight: 700;
+}
+.s-badge-green  { background: #d4edda; color: #155724; }
+.s-badge-gray   { background: #e2e3e5; color: #555; }
+.s-badge-orange { background: #fff3cd; color: #7d5a00; }
+.s-badge-blue   { background: #cce5ff; color: #004085; }
+.s-badge-red    { background: #f8d7da; color: #721c24; }
+
+/* ── Screen: section title ── */
+.s-section-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: #2d6a4f;
+  padding: 8px 10px 4px;
+}
+
+/* ── Screen: product row ── */
+.s-product {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-bottom: 1px solid #f5f5f5;
+}
+.s-product-img {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  background: #e8f5e9;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.s-product-info { flex: 1; }
+.s-product-name  { font-size: 11px; font-weight: 700; }
+.s-product-price { font-size: 10px; color: #2d6a4f; font-weight: 700; margin-top: 1px; }
+.s-qty-btn {
+  background: #2d6a4f;
+  color: white;
+  border-radius: 6px;
+  width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ── Screen: status bar ── */
+.s-status-bar {
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 6px;
+  border-bottom: 1px solid #f0f0f0;
+  background: white;
+}
+.s-status-item { text-align: center; }
+.s-status-dot  { width: 8px; height: 8px; border-radius: 50%; margin: 0 auto 3px; }
+.s-status-text { font-size: 8px; color: #666; }
+
+/* ── Screen: order row ── */
+.s-order {
+  padding: 8px 10px;
+  border-bottom: 1px solid #f5f5f5;
+}
+.s-order-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; }
+.s-order-num  { font-size: 10px; font-weight: 700; }
+.s-order-addr { font-size: 9px; color: #888; }
+.s-order-items { font-size: 9px; color: #555; margin-top: 2px; }
+
+/* ── Screen: bottom nav ── */
+.s-bottom-nav {
+  display: flex;
+  background: white;
+  border-top: 1px solid #eee;
+  padding: 6px 0 4px;
+  margin-top: auto;
+}
+.s-nav-item {
+  flex: 1;
+  text-align: center;
+  font-size: 9px;
+  color: #aaa;
+}
+.s-nav-item.active { color: #2d6a4f; }
+.s-nav-icon { font-size: 16px; display: block; margin-bottom: 1px; }
+
+/* ── Screen: settings row ── */
+.s-setting-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 10px;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 11px;
+}
+.s-setting-label { color: #333; }
+.s-setting-value { color: #2d6a4f; font-weight: 600; font-size: 10px; }
+.s-toggle {
+  width: 28px; height: 16px;
+  border-radius: 8px;
+  background: #2d6a4f;
+  position: relative;
+  flex-shrink: 0;
+}
+.s-toggle::after {
+  content: '';
+  position: absolute;
+  right: 2px; top: 2px;
+  width: 12px; height: 12px;
+  background: white;
+  border-radius: 50%;
+}
+.s-toggle.off { background: #ccc; }
+.s-toggle.off::after { right: auto; left: 2px; }
+
+/* ── Screen: delivery card ── */
+.s-delivery {
+  background: white;
+  margin: 6px 8px;
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  border-left: 3px solid #2d6a4f;
+}
+.s-store-tag { font-size: 10px; font-weight: 700; color: #1d4ed8; margin-bottom: 4px; }
+.s-delivery-info { font-size: 10px; color: #555; line-height: 1.6; }
+.s-delivery-addr { font-size: 11px; font-weight: 600; color: #1a1c1c; margin-top: 3px; }
+
+/* ── Screen: admin row ── */
+.s-admin-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px;
+  border-bottom: 1px solid #f5f5f5;
+}
+.s-admin-icon { font-size: 20px; flex-shrink: 0; }
+.s-admin-label { font-size: 12px; font-weight: 600; }
+.s-admin-sub   { font-size: 10px; color: #888; }
+.s-chevron-r   { margin-left: auto; font-size: 12px; color: #ccc; }
+
+/* ── Screen: divider text ── */
+.s-divider {
+  text-align: center;
+  font-size: 9px;
+  color: #bbb;
+  padding: 4px 0;
+}
+
+/* ── Screen: link text ── */
+.s-link { text-align: center; font-size: 9px; color: #2d6a4f; padding: 6px 0; font-weight: 600; }
+
+/* ── Screen: amount row ── */
+.s-amount-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 10px;
+  font-size: 11px;
+}
+.s-amount-label { color: #666; }
+.s-amount-value { font-weight: 700; color: #1a1c1c; }
+.s-amount-total .s-amount-label { color: #1a1c1c; font-weight: 700; }
+.s-amount-total .s-amount-value { color: #2d6a4f; font-size: 13px; }
+
+/* ── Screen: photo placeholder ── */
+.s-photo {
+  background: #e8f5e9;
+  border-radius: 8px;
+  height: 60px;
+  margin: 4px 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  color: #aaa;
+}
+
+/* ── Screen: memo input ── */
+.s-memo {
+  background: #f4f6f8;
+  border-radius: 8px;
+  margin: 4px 10px;
+  padding: 7px 10px;
+  font-size: 10px;
+  color: #bbb;
+  min-height: 40px;
+}
+
+/* ── Screen: time slot row ── */
+.s-slots { display: flex; gap: 4px; padding: 4px 10px; flex-wrap: wrap; }
+.s-slot {
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 3px 8px;
+  font-size: 9px;
+  color: #666;
+}
+.s-slot.active { background: #2d6a4f; color: white; border-color: #2d6a4f; }
+
+/* ── Screen: welcome banner ── */
+.s-welcome {
+  background: linear-gradient(135deg, #2d6a4f, #52b788);
+  color: white;
+  padding: 12px;
+  border-radius: 10px;
+  margin: 6px 8px;
+}
+.s-welcome-title { font-size: 12px; font-weight: 700; }
+.s-welcome-sub   { font-size: 10px; opacity: 0.85; margin-top: 2px; }
+
+/* ── Screen: cart item ── */
+.s-cart-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid #f5f5f5;
+}
+.s-cart-name  { font-size: 11px; font-weight: 600; flex: 1; }
+.s-cart-price { font-size: 11px; color: #2d6a4f; font-weight: 700; }
+.s-cart-qty   { font-size: 10px; color: #888; display: block; margin-top: 1px; }
+
+/* print */
+@media print {
+  .header, .tabs, .btn-pdf, .chevron, .quick-grid { display: none !important; }
+  .content { display: block !important; padding: 0 !important; }
+  .section-body { display: block !important; }
+  .section { box-shadow: none; margin: 8px 0; }
+  body { background: white; }
+  .phone { box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+}
+
+@media (max-width: 360px) {
+  .phone { width: 210px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>🛒 코사마트 이용 안내</h1>
+      <p>역할을 선택하면 해당 매뉴얼을 볼 수 있어요</p>
+    </div>
+    <button class="btn-pdf" id="btnPdf" onclick="downloadPDF()">⬇️ PDF</button>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('customer', this)">🧑 고객</button>
+    <button class="tab" onclick="showTab('owner', this)">🏪 사장님</button>
+    <button class="tab" onclick="showTab('driver', this)">🚚 배달기사</button>
+    <button class="tab" onclick="showTab('admin', this)">⚙️ 관리자</button>
+  </div>
+</div>
+
+<!-- ═══════════════ 고객 ═══════════════ -->
+<div id="tab-customer" class="content active">
+
+  <div class="welcome-card">
+    <h2>👋 고객 매뉴얼에 오신 걸 환영해요!</h2>
+    <p>앱 설치 없이 브라우저에서 바로 주문할 수 있어요.</p>
+  </div>
+
+  <div class="quick-grid">
+    <div class="quick-card" onclick="openSection('c-join')"><div class="icon">✍️</div><div class="label">회원가입</div><div class="sub">처음이라면 시작!</div></div>
+    <div class="quick-card" onclick="openSection('c-order')"><div class="icon">🛍️</div><div class="label">주문하기</div><div class="sub">쇼핑부터 결제까지</div></div>
+    <div class="quick-card" onclick="openSection('c-status')"><div class="icon">📦</div><div class="label">주문 확인</div><div class="sub">내 주문 현황 보기</div></div>
+    <div class="quick-card" onclick="openSection('c-faq')"><div class="icon">❓</div><div class="label">자주 묻는 질문</div><div class="sub">궁금한 점 해결</div></div>
+  </div>
+
+  <!-- 회원가입 -->
+  <div class="section" id="c-join">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#e8f5e9">✍️</div>
+      <div class="section-title"><h2>회원가입 하기</h2><p>처음 이용하신다면 가입해 주세요</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <div class="tip">💡 회원가입을 하면 주문 내역을 언제든지 확인할 수 있어요!</div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>로그인 화면 진입</strong><p>코사마트 주소로 접속하면 아래와 같은 로그인 화면이 나와요.</p></div></li>
+      </ul>
+
+      <!-- 📱 로그인 화면 모크업 -->
+      <div class="mockup-wrap">
+        <div class="mockup-label">📱 로그인 화면</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="s-topbar" style="text-align:center;padding:14px 12px 10px;">
+              <div style="font-size:20px;margin-bottom:4px">🛒</div>
+              <div style="font-size:13px;font-weight:700">코사마트</div>
+              <div class="s-topbar-sub">신선한 식재료를 문 앞까지</div>
+            </div>
+            <div class="s-tabs">
+              <div class="s-tab active">🧑 고객</div>
+              <div class="s-tab">🏪 사장님</div>
+              <div class="s-tab">🚚 기사님</div>
+              <div class="s-tab">⚙️ 관리자</div>
+            </div>
+            <div style="padding:10px 10px 0;">
+              <div class="s-label">아이디</div>
+              <div class="s-input placeholder">아이디를 입력하세요</div>
+              <div class="s-label">비밀번호</div>
+              <div class="s-input placeholder">비밀번호를 입력하세요</div>
+            </div>
+            <div class="s-btn">로그인</div>
+            <div class="s-divider">── 또는 ──</div>
+            <div class="s-link">고객 회원가입 →</div>
+          </div>
+        </div>
+      </div>
+
+      <ul class="steps">
+        <li><div class="step-num">2</div><div class="step-text"><strong><kbd>고객</kbd> 탭이 선택된 상태 확인</strong><p>기본으로 고객 탭이 선택돼 있어요.</p></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>하단 "고객 회원가입 →" 링크 탭</strong><p>회원가입 화면으로 이동해요.</p></div></li>
+      </ul>
+
+      <!-- 📱 회원가입 화면 -->
+      <div class="mockup-wrap">
+        <div class="mockup-label">📱 회원가입 화면</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="s-topbar">
+              <div class="s-topbar-row"><span>← 뒤로</span><span>회원가입</span><span></span></div>
+            </div>
+            <div style="padding:10px 10px 0;">
+              <div class="s-section-title" style="padding-left:0">역할 선택</div>
+              <div style="display:flex;gap:6px;margin-bottom:8px;">
+                <div style="flex:1;text-align:center;background:#e8f5e9;border:2px solid #2d6a4f;border-radius:8px;padding:7px 4px;font-size:11px;font-weight:700;color:#2d6a4f;">🧑<br>고객</div>
+                <div style="flex:1;text-align:center;background:#f9f9f9;border:1px solid #eee;border-radius:8px;padding:7px 4px;font-size:11px;color:#999;">🏪<br>사장님</div>
+                <div style="flex:1;text-align:center;background:#f9f9f9;border:1px solid #eee;border-radius:8px;padding:7px 4px;font-size:11px;color:#999;">🚚<br>기사님</div>
+              </div>
+              <div class="s-label">닉네임</div>
+              <div class="s-input placeholder">예) 홍길동</div>
+              <div class="s-label">아이디</div>
+              <div class="s-input placeholder">영문+숫자</div>
+              <div class="s-label">비밀번호</div>
+              <div class="s-input placeholder">6자리 이상</div>
+            </div>
+            <div class="s-btn" style="margin-top:8px">가입하기</div>
+          </div>
+        </div>
+      </div>
+
+      <ul class="steps">
+        <li><div class="step-num">4</div><div class="step-text"><strong>닉네임·아이디·비밀번호 입력 후 <kbd>가입하기</kbd></strong><p>가입 완료 후 자동으로 마켓 화면으로 이동해요!</p></div></li>
+      </ul>
+      <div class="warn">⚠️ 아이디와 비밀번호는 꼭 메모해 두세요. 다른 기기에서 로그인할 때 필요해요!</div>
+    </div>
+  </div>
+
+  <!-- 마켓 둘러보기 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#fff3e0">🏬</div>
+      <div class="section-title"><h2>마켓 둘러보기</h2><p>가게와 상품을 살펴봐요</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>로그인 후 마켓 화면</strong><p>여러 가게가 카드 형태로 보여요. 각 카드에 영업 상태가 표시돼요.</p></div></li>
+      </ul>
+
+      <!-- 📱 마켓 화면 -->
+      <div class="mockup-wrap">
+        <div class="mockup-label">📱 마켓 메인 화면</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="s-topbar">
+              <div class="s-topbar-row"><span>🛒 코사마트</span><span style="font-size:16px">🛒</span></div>
+              <div class="s-topbar-sub">신선한 식재료를 빠르게 배달해 드려요</div>
+            </div>
+            <div style="padding:4px 0;">
+              <!-- store card 1 -->
+              <div class="s-card" style="border-left:3px solid #2d6a4f;">
+                <div class="s-card-row">
+                  <div>
+                    <div style="font-size:11px;font-weight:700">🥗 반찬가게</div>
+                    <div style="font-size:9px;color:#888;margin-top:2px">신선한 반찬을 매일 직접 만들어요</div>
+                  </div>
+                  <span class="s-badge s-badge-green">영업중</span>
+                </div>
+                <div style="font-size:9px;color:#2d6a4f;margin-top:6px">🕐 09:00 ~ 20:00 · 배달비 2,000원</div>
+              </div>
+              <!-- store card 2 -->
+              <div class="s-card" style="opacity:0.65;">
+                <div class="s-card-row">
+                  <div>
+                    <div style="font-size:11px;font-weight:700">🥩 홈앤미트</div>
+                    <div style="font-size:9px;color:#888;margin-top:2px">신선한 고기를 합리적인 가격으로</div>
+                  </div>
+                  <span class="s-badge s-badge-gray">영업종료</span>
+                </div>
+                <div style="font-size:9px;color:#aaa;margin-top:6px">🕐 10:00 ~ 19:00 · 배달비 2,000원</div>
+              </div>
+            </div>
+            <div class="s-bottom-nav">
+              <div class="s-nav-item active"><span class="s-nav-icon">🏠</span>마켓</div>
+              <div class="s-nav-item"><span class="s-nav-icon">📋</span>주문내역</div>
+              <div class="s-nav-item"><span class="s-nav-icon">👤</span>내 정보</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ul class="steps">
+        <li><div class="step-num">2</div><div class="step-text"><strong>영업 상태 확인</strong><p><span class="badge badge-green">영업중</span> 인 가게에서만 주문 가능해요. <span class="badge badge-gray">영업종료</span> 가게는 운영시간에 다시 방문해 주세요.</p></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>가게 카드 탭 → 상품 목록 확인</strong></div></li>
+      </ul>
+
+      <!-- 📱 상품 목록 -->
+      <div class="mockup-wrap">
+        <div class="mockup-label">📱 상품 목록 화면</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="s-topbar">
+              <div class="s-topbar-row"><span>← 뒤로</span><span>🥗 반찬가게</span><span class="s-badge s-badge-green" style="font-size:9px">영업중</span></div>
+              <div class="s-topbar-sub" style="margin-top:2px">신선한 반찬을 매일 직접 만들어요</div>
+            </div>
+            <div class="s-section-title">인기 반찬</div>
+            <div class="s-product">
+              <div class="s-product-img">🥬</div>
+              <div class="s-product-info">
+                <div class="s-product-name">시금치 나물</div>
+                <div class="s-product-price">3,500원</div>
+              </div>
+              <div class="s-qty-btn">+</div>
+            </div>
+            <div class="s-product">
+              <div class="s-product-img">🥕</div>
+              <div class="s-product-info">
+                <div class="s-product-name">당근 조림</div>
+                <div class="s-product-price">4,000원</div>
+              </div>
+              <div class="s-qty-btn">+</div>
+            </div>
+            <div class="s-product">
+              <div class="s-product-img">🐟</div>
+              <div class="s-product-info">
+                <div class="s-product-name">고등어 조림</div>
+                <div class="s-product-price">6,500원</div>
+              </div>
+              <div class="s-qty-btn">+</div>
+            </div>
+            <div class="s-product">
+              <div class="s-product-img">🥒</div>
+              <div class="s-product-info">
+                <div class="s-product-name">오이 무침</div>
+                <div class="s-product-price">3,000원</div>
+              </div>
+              <div class="s-qty-btn">+</div>
+            </div>
+            <div style="height:42px;background:white;border-top:1px solid #eee;display:flex;align-items:center;justify-content:center;">
+              <div style="background:#2d6a4f;color:white;border-radius:8px;padding:6px 20px;font-size:11px;font-weight:700;">장바구니 보기 🛒</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info">ℹ️ 영업 시간이 지나면 자동으로 <b>영업종료</b>로 바뀌어요. 별도로 끄지 않아도 돼요!</div>
+    </div>
+  </div>
+
+  <!-- 주문하기 -->
+  <div class="section" id="c-order">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#fce4ec">🛍️</div>
+      <div class="section-title"><h2>주문하기</h2><p>장바구니 담기 → 결제까지</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <div class="flow">
+        <div class="flow-item">상품 담기</div><span class="flow-arrow">→</span>
+        <div class="flow-item">장바구니</div><span class="flow-arrow">→</span>
+        <div class="flow-item">배달 정보</div><span class="flow-arrow">→</span>
+        <div class="flow-item">주문 완료</div>
+      </div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>상품에서 <kbd>+</kbd> 버튼 탭</strong><p>원하는 만큼 담고, 상품별 메모(요청사항)도 입력할 수 있어요.</p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>장바구니 확인 → 배달 정보 입력</strong></div></li>
+      </ul>
+
+      <!-- 📱 장바구니 화면 -->
+      <div class="mockup-wrap">
+        <div class="mockup-label">📱 장바구니 / 주문 화면</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="s-topbar">
+              <div class="s-topbar-row"><span>← 뒤로</span><span>장바구니</span><span></span></div>
+            </div>
+            <div class="s-section-title">주문 상품</div>
+            <div class="s-cart-item">
+              <div>
+                <div class="s-cart-name">시금치 나물</div>
+                <span class="s-cart-qty">1개</span>
+              </div>
+              <div class="s-cart-price">3,500원</div>
+            </div>
+            <div class="s-cart-item">
+              <div>
+                <div class="s-cart-name">고등어 조림</div>
+                <span class="s-cart-qty">2개</span>
+              </div>
+              <div class="s-cart-price">13,000원</div>
+            </div>
+            <div class="s-section-title">배달 주소</div>
+            <div class="s-input" style="margin:0 10px 4px;font-size:11px;">수원시 영통구 ○○아파트 101동 202호</div>
+            <div class="s-section-title">희망 배달 시간</div>
+            <div class="s-slots">
+              <div class="s-slot active">12:00 ~ 13:00</div>
+              <div class="s-slot">13:00 ~ 14:00</div>
+              <div class="s-slot">14:00 ~ 15:00</div>
+            </div>
+            <div class="s-section-title">전체 요청사항</div>
+            <div class="s-memo">문 앞에 놔주세요</div>
+            <hr style="margin:4px 10px;">
+            <div class="s-amount-row"><span class="s-amount-label">상품 합계</span><span class="s-amount-value">16,500원</span></div>
+            <div class="s-amount-row"><span class="s-amount-label">배달비</span><span class="s-amount-value">2,000원</span></div>
+            <div class="s-amount-row s-amount-total" style="border-top:1px solid #eee;margin-top:2px;padding-top:6px;"><span class="s-amount-label">총 결제금액</span><span class="s-amount-value" style="font-size:13px;color:#2d6a4f;">18,500원</span></div>
+            <div class="s-btn" style="margin-top:6px">주문하기</div>
+          </div>
+        </div>
+      </div>
+
+      <ul class="steps">
+        <li><div class="step-num">3</div><div class="step-text"><strong>배달 주소 입력</strong><p>정확한 주소를 입력해 주세요. 아파트는 동·호수까지!</p></div></li>
+        <li><div class="step-num">4</div><div class="step-text"><strong>희망 배달 시간 선택 (선택사항)</strong><p>원하는 시간대를 탭하면 파란색으로 선택돼요. 선택 안 해도 주문 가능해요.</p></div></li>
+        <li><div class="step-num">5</div><div class="step-text"><strong>요청사항 입력 후 <kbd>주문하기</kbd></strong><p>버튼을 누르면 주문이 완료되고 주문번호가 생성돼요!</p></div></li>
+      </ul>
+      <div class="warn">⚠️ 한 번에 한 가게에서만 주문할 수 있어요.</div>
+    </div>
+  </div>
+
+  <!-- 주문 상태 확인 -->
+  <div class="section" id="c-status">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#e8eaf6">📦</div>
+      <div class="section-title"><h2>주문 상태 확인하기</h2><p>내 주문이 지금 어디 있는지 확인해요</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>하단 메뉴 <kbd>주문내역</kbd> 탭</strong><p>내 모든 주문이 목록으로 보여요.</p></div></li>
+      </ul>
+
+      <!-- 📱 주문내역 화면 -->
+      <div class="mockup-wrap">
+        <div class="mockup-label">📱 주문 내역 화면</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="s-topbar"><div style="font-size:13px;font-weight:700">주문 내역</div></div>
+            <div style="padding:4px 0;">
+              <div style="padding:8px 10px;border-bottom:1px solid #f5f5f5;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
+                  <div style="font-size:10px;font-weight:700;color:#1a1c1c;">주문 #2025-0042</div>
+                  <span class="s-badge s-badge-green" style="font-size:8px">배달완료</span>
+                </div>
+                <div style="font-size:9px;color:#888;">🥗 반찬가게 · 시금치나물 외 1건</div>
+                <div style="font-size:9px;color:#2d6a4f;font-weight:700;margin-top:2px;">18,500원</div>
+              </div>
+              <div style="padding:8px 10px;border-bottom:1px solid #f5f5f5;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
+                  <div style="font-size:10px;font-weight:700;color:#1a1c1c;">주문 #2025-0041</div>
+                  <span class="s-badge s-badge-blue" style="font-size:8px">배달중</span>
+                </div>
+                <div style="font-size:9px;color:#888;">🥩 홈앤미트 · 삼겹살 500g</div>
+                <div style="font-size:9px;color:#2d6a4f;font-weight:700;margin-top:2px;">12,000원</div>
+              </div>
+              <div style="padding:8px 10px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
+                  <div style="font-size:10px;font-weight:700;color:#1a1c1c;">주문 #2025-0038</div>
+                  <span class="s-badge s-badge-orange" style="font-size:8px">주문접수</span>
+                </div>
+                <div style="font-size:9px;color:#888;">🥗 반찬가게 · 당근조림 외 2건</div>
+                <div style="font-size:9px;color:#2d6a4f;font-weight:700;margin-top:2px;">22,000원</div>
+              </div>
+            </div>
+            <div class="s-bottom-nav">
+              <div class="s-nav-item"><span class="s-nav-icon">🏠</span>마켓</div>
+              <div class="s-nav-item active"><span class="s-nav-icon">📋</span>주문내역</div>
+              <div class="s-nav-item"><span class="s-nav-icon">👤</span>내 정보</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding: 8px 0;">
+        <div class="notif-row"><span class="notif-emoji">🆕</span><div class="notif-text"><strong>주문접수</strong><span>주문이 들어왔어요. 가게에서 확인 중이에요.</span></div></div>
+        <div class="notif-row"><span class="notif-emoji">✅</span><div class="notif-text"><strong>주문확인</strong><span>가게에서 주문을 확인하고 준비 중이에요.</span></div></div>
+        <div class="notif-row"><span class="notif-emoji">🚚</span><div class="notif-text"><strong>배달중</strong><span>배달기사가 상품을 픽업하고 출발했어요!</span></div></div>
+        <div class="notif-row"><span class="notif-emoji">🎉</span><div class="notif-text"><strong>배달완료</strong><span>배달이 완료됐어요.</span></div></div>
+        <div class="notif-row"><span class="notif-emoji">❌</span><div class="notif-text"><strong>배달실패</strong><span>배달에 문제가 생겼어요. 가게에 문의해 주세요.</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 고객 FAQ -->
+  <div class="section" id="c-faq">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#f3e5f5">❓</div>
+      <div class="section-title"><h2>자주 묻는 질문</h2><p>이런 게 궁금하셨나요?</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <div class="faq-item"><div class="faq-q">회원가입 없이 주문할 수 있나요?</div><div class="faq-a">네, 가능해요! 하지만 주문 내역 확인을 위해 가입을 권장해요.</div></div>
+      <div class="faq-item"><div class="faq-q">영업중인데 주문이 안 돼요</div><div class="faq-a">페이지를 새로고침 해 보세요. 그래도 안 되면 가게에 직접 문의해 주세요.</div></div>
+      <div class="faq-item"><div class="faq-q">주문 취소는 어떻게 하나요?</div><div class="faq-a">현재 앱 내 취소 기능은 없어요. 가게에 직접 연락해서 취소 요청해 주세요.</div></div>
+      <div class="faq-item"><div class="faq-q">희망 시간 선택을 안 해도 되나요?</div><div class="faq-a">네, 선택하지 않으면 시간 제약 없이 빠르게 배달돼요.</div></div>
+      <div class="faq-item"><div class="faq-q">비밀번호를 잊어버렸어요</div><div class="faq-a">관리자에게 문의해 주세요. 비밀번호 재설정을 도와드릴게요.</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════ 사장님 ═══════════════ -->
+<div id="tab-owner" class="content">
+
+  <div class="welcome-card" style="background: linear-gradient(135deg, #1565c0, #1976d2);">
+    <h2>👋 사장님 매뉴얼이에요!</h2>
+    <p>주문 관리와 가게 설정을 도와드려요.</p>
+  </div>
+
+  <!-- 로그인 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#e3f2fd">🔑</div>
+      <div class="section-title"><h2>사장님 로그인</h2><p>사장님 탭에서 로그인해요</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <!-- 📱 사장님 로그인 -->
+      <div class="mockup-wrap">
+        <div class="mockup-label">📱 사장님 탭 선택 후 로그인</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="s-topbar" style="text-align:center;padding:14px 12px 10px;">
+              <div style="font-size:20px;margin-bottom:4px">🛒</div>
+              <div style="font-size:13px;font-weight:700">코사마트</div>
+            </div>
+            <div class="s-tabs">
+              <div class="s-tab">🧑 고객</div>
+              <div class="s-tab active">🏪 사장님</div>
+              <div class="s-tab">🚚 기사님</div>
+              <div class="s-tab">⚙️ 관리자</div>
+            </div>
+            <div style="padding:10px 10px 0;">
+              <div class="s-label">아이디</div>
+              <div class="s-input" style="color:#333;">banchanjip</div>
+              <div class="s-label">비밀번호</div>
+              <div class="s-input placeholder">비밀번호 입력</div>
+            </div>
+            <div class="s-btn">로그인</div>
+            <div class="s-link">사장님 가입 신청 →</div>
+          </div>
+        </div>
+      </div>
+
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong><kbd>사장님</kbd> 탭 선택 후 계정으로 로그인</strong><p>관리자에게 받은 아이디/비밀번호를 입력하세요.</p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>사장님 대시보드로 이동</strong></div></li>
+      </ul>
+      <div class="tip">💡 계정이 없으면 <b>사장님 가입 신청</b> 링크로 가입하거나, 관리자에게 문의하세요.</div>
+    </div>
+  </div>
+
+  <!-- 주문 관리 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#e8f5e9">📋</div>
+      <div class="section-title"><h2>주문 확인 및 관리</h2><p>들어온 주문을 확인하고 처리해요</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <!-- 📱 주문 목록 -->
+      <div class="mockup-wrap">
+        <div class="mockup-label">📱 사장님 주문 목록</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="s-topbar">
+              <div style="font-size:13px;font-weight:700">🏪 반찬가게 주문 관리</div>
+              <div class="s-topbar-sub">오늘 접수된 주문: 3건</div>
+            </div>
+            <div style="padding:4px 0;">
+              <div class="s-order" style="border-left:3px solid #fb8c00;">
+                <div class="s-order-top">
+                  <div class="s-order-num">주문 #2025-0042</div>
+                  <span class="s-badge s-badge-orange">주문접수</span>
+                </div>
+                <div class="s-order-addr">👤 kakao_user1 · 수원시 영통구 ○○로 123</div>
+                <div class="s-order-items">시금치나물, 고등어조림 × 2 · 18,500원</div>
+              </div>
+              <div class="s-order" style="border-left:3px solid #1976d2;">
+                <div class="s-order-top">
+                  <div class="s-order-num">주문 #2025-0041</div>
+                  <span class="s-badge s-badge-blue">배달중</span>
+                </div>
+                <div class="s-order-addr">👤 kakao_user2 · 수원시 팔달구 △△동 456</div>
+                <div class="s-order-items">당근조림, 오이무침 · 9,000원</div>
+              </div>
+              <div class="s-order" style="border-left:3px solid #2d6a4f;">
+                <div class="s-order-top">
+                  <div class="s-order-num">주문 #2025-0040</div>
+                  <span class="s-badge s-badge-green">배달완료</span>
+                </div>
+                <div class="s-order-addr">👤 kakao_user3 · 수원시 권선구 □□길 78</div>
+                <div class="s-order-items">시금치나물 × 3 · 10,500원</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>주문 목록에서 새 주문 확인</strong><p><span class="badge badge-orange">주문접수</span> 상태인 주문을 확인하세요.</p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>주문 탭 → 상세 내용 확인</strong><p>주문 상품, 수량, 고객 메모, 배달 주소를 확인해요.</p></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>상품 준비 완료 후 상태 업데이트</strong><p>기사님이 픽업하러 올 수 있도록 준비 완료 처리해요.</p></div></li>
+      </ul>
+      <div class="info">ℹ️ 텔레그램 알림이 설정되면 새 배달 이벤트마다 알림을 받을 수 있어요.</div>
+    </div>
+  </div>
+
+  <!-- 가게 설정 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#fff3e0">🏪</div>
+      <div class="section-title"><h2>가게 정보 설정</h2><p>영업시간, 공지사항 등을 관리해요</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <!-- 📱 가게 설정 화면 -->
+      <div class="mockup-wrap">
+        <div class="mockup-label">📱 가게 설정 화면</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="s-topbar">
+              <div class="s-topbar-row"><span>← 뒤로</span><span>내 가게 설정</span><span></span></div>
+            </div>
+            <div class="s-section-title">기본 설정</div>
+            <div class="s-setting-row">
+              <div>
+                <div class="s-setting-label">영업 상태</div>
+              </div>
+              <div class="s-toggle"></div>
+            </div>
+            <div class="s-setting-row">
+              <div class="s-setting-label">영업 시간</div>
+              <div class="s-setting-value">09:00 ~ 20:00</div>
+            </div>
+            <div class="s-setting-row">
+              <div class="s-setting-label">주간 휴무</div>
+              <div class="s-setting-value">매주 일요일</div>
+            </div>
+            <div class="s-section-title">공지사항</div>
+            <div class="s-memo" style="color:#555;font-size:10px;">오늘은 시금치나물 재고가 한정되어 있어요.<br>빨리 주문하세요! 🥬</div>
+            <div class="s-section-title">배달비</div>
+            <div class="s-setting-row">
+              <div class="s-setting-label">기본 배달비</div>
+              <div class="s-setting-value">2,000원</div>
+            </div>
+            <div class="s-btn" style="margin-top:10px">저장하기</div>
+          </div>
+        </div>
+      </div>
+
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>영업 상태 토글</strong><p>초록색이면 영업중, 회색이면 영업종료예요. 탭해서 바꿀 수 있어요.</p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>영업 시간 설정</strong><p><kbd>09:00-21:00</kbd> 형식으로 입력해요. 해당 시간 외에는 자동으로 영업종료가 돼요.</p></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>공지사항 입력</strong><p>고객에게 전달할 내용을 적어요. 예) "오늘 시금치 품절"</p></div></li>
+        <li><div class="step-num">4</div><div class="step-text"><strong><kbd>저장하기</kbd> 반드시 누르기</strong><p>저장 버튼을 눌러야 변경사항이 반영돼요!</p></div></li>
+      </ul>
+      <div class="warn">⚠️ 영업시간이 지나면 자동으로 영업종료로 표시돼요. 따로 끄지 않아도 괜찮아요!</div>
+    </div>
+  </div>
+
+  <!-- 텔레그램 알림 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#e3f2fd">📱</div>
+      <div class="section-title"><h2>텔레그램 알림 받기</h2><p>배달 상황을 실시간으로 확인해요</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <!-- 📱 텔레그램 메시지 예시 -->
+      <div class="mockup-wrap">
+        <div class="mockup-label">📱 텔레그램 알림 예시</div>
+        <div class="phone">
+          <div class="phone-screen" style="background:#e5ddd5;">
+            <div style="background:#075e54;color:white;padding:10px 12px;font-size:12px;font-weight:700;">
+              📢 반찬가게방
+            </div>
+            <div style="padding:10px 8px;display:flex;flex-direction:column;gap:8px;">
+              <div style="background:white;border-radius:8px;border-top-left-radius:0;padding:10px;max-width:90%;box-shadow:0 1px 2px rgba(0,0,0,0.1);">
+                <div style="font-size:11px;font-weight:700;color:#075e54;margin-bottom:4px;">📋 [배달 배정]</div>
+                <div style="font-size:10px;color:#333;line-height:1.6;">기사: 김배달<br>주문번호: #2025-0042<br>주문자: kakao_user1<br>주소: 수원시 영통구 ○○로 123</div>
+                <div style="font-size:9px;color:#aaa;margin-top:4px;text-align:right;">오후 2:34</div>
+              </div>
+              <div style="background:white;border-radius:8px;border-top-left-radius:0;padding:10px;max-width:90%;box-shadow:0 1px 2px rgba(0,0,0,0.1);">
+                <div style="font-size:11px;font-weight:700;color:#075e54;margin-bottom:4px;">🚚 [배달 출발]</div>
+                <div style="font-size:10px;color:#333;line-height:1.6;">주문자: kakao_user1<br>주소: 수원시 영통구 ○○로 123</div>
+                <div style="font-size:9px;color:#aaa;margin-top:4px;text-align:right;">오후 2:41</div>
+              </div>
+              <div style="background:white;border-radius:8px;border-top-left-radius:0;padding:10px;max-width:90%;box-shadow:0 1px 2px rgba(0,0,0,0.1);">
+                <div style="font-size:11px;font-weight:700;color:#075e54;margin-bottom:4px;">✅ [배달 완료]</div>
+                <div style="font-size:10px;color:#333;line-height:1.6;">주문번호: #2025-0042<br>주문자: kakao_user1<br>금액: 18,500원</div>
+                <div style="font-size:9px;color:#aaa;margin-top:4px;text-align:right;">오후 3:05</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notif-row"><span class="notif-emoji">📋</span><div class="notif-text"><strong>배달 배정</strong><span>기사님이 배달을 수락했을 때</span></div></div>
+      <div class="notif-row"><span class="notif-emoji">🚚</span><div class="notif-text"><strong>배달 출발</strong><span>기사님이 픽업 완료하고 출발했을 때</span></div></div>
+      <div class="notif-row"><span class="notif-emoji">✅</span><div class="notif-text"><strong>배달 완료</strong><span>고객에게 전달 완료됐을 때</span></div></div>
+      <div class="notif-row"><span class="notif-emoji">❌</span><div class="notif-text"><strong>배달 실패</strong><span>배달에 문제가 생겼을 때</span></div></div>
+      <div class="tip">💡 텔레그램 앱을 설치하고 관리자에게 가게 그룹에 초대해 달라고 요청하세요!</div>
+    </div>
+  </div>
+
+  <!-- 사장님 FAQ -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#f3e5f5">❓</div>
+      <div class="section-title"><h2>자주 묻는 질문</h2></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <div class="faq-item"><div class="faq-q">영업시간이 지났는데도 영업중으로 떠요</div><div class="faq-a">페이지를 새로고침하거나, 가게 설정에서 영업시간이 제대로 입력됐는지 확인해 주세요.</div></div>
+      <div class="faq-item"><div class="faq-q">새 주문 알림을 못 받았어요</div><div class="faq-a">텔레그램 알림 설정을 확인하고, 관리자에게 Chat ID 설정을 요청해 주세요.</div></div>
+      <div class="faq-item"><div class="faq-q">상품 목록을 수정하고 싶어요</div><div class="faq-a">현재는 관리자가 상품을 관리해요. 추가/수정/삭제는 관리자에게 요청해 주세요.</div></div>
+      <div class="faq-item"><div class="faq-q">특정 날짜에 휴무하고 싶어요</div><div class="faq-a">가게 설정에서 임시 휴무일에 날짜를 추가하세요. 형식: 2025-01-01</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════ 배달기사 ═══════════════ -->
+<div id="tab-driver" class="content">
+
+  <div class="welcome-card" style="background: linear-gradient(135deg, #e65100, #f57c00);">
+    <h2>👋 배달기사 매뉴얼이에요!</h2>
+    <p>배달 수락부터 완료까지 안내해 드려요.</p>
+  </div>
+
+  <!-- 로그인 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#fff3e0">🔑</div>
+      <div class="section-title"><h2>기사님 로그인</h2><p>기사님 탭에서 시작해요</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <div class="mockup-wrap">
+        <div class="mockup-label">📱 기사님 탭 선택 후 로그인</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="s-topbar" style="text-align:center;padding:14px 12px 10px;">
+              <div style="font-size:20px;margin-bottom:4px">🛒</div>
+              <div style="font-size:13px;font-weight:700">코사마트</div>
+            </div>
+            <div class="s-tabs">
+              <div class="s-tab">🧑 고객</div>
+              <div class="s-tab">🏪 사장님</div>
+              <div class="s-tab active">🚚 기사님</div>
+              <div class="s-tab">⚙️ 관리자</div>
+            </div>
+            <div style="padding:10px 10px 0;">
+              <div class="s-label">아이디</div>
+              <div class="s-input placeholder">아이디를 입력하세요</div>
+              <div class="s-label">비밀번호</div>
+              <div class="s-input placeholder">비밀번호를 입력하세요</div>
+            </div>
+            <div class="s-btn s-btn-orange">로그인</div>
+            <div class="s-link" style="color:#e65100">기사 가입 신청 →</div>
+          </div>
+        </div>
+      </div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong><kbd>기사님</kbd> 탭 선택</strong></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>계정으로 로그인 또는 가입 신청</strong><p>관리자에게 받은 계정으로 로그인하거나 <b>기사 가입 신청</b>으로 신청하세요.</p></div></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 배달 목록 및 수락 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#e8f5e9">📋</div>
+      <div class="section-title"><h2>배달 수락하기</h2><p>대기 중인 배달을 확인하고 수락해요</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <!-- 📱 배달 목록 -->
+      <div class="mockup-wrap">
+        <div class="mockup-label">📱 배달 대기 목록</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="s-topbar" style="background:linear-gradient(135deg,#e65100,#f57c00);">
+              <div style="font-size:13px;font-weight:700">🚚 배달 목록</div>
+              <div class="s-topbar-sub">수락 가능한 배달: 2건</div>
+            </div>
+            <div style="padding:4px 0;">
+              <div class="s-delivery">
+                <div class="s-store-tag">🏪 반찬가게</div>
+                <div class="s-delivery-info">
+                  👤 kakao_user1<br>
+                  <span class="s-delivery-addr">수원시 영통구 ○○로 123</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+                  <div style="font-size:10px;color:#2d6a4f;font-weight:700;">18,500원</div>
+                  <div style="background:#e65100;color:white;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:700;">수락하기</div>
+                </div>
+              </div>
+              <div class="s-delivery" style="border-left-color:#1565c0;">
+                <div class="s-store-tag" style="color:#7c3aed;">🏪 홈앤미트</div>
+                <div class="s-delivery-info">
+                  👤 kakao_user4<br>
+                  <span class="s-delivery-addr">수원시 팔달구 △△동 456</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+                  <div style="font-size:10px;color:#2d6a4f;font-weight:700;">23,000원</div>
+                  <div style="background:#e65100;color:white;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:700;">수락하기</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>배달 카드에서 가게 이름 확인</strong><p>🏪 파란 글씨로 가게 이름이 보여요. <b>이 가게로 픽업하러 가야 해요!</b></p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>주소·금액 확인 후 <kbd>수락하기</kbd> 탭</strong><p>수락하면 내 배달로 배정돼요. 동시에 다른 기사가 수락하면 먼저 누른 쪽에 배정돼요.</p></div></li>
+      </ul>
+      <div class="warn">⚠️ 수락 후에는 반드시 배달을 완료해 주세요!</div>
+    </div>
+  </div>
+
+  <!-- 픽업 → 배달 → 완료 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#fff8e1">🚚</div>
+      <div class="section-title"><h2>픽업 → 배달 → 완료</h2><p>배달 수락 후 진행 과정이에요</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <div class="flow">
+        <div class="flow-item">수락</div><span class="flow-arrow">→</span>
+        <div class="flow-item">가게 픽업</div><span class="flow-arrow">→</span>
+        <div class="flow-item">배달 출발</div><span class="flow-arrow">→</span>
+        <div class="flow-item">완료</div>
+      </div>
+
+      <!-- 📱 배달 진행 화면 -->
+      <div class="mockup-wrap">
+        <div class="mockup-label">📱 배달 진행 화면 (수락 후)</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="s-topbar" style="background:linear-gradient(135deg,#e65100,#f57c00);">
+              <div class="s-topbar-row"><span>← 뒤로</span><span>배달 상세</span><span></span></div>
+            </div>
+            <div class="s-card" style="border-left:3px solid #e65100;margin-top:8px;">
+              <div class="s-store-tag" style="font-size:12px;margin-bottom:6px;">🏪 반찬가게 (픽업 장소)</div>
+              <div style="font-size:10px;color:#555;line-height:1.7;">
+                👤 주문자: kakao_user1<br>
+                📍 배달 주소: 수원시 영통구 ○○로 123<br>
+                🧾 주문번호: #2025-0042<br>
+                💰 금액: 18,500원
+              </div>
+              <div style="font-size:10px;color:#888;margin-top:6px;padding-top:6px;border-top:1px solid #f5f5f5;">
+                🛒 시금치나물 × 1, 고등어조림 × 2
+              </div>
+            </div>
+            <div style="font-size:10px;color:#888;padding:6px 10px;">고객 요청: 문 앞에 놔주세요</div>
+            <div class="s-btn s-btn-orange" style="margin-top:8px">✅ 픽업 완료 (출발)</div>
+            <div style="font-size:9px;color:#bbb;text-align:center;padding:4px;">가게에서 상품을 받은 후 눌러주세요</div>
+          </div>
+        </div>
+      </div>
+
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>🏪 가게로 이동해서 상품 픽업</strong><p>카드에 표시된 가게 이름으로 찾아가세요.</p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>상품 받은 후 <kbd>픽업 완료 (출발)</kbd> 탭</strong><p>가게와 관리자에게 출발 알림이 자동으로 가요.</p></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>배달 주소로 이동 후 전달</strong></div></li>
+        <li><div class="step-num">4</div><div class="step-text"><strong><kbd>배달 완료</kbd> 탭</strong><p>메모나 사진을 남길 수 있어요. 완료 후 알림이 발송돼요.</p></div></li>
+      </ul>
+
+      <!-- 📱 배달 완료 화면 -->
+      <div class="mockup-wrap">
+        <div class="mockup-label">📱 배달 완료 화면</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="s-topbar" style="background:linear-gradient(135deg,#e65100,#f57c00);">
+              <div class="s-topbar-row"><span>← 뒤로</span><span>배달 완료 처리</span><span></span></div>
+            </div>
+            <div style="padding:10px;">
+              <div style="font-size:11px;font-weight:700;color:#333;margin-bottom:8px;">배달 완료 확인</div>
+              <div style="font-size:10px;color:#555;background:#f4f6f8;border-radius:8px;padding:10px;line-height:1.8;">
+                📦 주문번호: #2025-0042<br>
+                👤 kakao_user1<br>
+                📍 수원시 영통구 ○○로 123
+              </div>
+            </div>
+            <div class="s-section-title">배달 메모 (선택)</div>
+            <div class="s-memo" style="color:#555;font-size:10px;">현관 앞에 두고 왔습니다</div>
+            <div class="s-section-title">배달 사진 (선택)</div>
+            <div class="s-photo">📷 사진 추가</div>
+            <div class="s-btn" style="background:#2d6a4f;margin-top:10px">✅ 배달 완료 처리</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tip">💡 배달 완료 메모를 남기면 가게·관리자에게도 전달돼요. 특이사항은 꼭 기록하세요!</div>
+    </div>
+  </div>
+
+  <!-- 배달 실패 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#fce4ec">⚠️</div>
+      <div class="section-title"><h2>배달 실패 처리</h2><p>전달이 어려울 때 이렇게 하세요</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <!-- 📱 실패 처리 화면 -->
+      <div class="mockup-wrap">
+        <div class="mockup-label">📱 배달 실패 처리 화면</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="s-topbar" style="background:#c62828;">
+              <div class="s-topbar-row"><span>← 뒤로</span><span>배달 실패 처리</span><span></span></div>
+            </div>
+            <div style="padding:12px;">
+              <div style="font-size:11px;font-weight:700;color:#c62828;margin-bottom:8px;">⚠️ 배달 실패 사유를 입력해 주세요</div>
+              <div style="font-size:10px;color:#555;margin-bottom:8px;">실패 사유를 입력하지 않으면 처리되지 않아요.</div>
+              <div style="background:#f4f6f8;border-radius:8px;border:1px solid #eee;padding:10px;min-height:80px;font-size:10px;color:#555;">
+                고객 부재 — 3회 전화 시도 후 연락 안 됨
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;margin:0 10px;">
+              <div class="s-btn-outline" style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:11px;">취소</div>
+              <div class="s-btn s-btn-red" style="flex:1;margin:0;border-radius:8px;">실패 처리</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>배달 상세 화면에서 <kbd>배달 실패</kbd> 버튼 탭</strong></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>실패 사유 입력</strong><p>예) "고객 연락 안 됨", "주소 불명", "고객 수령 거부"</p></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>처리 후 관리자에게 연락</strong></div></li>
+      </ul>
+      <div class="warn">⚠️ 실패 사유를 입력해야 처리돼요. 빈 칸으로는 불가해요.</div>
+    </div>
+  </div>
+
+  <!-- 기사 FAQ -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#f3e5f5">❓</div>
+      <div class="section-title"><h2>자주 묻는 질문</h2></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <div class="faq-item"><div class="faq-q">배달 목록이 안 보여요</div><div class="faq-a">로그인 상태를 확인하고 페이지를 새로고침해 보세요. 대기 건이 없으면 목록이 비어 있어요.</div></div>
+      <div class="faq-item"><div class="faq-q">수락했는데 다른 기사에게 배정됐어요</div><div class="faq-a">동시에 수락하면 더 빠른 쪽에 배정돼요. 다른 배달을 찾아보세요!</div></div>
+      <div class="faq-item"><div class="faq-q">어느 가게로 가야 하나요?</div><div class="faq-a">배달 카드에 🏪 파란 글씨로 가게 이름이 표시돼요. 그 가게로 찾아가서 픽업하면 돼요.</div></div>
+      <div class="faq-item"><div class="faq-q">완료 처리가 안 돼요</div><div class="faq-a">인터넷 연결을 확인하고 다시 시도해 보세요. 계속 안 되면 관리자에게 연락하세요.</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════ 관리자 ═══════════════ -->
+<div id="tab-admin" class="content">
+
+  <div class="welcome-card" style="background: linear-gradient(135deg, #4a148c, #6a1b9a);">
+    <h2>👋 관리자 매뉴얼이에요!</h2>
+    <p>시스템 전반을 관리하는 역할이에요.</p>
+  </div>
+
+  <!-- 관리자 로그인 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#f3e5f5">🔑</div>
+      <div class="section-title"><h2>관리자 로그인</h2><p>관리자 탭에서 로그인해요</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <div class="mockup-wrap">
+        <div class="mockup-label">📱 관리자 탭 선택 후 로그인</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="s-topbar" style="text-align:center;padding:14px 12px 10px;background:linear-gradient(135deg,#4a148c,#6a1b9a);">
+              <div style="font-size:20px;margin-bottom:4px">🛒</div>
+              <div style="font-size:13px;font-weight:700">코사마트</div>
+            </div>
+            <div class="s-tabs">
+              <div class="s-tab">🧑 고객</div>
+              <div class="s-tab">🏪 사장님</div>
+              <div class="s-tab">🚚 기사님</div>
+              <div class="s-tab active">⚙️ 관리자</div>
+            </div>
+            <div style="padding:10px 10px 0;">
+              <div class="s-label">아이디</div>
+              <div class="s-input" style="color:#333;">admin</div>
+              <div class="s-label">비밀번호</div>
+              <div class="s-input placeholder">비밀번호 입력</div>
+            </div>
+            <div class="s-btn" style="background:#4a148c;">로그인</div>
+          </div>
+        </div>
+      </div>
+      <div class="warn">⚠️ 관리자 계정은 외부에 절대 공유하지 마세요!</div>
+    </div>
+  </div>
+
+  <!-- 전체 주문 관리 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#e8f5e9">📊</div>
+      <div class="section-title"><h2>전체 주문 관리</h2><p>모든 가게의 주문을 한눈에 봐요</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <!-- 📱 관리자 주문 관리 -->
+      <div class="mockup-wrap">
+        <div class="mockup-label">📱 관리자 대시보드</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="s-topbar" style="background:linear-gradient(135deg,#4a148c,#6a1b9a);">
+              <div style="font-size:13px;font-weight:700">⚙️ 관리자 패널</div>
+              <div class="s-topbar-sub">오늘 전체 주문: 5건</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px;">
+              <div style="background:white;border-radius:10px;padding:10px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+                <div style="font-size:20px;font-weight:700;color:#2d6a4f;">5</div>
+                <div style="font-size:9px;color:#888;">오늘 주문</div>
+              </div>
+              <div style="background:white;border-radius:10px;padding:10px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+                <div style="font-size:20px;font-weight:700;color:#e65100;">2</div>
+                <div style="font-size:9px;color:#888;">배달 대기</div>
+              </div>
+              <div style="background:white;border-radius:10px;padding:10px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+                <div style="font-size:20px;font-weight:700;color:#1976d2;">1</div>
+                <div style="font-size:9px;color:#888;">배달 중</div>
+              </div>
+              <div style="background:white;border-radius:10px;padding:10px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+                <div style="font-size:20px;font-weight:700;color:#4a148c;">2</div>
+                <div style="font-size:9px;color:#888;">완료</div>
+              </div>
+            </div>
+            <div class="s-admin-row">
+              <div class="s-admin-icon">📋</div>
+              <div><div class="s-admin-label">전체 주문 관리</div><div class="s-admin-sub">주문 상태 변경·취소 처리</div></div>
+              <div class="s-chevron-r">▶</div>
+            </div>
+            <div class="s-admin-row">
+              <div class="s-admin-icon">👥</div>
+              <div><div class="s-admin-label">사용자 관리</div><div class="s-admin-sub">계정 생성·비번 재설정</div></div>
+              <div class="s-chevron-r">▶</div>
+            </div>
+            <div class="s-admin-row">
+              <div class="s-admin-icon">🏬</div>
+              <div><div class="s-admin-label">가게 설정</div><div class="s-admin-sub">영업시간·텔레그램 Chat ID</div></div>
+              <div class="s-chevron-r">▶</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>대시보드에서 오늘 주문 현황 확인</strong><p>접수/배달중/완료/대기 건수를 한눈에 볼 수 있어요.</p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>전체 주문 관리 → 주문 상세 확인·처리</strong><p>모든 가게의 주문을 직접 상태 변경할 수 있어요.</p></div></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 사용자 관리 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#e3f2fd">👥</div>
+      <div class="section-title"><h2>사용자 관리</h2><p>고객·사장님·기사님 계정을 관리해요</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <!-- 📱 사용자 관리 -->
+      <div class="mockup-wrap">
+        <div class="mockup-label">📱 사용자 관리 화면</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="s-topbar" style="background:linear-gradient(135deg,#4a148c,#6a1b9a);">
+              <div class="s-topbar-row"><span>← 뒤로</span><span>사용자 관리</span><span>+ 추가</span></div>
+            </div>
+            <div class="s-tabs" style="font-size:9px;">
+              <div class="s-tab active" style="font-size:10px;">전체</div>
+              <div class="s-tab" style="font-size:10px;">고객</div>
+              <div class="s-tab" style="font-size:10px;">사장님</div>
+              <div class="s-tab" style="font-size:10px;">기사님</div>
+            </div>
+            <div style="padding:4px 0;">
+              <div class="s-admin-row">
+                <div style="width:32px;height:32px;background:#e8f5e9;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🏪</div>
+                <div>
+                  <div class="s-admin-label">banchanjip</div>
+                  <div class="s-admin-sub">사장님 · 반찬가게 · 활성</div>
+                </div>
+                <span class="s-badge s-badge-green" style="font-size:8px">활성</span>
+              </div>
+              <div class="s-admin-row">
+                <div style="width:32px;height:32px;background:#e3f2fd;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🚚</div>
+                <div>
+                  <div class="s-admin-label">driver01</div>
+                  <div class="s-admin-sub">기사님 · 김배달 · 활성</div>
+                </div>
+                <span class="s-badge s-badge-green" style="font-size:8px">활성</span>
+              </div>
+              <div class="s-admin-row">
+                <div style="width:32px;height:32px;background:#f3e5f5;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🧑</div>
+                <div>
+                  <div class="s-admin-label">user_hong</div>
+                  <div class="s-admin-sub">고객 · kakao_user1 · 활성</div>
+                </div>
+                <span class="s-badge s-badge-green" style="font-size:8px">활성</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>사용자 목록 확인</strong><p>역할별 탭으로 필터링해서 볼 수 있어요.</p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>오른쪽 상단 <kbd>+ 추가</kbd>로 신규 계정 생성</strong><p>사장님이나 기사님 계정을 직접 만들어 줄 수 있어요.</p></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>계정 탭 → 비밀번호 재설정·상태 변경</strong></div></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 가게 설정 관리 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#fff3e0">🏬</div>
+      <div class="section-title"><h2>가게 설정 관리</h2><p>각 가게의 상세 설정을 관리해요</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <!-- 📱 가게 설정 (관리자) -->
+      <div class="mockup-wrap">
+        <div class="mockup-label">📱 관리자 가게 설정 (Chat ID 포함)</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="s-topbar" style="background:linear-gradient(135deg,#4a148c,#6a1b9a);">
+              <div class="s-topbar-row"><span>← 뒤로</span><span>🥗 반찬가게 설정</span><span></span></div>
+            </div>
+            <div class="s-section-title">운영 설정</div>
+            <div class="s-setting-row">
+              <div class="s-setting-label">영업 상태</div>
+              <div class="s-toggle"></div>
+            </div>
+            <div class="s-setting-row">
+              <div class="s-setting-label">영업 시간</div>
+              <div class="s-setting-value">09:00-20:00</div>
+            </div>
+            <div class="s-setting-row">
+              <div class="s-setting-label">주간 휴무</div>
+              <div class="s-setting-value">일요일</div>
+            </div>
+            <div class="s-setting-row">
+              <div class="s-setting-label">배달비</div>
+              <div class="s-setting-value">2,000원</div>
+            </div>
+            <div class="s-section-title" style="color:#7c3aed;">텔레그램 알림 (관리자 전용)</div>
+            <div class="s-setting-row">
+              <div>
+                <div class="s-setting-label">텔레그램 Chat ID</div>
+                <div style="font-size:9px;color:#aaa;">가게 그룹 채팅방의 ID</div>
+              </div>
+            </div>
+            <div class="s-input" style="margin:0 10px 4px;font-size:11px;color:#333;">-5210586190</div>
+            <div class="s-btn" style="background:#4a148c;margin-top:10px">저장하기</div>
+          </div>
+        </div>
+      </div>
+
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>가게 설정에서 모든 항목 수정 가능</strong><p>영업시간, 배달비, 공지사항, 휴무일 등을 직접 설정할 수 있어요.</p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>텔레그램 Chat ID 입력 (관리자 전용)</strong><p>각 가게의 텔레그램 그룹 Chat ID를 입력하면, 배달 이벤트마다 그 그룹으로 알림이 가요.</p></div></li>
+      </ul>
+      <div class="info">ℹ️ Chat ID는 관리자 화면에서만 보여요. 사장님 화면에는 표시되지 않아요.</div>
+    </div>
+  </div>
+
+  <!-- 텔레그램 설정 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#e8eaf6">📱</div>
+      <div class="section-title"><h2>텔레그램 알림 설정</h2><p>가게별 그룹 Chat ID 등록 방법</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <div class="tip">💡 배달 이벤트마다 <b>관리자 그룹</b>과 <b>해당 가게 그룹</b> 양쪽으로 알림이 가요!</div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>텔레그램에서 새 그룹 생성</strong><p>텔레그램 앱에서 새 그룹을 만들고, 코사마트 봇과 사장님을 초대해요.</p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>그룹에서 메시지를 보낸 후 Chat ID 확인</strong><p>봇에게 /getUpdates 요청을 보내거나, 봇이 메시지를 받으면 chat_id가 확인돼요.<br>그룹 Chat ID는 <kbd>-521XXXXXXX</kbd> 처럼 음수예요.</p></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>관리자 → 가게 설정 → Chat ID 입력 후 저장</strong></div></li>
+      </ul>
+      <hr>
+      <div class="notif-row"><span class="notif-emoji">📋</span><div class="notif-text"><strong>배달 배정</strong><span>기사 이름, 주문번호, 주문자, 주소 포함</span></div></div>
+      <div class="notif-row"><span class="notif-emoji">🚚</span><div class="notif-text"><strong>배달 출발 (픽업)</strong><span>주문자, 배달 주소 포함</span></div></div>
+      <div class="notif-row"><span class="notif-emoji">✅</span><div class="notif-text"><strong>배달 완료</strong><span>주문번호, 금액, 기사 메모 포함</span></div></div>
+      <div class="notif-row"><span class="notif-emoji">❌</span><div class="notif-text"><strong>배달 실패</strong><span>주문번호, 실패 사유 포함</span></div></div>
+    </div>
+  </div>
+
+  <!-- 관리자 FAQ -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#f3e5f5">❓</div>
+      <div class="section-title"><h2>자주 묻는 질문</h2></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <div class="faq-item"><div class="faq-q">텔레그램 알림이 안 와요</div><div class="faq-a">Chat ID가 올바르게 입력됐는지, 봇이 그룹에 초대됐는지 확인하세요. 봇은 메시지 전송 권한이 있어야 해요.</div></div>
+      <div class="faq-item"><div class="faq-q">사장님이 영업시간 설정했는데 반영이 안 돼요</div><div class="faq-a">저장 후 새로고침을 해보세요. 형식이 맞아야 해요: HH:MM-HH:MM</div></div>
+      <div class="faq-item"><div class="faq-q">새 가게를 추가하고 싶어요</div><div class="faq-a">관리자 화면 또는 Supabase 관리 패널에서 신규 가게를 등록할 수 있어요.</div></div>
+      <div class="faq-item"><div class="faq-q">주문 상태를 직접 수정하고 싶어요</div><div class="faq-a">관리자 주문 상세 화면에서 상태를 직접 변경할 수 있어요.</div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const ROLE_LABELS = { customer:'고객', owner:'사장님', driver:'배달기사', admin:'관리자' };
+let currentRole = 'customer';
+
+function showTab(role, el) {
+  currentRole = role;
+  document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + role).classList.add('active');
+  el.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleSection(header) {
+  const body = header.nextElementSibling;
+  const open = body.classList.contains('open');
+  body.classList.toggle('open', !open);
+  header.classList.toggle('open', !open);
+}
+
+function openSection(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const header = el.querySelector('.section-header');
+  const body   = el.querySelector('.section-body');
+  body.classList.add('open');
+  header.classList.add('open');
+  setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+}
+
+function downloadPDF() {
+  const btn = document.getElementById('btnPdf');
+  btn.classList.add('loading');
+  btn.textContent = '생성 중...';
+
+  // Expand all sections before print
+  const tab = document.getElementById('tab-' + currentRole);
+  tab.querySelectorAll('.section-body').forEach(b => b.classList.add('open'));
+  tab.querySelectorAll('.section-header').forEach(h => h.classList.add('open'));
+
+  // Set print title
+  document.title = '코사마트 ' + ROLE_LABELS[currentRole] + ' 매뉴얼';
+
+  setTimeout(() => {
+    window.print();
+    btn.classList.remove('loading');
+    btn.innerHTML = '⬇️ PDF';
+  }, 300);
+}
+</script>
+
+<style>
+@media print {
+  .header, .btn-pdf, .quick-grid, .tabs { display: none !important; }
+  body { background: white; }
+  .content { display: none !important; padding: 0 !important; }
+  .content.active { display: block !important; }
+  .section-body { display: block !important; border-top: 1px solid #eee; }
+  .section { box-shadow: none; border: 1px solid #eee; page-break-inside: avoid; }
+  .mockup-wrap { page-break-inside: avoid; }
+  .phone { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  .welcome-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .s-topbar, .s-btn, .s-badge, .s-delivery, .s-welcome { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</body>
+</html>

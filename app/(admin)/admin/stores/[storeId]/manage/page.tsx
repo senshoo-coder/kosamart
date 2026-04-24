@@ -261,33 +261,26 @@ export default function AdminStoreManagePage({ params }: { params: Promise<{ sto
     const swapIdx = direction === 'up' ? groupIdx - 1 : groupIdx + 1
     if (swapIdx < 0 || swapIdx >= group.length) return
 
-    const a = group[groupIdx]
-    const b = group[swapIdx]
-    const aOrder = a.sort_order ?? 0
-    const bOrder = b.sort_order ?? 0
+    const newGroup = [...group]
+    ;[newGroup[groupIdx], newGroup[swapIdx]] = [newGroup[swapIdx], newGroup[groupIdx]]
+    const offset = target.is_available ? 0 : 10000
+    const updates = newGroup.map((p, i) => ({ id: p.id, sort_order: offset + i }))
+    const updateMap = new Map(updates.map(u => [u.id, u.sort_order]))
 
-    setProducts(prev => {
-      const next = prev.map(p => {
-        if (p.id === a.id) return { ...p, sort_order: bOrder }
-        if (p.id === b.id) return { ...p, sort_order: aOrder }
-        return p
-      })
-      return [...next].sort((x, y) => (x.sort_order ?? 0) - (y.sort_order ?? 0))
-    })
+    setProducts(prev =>
+      prev
+        .map(p => updateMap.has(p.id) ? { ...p, sort_order: updateMap.get(p.id)! } : p)
+        .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+    )
 
     try {
-      await Promise.all([
+      await Promise.all(updates.map(u =>
         fetch('/api/store/products', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: a.id, store_id: storeId, sort_order: bOrder }),
-        }),
-        fetch('/api/store/products', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: b.id, store_id: storeId, sort_order: aOrder }),
-        }),
-      ])
+          body: JSON.stringify({ id: u.id, store_id: storeId, sort_order: u.sort_order }),
+        })
+      ))
     } catch {
       alert('순서 변경 중 오류가 발생했습니다')
       loadProducts(storeId)

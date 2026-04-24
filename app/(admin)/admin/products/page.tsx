@@ -85,28 +85,18 @@ export default function ProductsPage() {
   async function moveProduct(index: number, direction: 'up' | 'down') {
     const swapIdx = direction === 'up' ? index - 1 : index + 1
     if (swapIdx < 0 || swapIdx >= products.length) return
-    const a = products[index]
-    const b = products[swapIdx]
-    const aOrder = a.sort_order ?? index
-    const bOrder = b.sort_order ?? swapIdx
-    // 낙관적 업데이트
-    const next = [...products]
-    next[index] = { ...a, sort_order: bOrder }
-    next[swapIdx] = { ...b, sort_order: aOrder }
-    next.sort((x, y) => (x.sort_order ?? 0) - (y.sort_order ?? 0))
-    setProducts(next)
-    await Promise.all([
-      fetch(`/api/products/${a.id}`, {
+    // 자리 바꾸고 전체 sort_order를 0,1,2..로 재번호 (기존 값이 0끼리 겹쳐 있어도 확실히 반영)
+    const newProducts = [...products]
+    ;[newProducts[index], newProducts[swapIdx]] = [newProducts[swapIdx], newProducts[index]]
+    const renumbered = newProducts.map((p, i) => ({ ...p, sort_order: i }))
+    setProducts(renumbered)
+    await Promise.all(renumbered.map(p =>
+      fetch(`/api/products/${p.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sort_order: bOrder }),
-      }),
-      fetch(`/api/products/${b.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sort_order: aOrder }),
-      }),
-    ])
+        body: JSON.stringify({ sort_order: p.sort_order }),
+      })
+    ))
   }
 
   function openEdit(product: Product) {

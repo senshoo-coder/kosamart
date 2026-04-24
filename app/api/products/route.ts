@@ -29,8 +29,8 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const cookieStore = await cookies()
   const role = cookieStore.get('cosmart_role')?.value
-  if (role !== 'admin' && role !== 'owner') {
-    return NextResponse.json({ data: null, error: '권한이 없습니다' }, { status: 403 })
+  if (role !== 'admin') {
+    return NextResponse.json({ data: null, error: '관리자만 접근 가능합니다' }, { status: 403 })
   }
 
   const body = await req.json()
@@ -38,6 +38,9 @@ export async function POST(req: NextRequest) {
 
   if (!group_buy_id || !name?.trim() || !price) {
     return NextResponse.json({ data: null, error: '필수 항목 누락' }, { status: 400 })
+  }
+  if (price < 0 || (stock_limit != null && stock_limit < 0)) {
+    return NextResponse.json({ data: null, error: '가격·재고는 0 이상이어야 합니다' }, { status: 400 })
   }
 
   const supabase = await createAdminClient()

@@ -2,22 +2,29 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 
-async function requireAdminOrOwner() {
+async function requireAdmin() {
   const cookieStore = await cookies()
   const role = cookieStore.get('cosmart_role')?.value
-  if (role !== 'admin' && role !== 'owner') {
-    return NextResponse.json({ data: null, error: '권한이 없습니다' }, { status: 403 })
+  if (role !== 'admin') {
+    return NextResponse.json({ data: null, error: '관리자만 접근 가능합니다' }, { status: 403 })
   }
   return null
 }
 
 // PATCH /api/products/[id]
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const denied = await requireAdminOrOwner()
+  const denied = await requireAdmin()
   if (denied) return denied
 
   const { id } = await params
   const body = await req.json()
+
+  if (body.price != null && body.price < 0) {
+    return NextResponse.json({ data: null, error: '가격은 0 이상이어야 합니다' }, { status: 400 })
+  }
+  if (body.stock_limit != null && body.stock_limit < 0) {
+    return NextResponse.json({ data: null, error: '재고는 0 이상이어야 합니다' }, { status: 400 })
+  }
 
   const supabase = await createAdminClient()
   const { data, error } = await supabase
@@ -34,7 +41,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
 // DELETE /api/products/[id]
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const denied = await requireAdminOrOwner()
+  const denied = await requireAdmin()
   if (denied) return denied
 
   const { id } = await params

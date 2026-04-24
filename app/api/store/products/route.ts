@@ -131,6 +131,9 @@ export async function POST(req: NextRequest) {
   if (!store_id || !name || price == null) {
     return NextResponse.json({ data: null, error: '필수 항목 누락 (store_id, name, price)' }, { status: 400 })
   }
+  if (price < 0 || (original_price != null && original_price < 0)) {
+    return NextResponse.json({ data: null, error: '가격은 0 이상이어야 합니다' }, { status: 400 })
+  }
 
   if (role === 'owner') {
     const ownerStoreId = await getOwnerStoreId()
@@ -186,6 +189,22 @@ export async function PATCH(req: NextRequest) {
   }
   if (!targetStoreId) return NextResponse.json({ data: null, error: 'store_id를 찾을 수 없습니다' }, { status: 400 })
 
+  // 사장님은 본인 가게만 수정 가능
+  if (role === 'owner') {
+    const ownerStoreId = await getOwnerStoreId()
+    if (!ownerStoreId || ownerStoreId !== targetStoreId) {
+      return NextResponse.json({ data: null, error: '본인 가게만 관리 가능' }, { status: 403 })
+    }
+  }
+
+  // 가격 음수 방지
+  if (updates.price != null && updates.price < 0) {
+    return NextResponse.json({ data: null, error: '가격은 0 이상이어야 합니다' }, { status: 400 })
+  }
+  if (updates.original_price != null && updates.original_price < 0) {
+    return NextResponse.json({ data: null, error: '정가는 0 이상이어야 합니다' }, { status: 400 })
+  }
+
   let products = await readProducts(targetStoreId)
   const idx = products.findIndex(p => p.id === id)
 
@@ -231,6 +250,14 @@ export async function DELETE(req: NextRequest) {
     }
   }
   if (!targetStoreId) return NextResponse.json({ data: null, error: 'store_id를 찾을 수 없습니다' }, { status: 400 })
+
+  // 사장님은 본인 가게 상품만 삭제 가능
+  if (role === 'owner') {
+    const ownerStoreId = await getOwnerStoreId()
+    if (!ownerStoreId || ownerStoreId !== targetStoreId) {
+      return NextResponse.json({ data: null, error: '본인 가게만 관리 가능' }, { status: 403 })
+    }
+  }
 
   let products = await readProducts(targetStoreId)
   const before = products.length

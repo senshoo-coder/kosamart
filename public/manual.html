@@ -547,7 +547,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
   <div class="header-top">
     <div>
       <h1>🛒 코사마트 이용 안내</h1>
-      <p>역할을 선택하면 해당 매뉴얼을 볼 수 있어요 &nbsp;·&nbsp; 최종 업데이트: 2026.04</p>
+      <p>역할을 선택하면 해당 매뉴얼을 볼 수 있어요 &nbsp;·&nbsp; 최종 업데이트: 2026.04.24</p>
     </div>
     <button class="btn-pdf" id="btnPdf" onclick="downloadPDF()">⬇️ PDF</button>
   </div>
@@ -1118,6 +1118,24 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
       <div class="warn">⚠️ 고객이 입금했어도 <b>입금확인·승인</b> 버튼을 눌러야 배달이 진행돼요!</div>
       <div class="info">ℹ️ <b>매장 픽업 주문</b>은 배달기사가 배정되지 않아요. 고객이 직접 방문할 때까지 기다려 주세요. 고객 픽업 완료 시 상세 화면에서 <kbd>픽업완료 처리</kbd>를 눌러주세요.</div>
       <div class="info">ℹ️ 텔레그램 알림이 설정되면 새 배달 이벤트마다 알림을 받을 수 있어요.</div>
+    </div>
+  </div>
+
+  <!-- 상품 순서 변경 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#e0f2fe">🔀</div>
+      <div class="section-title"><h2>상품 순서 변경</h2><p>판매 페이지에서 보이는 순서를 바꿔요</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <div class="tip">💡 자주 팔리는 상품을 위에 올리면 고객이 더 쉽게 찾을 수 있어요!</div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>내 가게 → 상품 목록</strong><p>각 상품 왼쪽에 <b>▲ ▼</b> 버튼이 있어요.</p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>▲ 버튼으로 위로, ▼ 버튼으로 아래로</strong><p>클릭하면 즉시 순서가 바뀌고, 고객 화면에도 반영돼요.</p></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>판매중 / 품절은 각각 따로 정렬돼요</strong><p>판매중 상품은 판매중끼리, 품절 상품은 품절끼리 순서를 조정할 수 있어요.</p></div></li>
+      </ul>
+      <div class="info">ℹ️ 순서 변경은 저장 버튼 없이 바로 반영돼요. 고객 화면은 최대 30초 이내에 새 순서를 반영합니다.</div>
     </div>
   </div>
 
@@ -1765,6 +1783,23 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
     </div>
   </div>
 
+  <!-- 상품 관리 (관리자) -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#e0f2fe">📦</div>
+      <div class="section-title"><h2>상품 관리 / 순서 변경</h2><p>각 가게 및 공구 상품을 관리해요</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <div class="info">ℹ️ 관리자는 <b>모든 가게의 상품</b>과 <b>공구 상품</b>을 관리할 수 있어요.</div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>가게별 상품 관리</strong><p>가게 관리 → 해당 가게 → 상품 목록. ▲▼ 버튼으로 순서 조정 가능.</p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>공구 상품 관리</strong><p>공구 상품 페이지에서 ▲▼ 버튼으로 순서를 바꿀 수 있어요.</p></div></li>
+      </ul>
+      <div class="tip">💡 사장님 계정은 본인 가게 상품만 수정 가능하고, 타 가게 상품은 읽기·수정 모두 차단돼요. (API 레벨에서 store_id 검증)</div>
+    </div>
+  </div>
+
   <!-- 보안 및 개인정보 -->
   <div class="section">
     <div class="section-header" onclick="toggleSection(this)">
@@ -1777,10 +1812,12 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
 
       <div style="padding:8px 0;">
         <div class="notif-row"><span class="notif-emoji">🔑</span><div class="notif-text"><strong>역할 기반 접근 제어</strong><span>고객·사장님·기사님·관리자 역할별로 접근 가능한 기능이 엄격히 제한돼요. 타인의 주문 조회·수정이 불가능해요.</span></div></div>
+        <div class="notif-row"><span class="notif-emoji">🏪</span><div class="notif-text"><strong>사장님 가게 경계</strong><span>사장님은 본인 가게의 주문/상품만 처리할 수 있어요. 주문 승인·거부·픽업완료·상품 수정 시 store_id를 서버에서 검증합니다.</span></div></div>
         <div class="notif-row"><span class="notif-emoji">🍪</span><div class="notif-text"><strong>보안 쿠키 인증</strong><span>로그인 정보는 httpOnly·Secure 쿠키로 저장돼요. JavaScript로 접근하거나 중간에서 가로채기가 불가능해요.</span></div></div>
         <div class="notif-row"><span class="notif-emoji">📁</span><div class="notif-text"><strong>파일 업로드 제한</strong><span>이미지 업로드는 JPEG·PNG·WebP·GIF 형식만 허용되고, 파일 크기는 10MB 이하로 제한돼요.</span></div></div>
+        <div class="notif-row"><span class="notif-emoji">💰</span><div class="notif-text"><strong>입력값 검증</strong><span>가격·재고 등 숫자 필드는 음수 입력을 차단합니다.</span></div></div>
         <div class="notif-row"><span class="notif-emoji">🤖</span><div class="notif-text"><strong>웹훅 보안</strong><span>텔레그램 알림 웹훅은 비밀 키(WEBHOOK_SECRET)로 인증돼요. 외부에서 위조 요청을 보낼 수 없어요.</span></div></div>
-        <div class="notif-row"><span class="notif-emoji">👤</span><div class="notif-text"><strong>개인정보 처리</strong><span>고객의 전화번호·주소·주문 내역은 주문 처리 목적으로만 사용되며, 역할별로 필요한 정보만 볼 수 있어요.</span></div></div>
+        <div class="notif-row"><span class="notif-emoji">👤</span><div class="notif-text"><strong>개인정보 자동 파기</strong><span>고객의 전화번호·주소·닉네임 등 개인정보는 일정 기간 후 자동 익명화돼요 (PII 자동 purge 정책).</span></div></div>
       </div>
 
       <ul class="steps">

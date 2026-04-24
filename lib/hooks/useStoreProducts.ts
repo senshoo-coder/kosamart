@@ -21,6 +21,11 @@ export interface DBProduct {
 const cache: Record<string, { data: DBProduct[]; ts: number }> = {}
 const CACHE_TTL = 30_000 // 30초
 
+export function clearStoreProductsCache(storeId?: string) {
+  if (storeId) delete cache[storeId]
+  else Object.keys(cache).forEach(k => delete cache[k])
+}
+
 export function useStoreProducts(storeId: string | undefined) {
   const [products, setProducts] = useState<DBProduct[]>([])
   const [loaded, setLoaded] = useState(false)

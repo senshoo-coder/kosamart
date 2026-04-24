@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { notifyAdmin } from '@/lib/telegram/messages'
 import { cookies } from 'next/headers'
+import { getOwnerStoreId } from '@/lib/auth/owner-store'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const cookieStore = await cookies()
@@ -19,6 +20,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   }
 
   const supabase = await createAdminClient()
+
+  if (role === 'owner') {
+    const ownerStoreId = await getOwnerStoreId()
+    const { data: orderOwner } = await supabase.from('orders').select('store_id').eq('id', id).single()
+    if (!ownerStoreId || !orderOwner || orderOwner.store_id !== ownerStoreId) {
+      return NextResponse.json({ data: null, error: '본인 가게 주문만 처리 가능' }, { status: 403 })
+    }
+  }
 
   const { error: updateError } = await supabase
     .from('orders')

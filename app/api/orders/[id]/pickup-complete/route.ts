@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { notifyAdmin, notifyStore } from '@/lib/telegram/messages'
 import { cookies } from 'next/headers'
+import { getOwnerStoreId } from '@/lib/auth/owner-store'
 
 const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 const SUPA_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
@@ -40,6 +41,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   if (fetchError || !order) {
     return NextResponse.json({ data: null, error: '주문을 찾을 수 없습니다' }, { status: 404 })
+  }
+
+  if (role === 'owner') {
+    const ownerStoreId = await getOwnerStoreId()
+    if (!ownerStoreId || order.store_id !== ownerStoreId) {
+      return NextResponse.json({ data: null, error: '본인 가게 주문만 처리 가능' }, { status: 403 })
+    }
   }
 
   if (order.status !== 'approved') {

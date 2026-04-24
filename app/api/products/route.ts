@@ -12,6 +12,7 @@ export async function GET(req: NextRequest) {
   let query = supabase
     .from('products')
     .select('*')
+    .order('sort_order', { ascending: true })
     .order('created_at', { ascending: true })
 
   if (groupBuyId) {

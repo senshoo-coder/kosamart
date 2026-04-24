@@ -157,7 +157,8 @@ export default function OwnerStorePage() {
       const res = await fetch(`/api/store/products?store_id=${sid}`)
       const json = await res.json()
       if (json.data && json.data.length > 0) {
-        setProducts(json.data)
+        const sorted = [...json.data].sort((a: DBProduct, b: DBProduct) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+        setProducts(sorted)
       } else {
         // DB에 없으면 정적 데이터 fallback (store state 대신 직접 조회)
         const staticStore = STORES.find(s => s.id === sid)
@@ -309,6 +310,48 @@ export default function OwnerStorePage() {
       }
     } catch {
       alert('삭제 중 오류가 발생했습니다')
+    }
+  }
+
+  async function moveProduct(productId: string, direction: 'up' | 'down') {
+    // 같은 그룹(판매중/품절) 내에서만 이동
+    const isAvailable = products.find(p => p.id === productId)?.is_available
+    const group = products.filter(p => p.is_available === isAvailable)
+    const groupIdx = group.findIndex(p => p.id === productId)
+    const swapIdx = direction === 'up' ? groupIdx - 1 : groupIdx + 1
+    if (swapIdx < 0 || swapIdx >= group.length) return
+
+    const a = group[groupIdx]
+    const b = group[swapIdx]
+    const aOrder = a.sort_order ?? 0
+    const bOrder = b.sort_order ?? 0
+
+    // 낙관적 업데이트
+    setProducts(prev => {
+      const next = prev.map(p => {
+        if (p.id === a.id) return { ...p, sort_order: bOrder }
+        if (p.id === b.id) return { ...p, sort_order: aOrder }
+        return p
+      })
+      return [...next].sort((x, y) => (x.sort_order ?? 0) - (y.sort_order ?? 0))
+    })
+
+    try {
+      await Promise.all([
+        fetch('/api/store/products', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: a.id, sort_order: bOrder }),
+        }),
+        fetch('/api/store/products', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: b.id, sort_order: aOrder }),
+        }),
+      ])
+    } catch {
+      alert('순서 변경 중 오류가 발생했습니다')
+      if (storeId) loadProducts(storeId)
     }
   }
 
@@ -657,7 +700,7 @@ export default function OwnerStorePage() {
           <p className="text-[11px] text-[#a3a3a3] mt-0.5">상품을 탭하여 수정하세요</p>
         </div>
         <div className="divide-y divide-[#f5f5f5]">
-          {availableProducts.map(product => (
+          {availableProducts.map((product, idx) => (
             <ProductRow
               key={product.id}
               product={product}
@@ -667,6 +710,10 @@ export default function OwnerStorePage() {
               onEdit={() => openEditProduct(product)}
               onToggle={() => toggleAvailability(product)}
               onDelete={() => setDeleteConfirm(product.id)}
+              onMoveUp={() => moveProduct(product.id, 'up')}
+              onMoveDown={() => moveProduct(product.id, 'down')}
+              canMoveUp={idx > 0}
+              canMoveDown={idx < availableProducts.length - 1}
               calcDiscount={calcDiscount}
             />
           ))}
@@ -685,7 +732,7 @@ export default function OwnerStorePage() {
             <h3 className="text-[14px] font-bold text-[#b91c1c]">품절 상품 ({unavailableProducts.length}개)</h3>
           </div>
           <div className="divide-y divide-[#f5f5f5]">
-            {unavailableProducts.map(product => (
+            {unavailableProducts.map((product, idx) => (
               <ProductRow
                 key={product.id}
                 product={product}
@@ -695,6 +742,10 @@ export default function OwnerStorePage() {
                 onEdit={() => openEditProduct(product)}
                 onToggle={() => toggleAvailability(product)}
                 onDelete={() => setDeleteConfirm(product.id)}
+                onMoveUp={() => moveProduct(product.id, 'up')}
+                onMoveDown={() => moveProduct(product.id, 'down')}
+                canMoveUp={idx > 0}
+                canMoveDown={idx < unavailableProducts.length - 1}
                 calcDiscount={calcDiscount}
                 disabled
               />
@@ -744,7 +795,7 @@ export default function OwnerStorePage() {
   )
 }
 
-function ProductRow({ product, imageUrl, uploading, onUpload, onEdit, onToggle, onDelete, calcDiscount, disabled }: {
+function ProductRow({ product, imageUrl, uploading, onUpload, onEdit, onToggle, onDelete, onMoveUp, onMoveDown, canMoveUp, canMoveDown, calcDiscount, disabled }: {
   product: DBProduct
   imageUrl?: string
   uploading: boolean
@@ -752,6 +803,10 @@ function ProductRow({ product, imageUrl, uploading, onUpload, onEdit, onToggle, 
   onEdit: () => void
   onToggle: () => void
   onDelete: () => void
+  onMoveUp: () => void
+  onMoveDown: () => void
+  canMoveUp: boolean
+  canMoveDown: boolean
   calcDiscount: (price: number, original: number | null) => number | null
   disabled?: boolean
 }) {
@@ -759,6 +814,22 @@ function ProductRow({ product, imageUrl, uploading, onUpload, onEdit, onToggle, 
 
   return (
     <div className={`px-5 py-3 flex items-center gap-3 ${disabled ? 'opacity-50' : ''}`}>
+      {/* 순서 이동 */}
+      <div className="flex flex-col flex-shrink-0">
+        <button
+          onClick={onMoveUp}
+          disabled={!canMoveUp}
+          className="w-6 h-5 flex items-center justify-center text-[11px] text-[#888] hover:text-[#10b981] disabled:opacity-25 disabled:cursor-not-allowed"
+          title="위로"
+        >▲</button>
+        <button
+          onClick={onMoveDown}
+          disabled={!canMoveDown}
+          className="w-6 h-5 flex items-center justify-center text-[11px] text-[#888] hover:text-[#10b981] disabled:opacity-25 disabled:cursor-not-allowed"
+          title="아래로"
+        >▼</button>
+      </div>
+
       {/* 이미지 */}
       <button
         onClick={onUpload}

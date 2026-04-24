@@ -82,6 +82,33 @@ export default function ProductsPage() {
     loadProducts(selectedGb)
   }
 
+  async function moveProduct(index: number, direction: 'up' | 'down') {
+    const swapIdx = direction === 'up' ? index - 1 : index + 1
+    if (swapIdx < 0 || swapIdx >= products.length) return
+    const a = products[index]
+    const b = products[swapIdx]
+    const aOrder = a.sort_order ?? index
+    const bOrder = b.sort_order ?? swapIdx
+    // 낙관적 업데이트
+    const next = [...products]
+    next[index] = { ...a, sort_order: bOrder }
+    next[swapIdx] = { ...b, sort_order: aOrder }
+    next.sort((x, y) => (x.sort_order ?? 0) - (y.sort_order ?? 0))
+    setProducts(next)
+    await Promise.all([
+      fetch(`/api/products/${a.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sort_order: bOrder }),
+      }),
+      fetch(`/api/products/${b.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sort_order: aOrder }),
+      }),
+    ])
+  }
+
   function openEdit(product: Product) {
     setEditProduct(product)
     setForm({
@@ -151,14 +178,31 @@ export default function ProductsPage() {
 
       {/* 상품 그리드 */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        {products.map(product => (
+        {products.map((product, idx) => (
           <div
             key={product.id}
             className="bg-white rounded-[8px] p-4 transition-opacity"
             style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)', opacity: product.is_available ? 1 : 0.45 }}
           >
             <div className="flex items-start justify-between mb-3">
-              <span className="text-3xl">{EMOJIS[product.name] || '🛒'}</span>
+              <div className="flex items-center gap-1">
+                <span className="text-3xl">{EMOJIS[product.name] || '🛒'}</span>
+                {/* 순서 이동 버튼 */}
+                <div className="flex flex-col">
+                  <button
+                    onClick={() => moveProduct(idx, 'up')}
+                    disabled={idx === 0}
+                    className="w-5 h-4 flex items-center justify-center text-[10px] text-[#888] hover:text-[#10b981] disabled:opacity-25 disabled:cursor-not-allowed"
+                    title="위로"
+                  >▲</button>
+                  <button
+                    onClick={() => moveProduct(idx, 'down')}
+                    disabled={idx === products.length - 1}
+                    className="w-5 h-4 flex items-center justify-center text-[10px] text-[#888] hover:text-[#10b981] disabled:opacity-25 disabled:cursor-not-allowed"
+                    title="아래로"
+                  >▼</button>
+                </div>
+              </div>
               {/* 활성화 토글 */}
               <button
                 onClick={() => toggleAvailable(product)}

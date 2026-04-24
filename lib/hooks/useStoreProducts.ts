@@ -42,8 +42,9 @@ export function useStoreProducts(storeId: string | undefined) {
       .then(json => {
         if (cancelled) return
         if (json.data && json.data.length > 0) {
-          cache[storeId] = { data: json.data, ts: Date.now() }
-          setProducts(json.data)
+          const sorted = [...json.data].sort((a: DBProduct, b: DBProduct) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+          cache[storeId] = { data: sorted, ts: Date.now() }
+          setProducts(sorted)
         }
         setLoaded(true)
       })

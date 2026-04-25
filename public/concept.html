@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>코사마트 컨셉 페이퍼</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, 'Segoe UI', 'Malgun Gothic', sans-serif;
+  background: #f4f6f8;
+  color: #1a1c1c;
+  line-height: 1.7;
+  font-size: 15px;
+}
+.page {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 40px 32px 80px;
+  background: white;
+  min-height: 100vh;
+  box-shadow: 0 0 30px rgba(0,0,0,0.05);
+}
+
+/* Cover */
+.cover {
+  background: linear-gradient(135deg, #2d6a4f 0%, #40916c 50%, #52b788 100%);
+  color: white;
+  padding: 60px 40px;
+  border-radius: 16px;
+  margin-bottom: 40px;
+  position: relative;
+  overflow: hidden;
+}
+.cover::after {
+  content: '🛒';
+  position: absolute;
+  right: -20px; bottom: -40px;
+  font-size: 220px;
+  opacity: 0.12;
+}
+.cover .label { font-size: 13px; font-weight: 600; letter-spacing: 2px; opacity: 0.8; margin-bottom: 10px; text-transform: uppercase; }
+.cover h1 { font-size: 38px; font-weight: 800; margin-bottom: 12px; line-height: 1.2; }
+.cover .subtitle { font-size: 17px; opacity: 0.92; max-width: 540px; }
+.cover .meta {
+  margin-top: 28px;
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  opacity: 0.85;
+}
+.cover .meta div span { font-weight: 700; display: block; font-size: 11px; opacity: 0.8; letter-spacing: 1px; }
+
+/* Sections */
+.section {
+  margin-bottom: 44px;
+  page-break-inside: avoid;
+}
+.section h2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1a1c1c;
+  margin-bottom: 8px;
+  padding-bottom: 10px;
+  border-bottom: 3px solid #2d6a4f;
+  display: inline-block;
+}
+.section h2 .num {
+  color: #40916c;
+  margin-right: 10px;
+  font-weight: 900;
+}
+.section .intro {
+  color: #555;
+  margin-bottom: 22px;
+  font-size: 14px;
+}
+.section h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d6a4f;
+  margin: 22px 0 10px;
+}
+.section p { margin-bottom: 12px; color: #333; font-size: 14px; }
+.section ul { margin: 10px 0 16px 22px; }
+.section ul li { margin-bottom: 6px; font-size: 14px; color: #333; }
+.section ul li strong { color: #1a1c1c; }
+
+/* Highlight box */
+.box {
+  background: #f0fdf4;
+  border-left: 4px solid #40916c;
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin: 16px 0;
+  font-size: 14px;
+  color: #1b5e20;
+}
+.box.warn { background: #fff8e1; border-left-color: #ffa000; color: #6d4c00; }
+.box.info { background: #e3f2fd; border-left-color: #1976d2; color: #0d3c70; }
+
+/* Stats grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+  margin: 20px 0;
+}
+.stat-card {
+  background: white;
+  border: 1px solid #e6e8eb;
+  border-radius: 10px;
+  padding: 18px;
+  text-align: center;
+}
+.stat-card .num { font-size: 26px; font-weight: 800; color: #2d6a4f; }
+.stat-card .label { font-size: 12px; color: #666; margin-top: 4px; }
+
+/* Role cards */
+.roles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin: 20px 0;
+}
+.role-card {
+  border: 1px solid #e6e8eb;
+  border-radius: 12px;
+  padding: 18px;
+  background: white;
+}
+.role-card .icon {
+  font-size: 30px;
+  margin-bottom: 8px;
+}
+.role-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 6px; color: #1a1c1c; }
+.role-card p { font-size: 12px; color: #666; line-height: 1.55; }
+.role-card .feats { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #e6e8eb; }
+.role-card .feats li { font-size: 12px; color: #444; margin-left: 14px; }
+
+/* Process flow */
+.flow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+  padding: 16px;
+  background: #f7f9fb;
+  border-radius: 10px;
+}
+.flow-step {
+  background: white;
+  border: 1px solid #d1e7dd;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #2d6a4f;
+}
+.flow-arrow { color: #888; font-size: 14px; }
+
+/* Tech stack */
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+.tech-pill {
+  background: #1a1c1c;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  text-align: center;
+  font-weight: 600;
+}
+.tech-pill.green { background: #2d6a4f; }
+.tech-pill.blue { background: #1565c0; }
+.tech-pill.purple { background: #6a1b9a; }
+.tech-pill.orange { background: #e65100; }
+
+/* Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0;
+  font-size: 13px;
+}
+table th, table td {
+  border: 1px solid #e6e8eb;
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+table th {
+  background: #f0fdf4;
+  font-weight: 700;
+  color: #1a4d2e;
+}
+table td:first-child { font-weight: 600; color: #1a1c1c; width: 30%; }
+
+/* Print button */
+.print-btn {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  background: #2d6a4f;
+  color: white;
+  border: none;
+  border-radius: 24px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 100;
+}
+.print-btn:hover { background: #1f4a37; }
+
+/* Footer */
+.footer {
+  margin-top: 60px;
+  padding-top: 24px;
+  border-top: 1px solid #e6e8eb;
+  font-size: 12px;
+  color: #888;
+  text-align: center;
+}
+
+@media print {
+  body { background: white; }
+  .page { box-shadow: none; padding: 0; max-width: none; }
+  .print-btn { display: none; }
+  .cover { page-break-after: always; }
+  .section { page-break-inside: avoid; }
+}
+
+@media (max-width: 640px) {
+  .page { padding: 20px 16px; }
+  .cover { padding: 36px 22px; }
+  .cover h1 { font-size: 28px; }
+  .section h2 { font-size: 18px; }
+}
+</style>
+</head>
+<body>
+
+<button class="print-btn" onclick="window.print()">⬇️ PDF로 저장</button>
+
+<div class="page">
+
+<!-- ─────── COVER ─────── -->
+<div class="cover">
+  <div class="label">Concept Paper · v1.0</div>
+  <h1>🛒 코사마트<br>(Kosamart)</h1>
+  <div class="subtitle">
+    종로구 동네 가게와 주민을 잇는<br>
+    하이퍼로컬 마켓플레이스 &amp; 그룹 공구 플랫폼
+  </div>
+  <div class="meta">
+    <div><span>발행일</span>2026.04.24</div>
+    <div><span>버전</span>v1.0</div>
+    <div><span>분류</span>Service Concept Paper</div>
+    <div><span>운영 지역</span>서울 종로구 5개 동</div>
+  </div>
+</div>
+
+<!-- ─────── 1. 서비스 한 줄 ─────── -->
+<div class="section">
+  <h2><span class="num">01</span>한 줄 정의</h2>
+  <div class="box">
+    <strong>"동네 사장님이 직접 운영하고, 주민이 직접 주문·픽업·배달받는 마이크로 마켓"</strong><br>
+    <small>대형 플랫폼 수수료 없이 사장님의 마진을 지키고, 동네 단위의 빠른 배송과 매장 픽업을 함께 제공합니다.</small>
+  </div>
+</div>
+
+<!-- ─────── 2. 문제 의식 ─────── -->
+<div class="section">
+  <h2><span class="num">02</span>문제 의식</h2>
+  <p>기존 음식·식료품 배달 플랫폼은 다음과 같은 한계가 있습니다.</p>
+  <ul>
+    <li><strong>높은 수수료 부담</strong> — 매출의 10~30%를 수수료로 잃는 동네 가게</li>
+    <li><strong>복잡한 등록·정산</strong> — 디지털 친화도가 낮은 노포·소상공인의 진입 장벽</li>
+    <li><strong>광역 배송 모델의 비효율</strong> — 좁은 지역 안의 짧은 배달이 대형 라이더 시스템에 묻힘</li>
+    <li><strong>그룹 공동구매의 불편</strong> — 카톡 단톡방 운영의 수기 정산·취합 부담</li>
+  </ul>
+  <div class="box warn">
+    🎯 <strong>코사마트는</strong> 종로구 한 동네에 집중해, 가게는 <b>가입·관리가 쉬운 사장님 모드</b>를, 주민은 <b>회원가입 1분으로 다회 주문</b>을 가능하게 만들어 이 문제를 해결합니다.
+  </div>
+</div>
+
+<!-- ─────── 3. 지표 ─────── -->
+<div class="section">
+  <h2><span class="num">03</span>서비스 핵심 수치</h2>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="num">5</div><div class="label">운영 동 (종로구)</div></div>
+    <div class="stat-card"><div class="num">6+</div><div class="label">입점 가게 카테고리</div></div>
+    <div class="stat-card"><div class="num">4</div><div class="label">사용자 역할</div></div>
+    <div class="stat-card"><div class="num">0%</div><div class="label">중간 수수료</div></div>
+    <div class="stat-card"><div class="num">2,000원</div><div class="label">기본 배달비</div></div>
+    <div class="stat-card"><div class="num">5,000원~</div><div class="label">최소 주문</div></div>
+  </div>
+  <p style="font-size:12px;color:#888;margin-top:6px;">* 운영 지역: 종로구 신영동·홍지동·부암동·평창동·구기동</p>
+</div>
+
+<!-- ─────── 4. 4개 역할 모델 ─────── -->
+<div class="section">
+  <h2><span class="num">04</span>4-Role 시스템</h2>
+  <p class="intro">한 플랫폼 안에서 4가지 역할이 상호작용합니다.</p>
+  <div class="roles-grid">
+    <div class="role-card">
+      <div class="icon">🧑</div>
+      <h4>고객</h4>
+      <p>주민. 회원가입 후 동네 가게에서 주문·결제·배달 추적까지.</p>
+      <div class="feats"><ul>
+        <li>여러 가게 동시 주문</li>
+        <li>배달 / 매장 픽업 선택</li>
+        <li>실시간 상태 추적</li>
+      </ul></div>
+    </div>
+    <div class="role-card">
+      <div class="icon">🏪</div>
+      <h4>사장님</h4>
+      <p>입점 가게의 운영자. 본인 가게 데이터만 접근 가능 (서버 검증).</p>
+      <div class="feats"><ul>
+        <li>주문 입금확인·승인·거부</li>
+        <li>상품 등록·순서 조정</li>
+        <li>영업시간·휴무 설정</li>
+      </ul></div>
+    </div>
+    <div class="role-card">
+      <div class="icon">🚚</div>
+      <h4>배달기사</h4>
+      <p>지역 배달 파트너. 첫 수락 우선 배정 방식.</p>
+      <div class="feats"><ul>
+        <li>대기 배달 수락</li>
+        <li>픽업·완료·실패 처리</li>
+        <li>배달 사진 첨부</li>
+      </ul></div>
+    </div>
+    <div class="role-card">
+      <div class="icon">⚙️</div>
+      <h4>관리자</h4>
+      <p>플랫폼 운영자. 전체 가게·사용자·공구를 총괄.</p>
+      <div class="feats"><ul>
+        <li>가게 생성·텔레그램 연동</li>
+        <li>사용자·계정 관리</li>
+        <li>공구 상품 운영</li>
+      </ul></div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────── 5. 핵심 흐름 ─────── -->
+<div class="section">
+  <h2><span class="num">05</span>주문 처리 플로우</h2>
+  <h3>① 배달 주문</h3>
+  <div class="flow">
+    <div class="flow-step">고객 주문</div><span class="flow-arrow">→</span>
+    <div class="flow-step">계좌이체</div><span class="flow-arrow">→</span>
+    <div class="flow-step">사장님 입금확인·승인</div><span class="flow-arrow">→</span>
+    <div class="flow-step">기사 수락·픽업</div><span class="flow-arrow">→</span>
+    <div class="flow-step">배달 완료</div>
+  </div>
+
+  <h3>② 매장 픽업 주문</h3>
+  <div class="flow">
+    <div class="flow-step">고객 주문</div><span class="flow-arrow">→</span>
+    <div class="flow-step">계좌이체</div><span class="flow-arrow">→</span>
+    <div class="flow-step">사장님 입금확인·준비</div><span class="flow-arrow">→</span>
+    <div class="flow-step">고객 매장 방문</div><span class="flow-arrow">→</span>
+    <div class="flow-step">픽업 완료</div>
+  </div>
+
+  <div class="box info">
+    📡 매 단계마다 <b>텔레그램 봇</b>이 관리자·해당 가게·기사 그룹에 자동 알림을 발송합니다 (DB 트리거 기반).
+  </div>
+</div>
+
+<!-- ─────── 6. 차별화 ─────── -->
+<div class="section">
+  <h2><span class="num">06</span>차별화 요소</h2>
+  <table>
+    <tr><th>차별 포인트</th><th>구현 내용</th></tr>
+    <tr><td>중간 수수료 0%</td><td>고객→가게 직접 계좌이체 모델. 플랫폼은 수수료를 받지 않음.</td></tr>
+    <tr><td>동네 단위 운영</td><td>종로구 5개 동에 한정 — 단거리 배달, 매장 픽업 자유로움</td></tr>
+    <tr><td>4-Role 자율 운영</td><td>사장님이 직접 상품·영업시간·순서 관리. 관리자는 가게 생성·정산만.</td></tr>
+    <tr><td>설치 없음</td><td>PWA 기반 모바일 웹. 카톡 공유 한 번으로 진입.</td></tr>
+    <tr><td>실시간 알림</td><td>텔레그램 봇 통합. 별도 푸시 인프라 없이 즉시 통보.</td></tr>
+    <tr><td>그룹 공동구매</td><td>관리자가 공구 캠페인을 운영. 마감 알림·자동 집계 지원.</td></tr>
+  </table>
+</div>
+
+<!-- ─────── 7. 기술 스택 ─────── -->
+<div class="section">
+  <h2><span class="num">07</span>기술 스택</h2>
+  <h3>Frontend</h3>
+  <div class="tech-grid">
+    <div class="tech-pill">Next.js 16</div>
+    <div class="tech-pill">React 19</div>
+    <div class="tech-pill">TypeScript</div>
+    <div class="tech-pill">Tailwind CSS</div>
+    <div class="tech-pill">Turbopack</div>
+  </div>
+  <h3>Backend & Infra</h3>
+  <div class="tech-grid">
+    <div class="tech-pill green">Supabase Postgres</div>
+    <div class="tech-pill green">Supabase Storage</div>
+    <div class="tech-pill green">Supabase Auth</div>
+    <div class="tech-pill green">pg_cron / pg_net</div>
+    <div class="tech-pill purple">Railway</div>
+  </div>
+  <h3>Integration</h3>
+  <div class="tech-grid">
+    <div class="tech-pill blue">Telegram Bot API</div>
+    <div class="tech-pill blue">httpOnly Cookie Auth</div>
+    <div class="tech-pill blue">Webhook (HMAC-Secret)</div>
+  </div>
+</div>
+
+<!-- ─────── 8. 데이터 모델 ─────── -->
+<div class="section">
+  <h2><span class="num">08</span>데이터 모델 핵심</h2>
+  <table>
+    <tr><th>엔티티</th><th>설명</th></tr>
+    <tr><td>users</td><td>4가지 역할 (customer/owner/driver/admin), 사장님은 store_id로 가게 바인딩</td></tr>
+    <tr><td>stores</td><td>가게 정보 (영업시간·휴무·계좌·텔레그램 ChatID)</td></tr>
+    <tr><td>products</td><td>가게별 상품 (sort_order 기반 노출 순서 제어)</td></tr>
+    <tr><td>orders</td><td>주문 (status: pending → paid → approved → delivering → delivered)</td></tr>
+    <tr><td>order_items</td><td>주문 상세 (가격·수량·소계 스냅샷)</td></tr>
+    <tr><td>deliveries</td><td>배달 (driver_id, 사진, 상태). 픽업 주문은 생성하지 않음</td></tr>
+    <tr><td>group_buys</td><td>공구 캠페인 (관리자 운영)</td></tr>
+    <tr><td>order_status_logs</td><td>상태 전이 감사 로그</td></tr>
+  </table>
+</div>
+
+<!-- ─────── 9. 보안 / 개인정보 ─────── -->
+<div class="section">
+  <h2><span class="num">09</span>보안 &amp; 개인정보 정책</h2>
+  <table>
+    <tr><th>영역</th><th>정책</th></tr>
+    <tr><td>인증</td><td>bcrypt 비밀번호 해시 + httpOnly·Secure·SameSite=lax 쿠키</td></tr>
+    <tr><td>권한 분리</td><td>모든 API에서 역할 검증. 사장님은 본인 store_id 매칭 검증 (서버 사이드)</td></tr>
+    <tr><td>웹훅 보안</td><td>WEBHOOK_SECRET 헤더 검증으로 외부 위조 차단</td></tr>
+    <tr><td>입력 검증</td><td>가격·재고 음수 차단, 파일 업로드 10MB / 이미지 MIME 화이트리스트</td></tr>
+    <tr><td>PII 자동 파기</td><td>완료된 주문의 전화번호·주소·닉네임을 일정 기간 후 자동 익명화 (pg_cron)</td></tr>
+    <tr><td>역할 격리</td><td>고객은 본인 주문만, 기사는 본인 배달만, 사장님은 본인 가게 주문만 조회</td></tr>
+    <tr><td>로깅</td><td>주문 상태 전이는 order_status_logs에 감사 기록</td></tr>
+  </table>
+  <div class="box">
+    🔒 <strong>"필요한 것만, 필요한 사람에게만"</strong> — 데이터 최소 노출 원칙을 모든 API 응답에 적용합니다.
+  </div>
+</div>
+
+<!-- ─────── 10. 사용자 시나리오 ─────── -->
+<div class="section">
+  <h2><span class="num">10</span>대표 사용자 시나리오</h2>
+
+  <h3>📖 시나리오 A — 평창동 주민 김씨의 저녁 반찬</h3>
+  <p style="font-size:13px;color:#444;">
+    저녁 7시, 김씨는 카톡으로 받은 코사마트 링크를 열어 가입한다. 반찬가게에서 시금치나물·고등어조림을 담고, 평창동 주소 입력 후 "주문하기". 가게 계좌로 18,500원을 이체하고 닉네임을 입력자명으로 보낸다. 5분 뒤 사장님의 입금확인이 떨어지고, 동네 기사가 수락. 7시 35분, 문 앞에 도착 사진과 함께 배달 완료.
+  </p>
+
+  <h3>📖 시나리오 B — 빵집 사장님 박씨의 새 메뉴 등록</h3>
+  <p style="font-size:13px;color:#444;">
+    아침 6시, 박씨는 새로 만든 잡곡식빵을 코사마트에 등록한다. 사진을 한 장 찍어 올리고, 가격 4,500원 입력, 인기 메뉴는 ▲ 버튼으로 위로 올린다. 저장 없이 즉시 반영 — 고객 화면에서도 바로 노출. 첫 주문은 30분 만에 들어왔다.
+  </p>
+
+  <h3>📖 시나리오 C — 관리자의 단오 공동구매</h3>
+  <p style="font-size:13px;color:#444;">
+    관리자는 단오 절기에 맞춰 강원도 직배송 단호박 공구를 연다. 마감일을 5/30로 설정하고 텔레그램 그룹에 안내. 30주민이 참여하고, 마감일 새벽에 자동 정산 알림이 발송된다.
+  </p>
+</div>
+
+<!-- ─────── 11. 향후 로드맵 ─────── -->
+<div class="section">
+  <h2><span class="num">11</span>향후 로드맵</h2>
+  <table>
+    <tr><th>단계</th><th>주요 항목</th></tr>
+    <tr><td>Phase 1 (현재)</td><td>4-Role 운영, 종로구 5개 동, 6+ 입점 가게, 텔레그램 알림, 그룹 공구</td></tr>
+    <tr><td>Phase 2 (단기)</td><td>매출 정산 리포트 자동화, 단골 리워드, 카드결제 연동 검토</td></tr>
+    <tr><td>Phase 3 (중기)</td><td>인근 동(부암·홍지 외) 추가 확장, 기사 인센티브 시스템, 공구 캘린더</td></tr>
+    <tr><td>Phase 4 (장기)</td><td>지자체·동네 단체와의 연계, 비영리 공구 모델, 다국어 (외국인 주민) 지원</td></tr>
+  </table>
+</div>
+
+<!-- ─────── 12. 한 페이지 요약 ─────── -->
+<div class="section">
+  <h2><span class="num">12</span>한 페이지 요약 (Pitch)</h2>
+  <div class="box" style="background:#1a1c1c;color:white;border-left-color:#52b788;">
+    <p style="color:white;font-size:15px;line-height:1.8;">
+      <strong style="font-size:16px;color:#52b788;">코사마트는</strong> 종로구 동네 단위에서 작동하는, <strong>수수료 0%</strong>의 마이크로 마켓플레이스입니다.<br><br>
+      🏪 사장님은 디지털 진입 장벽 없이 가게를 운영하고,<br>
+      🧑 주민은 카톡 한 번으로 가입해 여러 가게를 동시에 주문하며,<br>
+      🚚 배달은 동네 안에서 빠르게,<br>
+      ⚙️ 운영은 단 한 명의 관리자로도 충분합니다.<br><br>
+      대형 플랫폼이 놓친 <strong>"가까운 곳, 가까운 사람"</strong>의 가치를 기술로 다시 잇습니다.
+    </p>
+  </div>
+</div>
+
+<div class="footer">
+  © 2026 코사마트 (Kosamart) · Concept Paper v1.0 · 2026.04.24<br>
+  운영: 서울 종로구 · 문의: 관리자 전용 채널
+</div>
+
+</div>
+
+</body>
+</html>

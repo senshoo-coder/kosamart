@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+export const CONCEPT_PAPER_HTML = `<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -511,3 +511,4 @@ table td:first-child { font-weight: 600; color: #1a1c1c; width: 30%; }
 
 </body>
 </html>
+`

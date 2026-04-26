@@ -25,6 +25,11 @@ const MODE_CONFIG: Record<string, { allowedRoles: string[]; loginRole: string; h
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // 옛 컨셉 페이퍼 URL 리다이렉트
+  if (pathname === '/concept.html') {
+    return NextResponse.redirect(new URL('/concept', request.url))
+  }
+
   // 프로덕션에서 개발 전용 경로 차단
   if (process.env.NODE_ENV === 'production') {
     if (pathname === '/test' || pathname.startsWith('/api/auth/demo')) {
@@ -104,6 +109,7 @@ export const config = {
     '/',
     '/login',
     '/register',
+    '/concept.html',
     '/shop/:path*',
     '/market/:path*',
     '/orders/:path*',

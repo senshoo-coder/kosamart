@@ -25,9 +25,12 @@ const MODE_CONFIG: Record<string, { allowedRoles: string[]; loginRole: string; h
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // 옛 컨셉 페이퍼 URL 리다이렉트
+  // 옛 컨셉 페이퍼 URL 리다이렉트 (상대 경로로 — 프록시 뒤에서도 안전)
   if (pathname === '/concept.html') {
-    return NextResponse.redirect(new URL('/concept', request.url))
+    return new NextResponse(null, {
+      status: 307,
+      headers: { Location: '/concept' },
+    })
   }
 
   // 프로덕션에서 개발 전용 경로 차단

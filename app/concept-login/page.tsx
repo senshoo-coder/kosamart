@@ -21,7 +21,7 @@ export default function ConceptLoginPage() {
       const json = await res.json()
       if (json.ok) {
         // 인증 성공 → 컨셉 페이퍼로 이동
-        window.location.href = '/concept.html'
+        window.location.href = '/concept'
       } else {
         setError(json.error || '비밀번호가 올바르지 않습니다')
       }

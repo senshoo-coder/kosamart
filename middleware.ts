@@ -1,14 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
-// 컨셉 페이퍼는 비밀번호 인증 후에만 접근 가능
+// 옛 경로 (/concept.html)는 새 경로로 리다이렉트
 export function middleware(req: NextRequest) {
-  const url = req.nextUrl.pathname
-  if (url === '/concept.html') {
-    const access = req.cookies.get('concept_access')?.value
-    if (access !== 'granted') {
-      const loginUrl = new URL('/concept-login', req.url)
-      return NextResponse.redirect(loginUrl)
-    }
+  if (req.nextUrl.pathname === '/concept.html') {
+    return NextResponse.redirect(new URL('/concept', req.url))
   }
   return NextResponse.next()
 }

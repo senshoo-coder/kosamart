@@ -63,6 +63,10 @@ export default function ForgotPasswordPage() {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="bg-[#fff8e1] border border-[#fbbf24]/30 rounded-lg px-4 py-3 text-[12.5px] leading-relaxed text-[#7c4a03]">
+              <p className="font-bold mb-1">💡 안내</p>
+              <p>코사마트는 비밀번호 분실 시 자동 재설정 이메일·SMS를 발송하지 않습니다. 닉네임으로 본인 확인 후 관리자가 직접 회신해 드립니다.</p>
+            </div>
             <div>
               <label className="block text-xs font-bold text-[#191c1e] uppercase tracking-wider mb-2">
                 닉네임 <span className="text-[#dc2626]">*</span>

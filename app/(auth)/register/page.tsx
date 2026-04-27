@@ -117,6 +117,12 @@ function RegisterForm() {
             </div>
           </div>
 
+          {/* 닉네임 분실 방지 안내 */}
+          <div className="bg-[#fff8e1] border border-[#fbbf24]/30 rounded-xl px-4 py-3 text-[12.5px] leading-relaxed text-[#7c4a03]">
+            <p className="font-bold mb-1">💡 닉네임을 꼭 기억해 주세요!</p>
+            <p>코사마트는 비밀번호 분실 시 자동 재설정 이메일·SMS를 발송하지 않습니다. 닉네임으로만 본인 확인이 가능하므로 안전하게 기록해 두세요.</p>
+          </div>
+
           {/* 입력 필드 */}
           <Input
             label="닉네임"

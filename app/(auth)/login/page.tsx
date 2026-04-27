@@ -214,11 +214,14 @@ function LoginForm() {
         </button>
 
         {/* 비밀번호 찾기 */}
-        <p className="mt-4 text-center">
+        <div className="mt-4 text-center">
           <Link href="/forgot-password" className="text-xs text-[#6c7a71] hover:text-[#006c49] hover:underline">
             비밀번호를 잊으셨나요?
           </Link>
-        </p>
+          <p className="text-[10px] text-[#9aa1a6] mt-1">
+            닉네임은 비밀번호 재설정의 유일한 단서입니다 — 안전하게 보관해 주세요
+          </p>
+        </div>
 
         {/* 회원가입 */}
         {role === 'customer' && (

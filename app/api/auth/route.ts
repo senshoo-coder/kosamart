@@ -39,12 +39,12 @@ export async function POST(req: NextRequest) {
   }
 
   // 선택한 역할과 실제 계정 역할이 다르면 차단
+  // (보안: 실제 역할을 노출하지 않음 — 계정 열거 공격 방지)
   function checkRoleMatch(actualRole: string): NextResponse | null {
     if (expected_role && expected_role !== actualRole) {
       const want = ROLE_LABELS[expected_role] ?? expected_role
-      const have = ROLE_LABELS[actualRole] ?? actualRole
       return NextResponse.json(
-        { data: null, error: `${want} 계정이 아닙니다 (${have} 계정). 올바른 역할 탭을 선택해 주세요` },
+        { data: null, error: `${want} 계정이 아닙니다. 올바른 역할 탭에서 다시 시도해 주세요` },
         { status: 403 }
       )
     }

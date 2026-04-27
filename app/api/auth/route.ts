@@ -20,9 +20,16 @@ const DEMO_ACCOUNTS = [
   { id: 'demo-admin-001',    nickname: '관리자',      password: 'demo1234', role: 'admin', device_uuid: 'demo-uuid-admin' },
 ]
 
+const ROLE_LABELS: Record<string, string> = {
+  customer: '고객',
+  owner: '사장님',
+  driver: '배달기사',
+  admin: '관리자',
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { nickname, password, device_uuid } = body
+  const { nickname, password, device_uuid, expected_role } = body
 
   if (!nickname?.trim()) {
     return NextResponse.json({ data: null, error: '닉네임을 입력해주세요' }, { status: 400 })
@@ -31,12 +38,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ data: null, error: '비밀번호를 입력해주세요' }, { status: 400 })
   }
 
+  // 선택한 역할과 실제 계정 역할이 다르면 차단
+  function checkRoleMatch(actualRole: string): NextResponse | null {
+    if (expected_role && expected_role !== actualRole) {
+      const want = ROLE_LABELS[expected_role] ?? expected_role
+      const have = ROLE_LABELS[actualRole] ?? actualRole
+      return NextResponse.json(
+        { data: null, error: `${want} 계정이 아닙니다 (${have} 계정). 올바른 역할 탭을 선택해 주세요` },
+        { status: 403 }
+      )
+    }
+    return null
+  }
+
   // 데모 모드
   if (isDemoMode) {
     const demoUser = DEMO_ACCOUNTS.find(u => u.nickname === nickname.trim() && u.password === password)
     if (!demoUser) {
       return NextResponse.json({ data: null, error: '닉네임 또는 비밀번호가 올바르지 않습니다' }, { status: 401 })
     }
+    const roleErr = checkRoleMatch(demoUser.role)
+    if (roleErr) return roleErr
     const cookieStore = await cookies()
     const secure = process.env.NODE_ENV === 'production'
     cookieStore.set('cosmart_user_id', demoUser.id, { httpOnly: true, sameSite: 'lax', secure, maxAge: 60 * 60 * 24 * 30 })
@@ -58,6 +80,8 @@ export async function POST(req: NextRequest) {
     if (process.env.NODE_ENV !== 'production') {
       const demoUser = DEMO_ACCOUNTS.find(u => u.nickname === nickname.trim() && u.password === password)
       if (demoUser) {
+        const roleErr = checkRoleMatch(demoUser.role)
+        if (roleErr) return roleErr
         const cookieStore = await cookies()
         cookieStore.set('cosmart_user_id', demoUser.id, { httpOnly: true, sameSite: 'lax', maxAge: 60 * 60 * 24 * 30 })
         cookieStore.set('cosmart_role', demoUser.role, { httpOnly: true, sameSite: 'lax', maxAge: 60 * 60 * 24 * 30 })
@@ -81,6 +105,10 @@ export async function POST(req: NextRequest) {
   if (!passwordMatch) {
     return NextResponse.json({ data: null, error: '닉네임 또는 비밀번호가 올바르지 않습니다' }, { status: 401 })
   }
+
+  // 선택한 역할과 실제 계정 역할 일치 검증
+  const roleErr = checkRoleMatch(user.role)
+  if (roleErr) return roleErr
 
   // 계정 상태 확인
   if (user.status === 'pending') {

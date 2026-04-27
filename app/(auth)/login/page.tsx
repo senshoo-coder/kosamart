@@ -49,6 +49,7 @@ function LoginForm() {
           nickname: nickname.trim(),
           password,
           device_uuid: getLocalStorage('cosmart_device_uuid') || generateDeviceUUID(),
+          expected_role: role,
         }),
       })
       const data = await res.json()
@@ -211,6 +212,13 @@ function LoginForm() {
             <><span className="material-symbols-outlined text-[18px]" style={{fontVariationSettings: "'FILL' 1"}}>{cfg.icon}</span>{cfg.label} 로그인<span className="material-symbols-outlined text-[18px]">arrow_forward</span></>
           )}
         </button>
+
+        {/* 비밀번호 찾기 */}
+        <p className="mt-4 text-center">
+          <Link href="/forgot-password" className="text-xs text-[#6c7a71] hover:text-[#006c49] hover:underline">
+            비밀번호를 잊으셨나요?
+          </Link>
+        </p>
 
         {/* 회원가입 */}
         {role === 'customer' && (

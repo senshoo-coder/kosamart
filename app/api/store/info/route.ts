@@ -80,6 +80,14 @@ export async function PATCH(req: NextRequest) {
     if (f in fields) filtered[f] = fields[f]
   }
 
+  // 음수 차단
+  if (filtered.deliveryFee != null && filtered.deliveryFee < 0) {
+    return NextResponse.json({ error: '배달비는 0 이상이어야 합니다' }, { status: 400 })
+  }
+  if (filtered.minOrder != null && filtered.minOrder < 0) {
+    return NextResponse.json({ error: '최소 주문 금액은 0 이상이어야 합니다' }, { status: 400 })
+  }
+
   if (Object.keys(filtered).length === 0) {
     return NextResponse.json({ error: '수정할 항목이 없습니다' }, { status: 400 })
   }

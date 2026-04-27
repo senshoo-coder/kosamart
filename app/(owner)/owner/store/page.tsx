@@ -531,8 +531,10 @@ export default function OwnerStorePage() {
                   <label className="text-[11px] text-[#a3a3a3] font-medium block mb-1">배달비 (원, 0=무료)</label>
                   <input
                     type="number"
+                    min="0"
+                    step="500"
                     value={infoForm.deliveryFee}
-                    onChange={e => setInfoForm(f => ({ ...f, deliveryFee: Number(e.target.value) }))}
+                    onChange={e => setInfoForm(f => ({ ...f, deliveryFee: Math.max(0, Number(e.target.value)) }))}
                     className="w-full border border-[#e0e0e0] rounded-[8px] px-3 py-2 text-[13px] text-[#1a1c1c] focus:outline-none focus:border-[#0058be]"
                   />
                 </div>

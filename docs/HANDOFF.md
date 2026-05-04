@@ -12,7 +12,9 @@
 - 4-Role: 고객 / 사장님 / 배달기사 / 관리자
 - **수수료 0%**, 점포별 직접 결제(계좌이체) — 플랫폼은 결제금 미경유 (법적 리스크 회피 핵심 원칙)
 - Next.js 16 + Supabase + Railway 배포
-- 운영 도메인: `https://kosamart-production.up.railway.app`
+- 운영 도메인:
+  - 메인 (예정): `https://골목상점.kr` (Punycode: `xn--vk1bp48b3wb.kr`)
+  - 백업/원본: `https://kosamart-production.up.railway.app`
 
 ---
 
@@ -156,7 +158,9 @@ supabase/migrations/           # 001~013 SQL 마이그레이션
 - **문서**: `/manual.html` (공개, 4-Role 매뉴얼), `/concept` (비밀번호 보호 컨셉 페이퍼)
 
 ### 운영 정보
-- **배포 URL**: `https://kosamart-production.up.railway.app`
+- **배포 URL**:
+  - 메인 (예정): `https://골목상점.kr` — Punycode `xn--vk1bp48b3wb.kr`. 등록·DNS 연결 완료 후 활성화
+  - 백업/원본: `https://kosamart-production.up.railway.app` (Railway 기본 도메인, 영구 유지)
 - **컨셉 페이퍼**: `/concept` (비밀번호 `kosamart2026`, env `CONCEPT_PAGE_PASSWORD`로 변경)
 - **매뉴얼**: `/manual.html`
 - **Repo**: `senshoo-coder/kosamart`
@@ -254,7 +258,7 @@ docs/HANDOFF.md를 먼저 읽고 컨텍스트를 파악해줘.
 
 주요 정보:
 - Repo: senshoo-coder/kosamart
-- 운영: https://kosamart-production.up.railway.app
+- 운영: https://골목상점.kr (예정) / https://kosamart-production.up.railway.app (백업)
 - main 브랜치 push 시 Railway 자동 배포
 - 데모 비번: demo1234 (모든 데모 계정)
 - 컨셉 페이퍼 비번: kosamart2026 (env CONCEPT_PAGE_PASSWORD)

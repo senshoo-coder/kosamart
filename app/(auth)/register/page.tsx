@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { generateDeviceUUID, getLocalStorage, setLocalStorage } from '@/lib/utils'
+import { filterPasswordInput, isValidPasswordFormat, PASSWORD_HELPER_TEXT } from '@/lib/utils/password'
 import Link from 'next/link'
 
 const ROLES = [
@@ -30,6 +31,7 @@ function RegisterForm() {
   async function handleRegister() {
     if (!nickname.trim()) { setError('닉네임을 입력해주세요'); return }
     if (password.length < 6) { setError('비밀번호는 6자 이상이어야 합니다'); return }
+    if (!isValidPasswordFormat(password)) { setError('비밀번호는 영문·숫자·특수기호만 사용 가능합니다'); return }
     if (password !== confirm) { setError('비밀번호가 일치하지 않습니다'); return }
 
     setLoading(true); setError('')
@@ -136,19 +138,22 @@ function RegisterForm() {
             value={phone}
             onChange={e => setPhone(e.target.value)}
           />
-          <Input
-            label="비밀번호"
-            type="password"
-            placeholder="6자 이상"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-          />
+          <div>
+            <Input
+              label="비밀번호"
+              type="password"
+              placeholder="6자 이상"
+              value={password}
+              onChange={e => setPassword(filterPasswordInput(e.target.value))}
+            />
+            <p className="text-[11px] text-[#a3a3a3] mt-1.5 px-1">{PASSWORD_HELPER_TEXT}</p>
+          </div>
           <Input
             label="비밀번호 확인"
             type="password"
             placeholder="비밀번호 재입력"
             value={confirm}
-            onChange={e => setConfirm(e.target.value)}
+            onChange={e => setConfirm(filterPasswordInput(e.target.value))}
             onKeyDown={e => e.key === 'Enter' && handleRegister()}
           />
 

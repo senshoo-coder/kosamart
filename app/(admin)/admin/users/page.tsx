@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { STORES } from '@/lib/market-data'
+import { filterPasswordInput, PASSWORD_HELPER_TEXT } from '@/lib/utils/password'
 
 interface StoreOption { id: string; name: string; emoji: string }
 
@@ -354,7 +355,10 @@ export default function AdminUsersPage() {
           <div className="relative w-full max-w-sm bg-white rounded-[16px] p-6 space-y-4">
             <h3 className="text-[16px] font-bold text-[#1a1c1c]">계정 직접 생성</h3>
             <Input label="닉네임" value={form.nickname} onChange={e => setForm(f => ({ ...f, nickname: e.target.value }))} />
-            <Input label="비밀번호 (6자 이상)" type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} />
+            <div>
+              <Input label="비밀번호 (6자 이상)" type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: filterPasswordInput(e.target.value) }))} />
+              <p className="text-[11px] text-[#a3a3a3] mt-1.5 px-1">{PASSWORD_HELPER_TEXT}</p>
+            </div>
             <Input label="전화번호 (선택)" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
             <div>
               <p className="text-[11px] text-[#3c4a42] tracking-[0.5px] uppercase mb-2 font-medium">역할</p>
@@ -478,9 +482,12 @@ export default function AdminUsersPage() {
           <div className="relative w-full max-w-sm bg-white rounded-[16px] p-6 space-y-4">
             <h3 className="text-[16px] font-bold text-[#1a1c1c]">비밀번호 초기화</h3>
             <p className="text-[13px] text-[#3c4a42]"><span className="font-semibold text-[#1a1c1c]">{resetTarget.nickname}</span> 계정</p>
-            <Input label="새 비밀번호 (6자 이상)" type="password" value={newPassword}
-              onChange={e => setNewPassword(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleResetPassword()} />
+            <div>
+              <Input label="새 비밀번호 (6자 이상)" type="password" value={newPassword}
+                onChange={e => setNewPassword(filterPasswordInput(e.target.value))}
+                onKeyDown={e => e.key === 'Enter' && handleResetPassword()} />
+              <p className="text-[11px] text-[#a3a3a3] mt-1.5 px-1">{PASSWORD_HELPER_TEXT}</p>
+            </div>
             <div className="flex gap-3 pt-2">
               <Button variant="secondary" className="flex-1" onClick={() => setResetTarget(null)}>취소</Button>
               <Button className="flex-1" loading={actionLoading === resetTarget.id + 'reset'} onClick={handleResetPassword}>변경</Button>

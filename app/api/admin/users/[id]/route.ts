@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import bcrypt from 'bcryptjs'
+import { isValidPasswordFormat } from '@/lib/utils/password'
 
 async function requireAdmin() {
   const cookieStore = await cookies()
@@ -64,6 +65,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   if (action === 'reset_password') {
     if (!password || password.length < 6) return NextResponse.json({ data: null, error: '비밀번호 6자 이상' }, { status: 400 })
+    if (!isValidPasswordFormat(password)) {
+      return NextResponse.json({ data: null, error: '비밀번호는 영문·숫자·특수기호만 사용 가능합니다 (한글 불가)' }, { status: 400 })
+    }
     const password_hash = await bcrypt.hash(password, 10)
     const { data, error } = await supabase
       .from('users').update({ password_hash }).eq('id', id)

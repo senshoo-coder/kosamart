@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import bcrypt from 'bcryptjs'
 import { notifyAdmin } from '@/lib/telegram/messages'
+import { isValidPasswordFormat } from '@/lib/utils/password'
 
 const ROLE_LABELS_REG: Record<string, string> = {
   customer: '고객',
@@ -16,6 +17,9 @@ export async function POST(req: NextRequest) {
 
   if (!nickname?.trim()) return NextResponse.json({ data: null, error: '닉네임을 입력해주세요' }, { status: 400 })
   if (!password || password.length < 6) return NextResponse.json({ data: null, error: '비밀번호는 6자 이상이어야 합니다' }, { status: 400 })
+  if (!isValidPasswordFormat(password)) {
+    return NextResponse.json({ data: null, error: '비밀번호는 영문·숫자·특수기호만 사용 가능합니다 (한글 불가)' }, { status: 400 })
+  }
   if (!['customer', 'owner', 'driver'].includes(role)) {
     return NextResponse.json({ data: null, error: '유효하지 않은 역할입니다' }, { status: 400 })
   }

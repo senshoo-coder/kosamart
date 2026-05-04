@@ -1,6 +1,6 @@
 # 도메인 연결 가이드 — 골목상점.kr
 
-> **상태**: 등록 대기 중
+> **상태**: 운영 중 ✅
 > **Punycode**: `xn--bb0bw4xzve3ni.kr`
 > **연결 대상**: Railway 배포 (`kosamart-production.up.railway.app`)
 
@@ -113,5 +113,4 @@ nslookup xn--bb0bw4xzve3ni.kr 8.8.8.8
 - [ ] 모바일 카톡으로 링크 공유 테스트
 - [ ] SSL 인증서 자동 발급 확인 (자물쇠 아이콘)
 - [ ] 컨셉 페이퍼·매뉴얼 링크 정상 작동 확인
-- [ ] [docs/HANDOFF.md](HANDOFF.md) "예정" → "운영 중" 변경
 - [ ] 기존 Railway URL → 새 도메인으로 301 리다이렉트 검토 (선택)

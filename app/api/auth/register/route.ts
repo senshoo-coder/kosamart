@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import bcrypt from 'bcryptjs'
+import { notifyAdmin } from '@/lib/telegram/messages'
+
+const ROLE_LABELS_REG: Record<string, string> = {
+  customer: '고객',
+  owner: '사장님',
+  driver: '배달기사',
+}
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
@@ -42,6 +49,20 @@ export async function POST(req: NextRequest) {
   }
 
   if (status === 'pending') {
+    // 관리자에게 텔레그램 알림 (실패해도 무시)
+    const roleLabel = ROLE_LABELS_REG[role] ?? role
+    const msg = [
+      `🆕 <b>[신규 가입 신청]</b>`,
+      ``,
+      `역할: <b>${roleLabel}</b>`,
+      `닉네임: <b>${user.nickname}</b>`,
+      phone ? `연락처: ${phone}` : null,
+      `신청 시각: ${new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}`,
+      ``,
+      `→ 관리자 화면 → 사용자 관리 → 승인 대기 탭에서 승인 처리해 주세요.`,
+    ].filter(Boolean).join('\n')
+    await notifyAdmin(msg).catch(() => {})
+
     return NextResponse.json({
       data: { pending: true, nickname: user.nickname, role: user.role },
       error: null,

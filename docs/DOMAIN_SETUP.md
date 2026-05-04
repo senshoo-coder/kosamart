@@ -1,7 +1,7 @@
 # 도메인 연결 가이드 — 골목상점.kr
 
 > **상태**: 등록 대기 중
-> **Punycode**: `xn--vk1bp48b3wb.kr`
+> **Punycode**: `xn--bb0bw4xzve3ni.kr`
 > **연결 대상**: Railway 배포 (`kosamart-production.up.railway.app`)
 
 ---
@@ -18,7 +18,7 @@
 ### 검색 방법
 검색창에 다음 중 하나 입력:
 - `골목상점.kr` (한글 그대로)
-- `xn--vk1bp48b3wb.kr` (Punycode)
+- `xn--bb0bw4xzve3ni.kr` (Punycode)
 
 ### 비용 (참고)
 - `.kr` 한글 도메인 1년: 약 25,000~30,000원
@@ -38,8 +38,8 @@
 2. 좌측 메뉴 → **Settings** → **Networking** (또는 Domains)
 3. **Custom Domain** 섹션에서 `+ Custom Domain` 클릭
 4. 다음 둘 다 추가:
-   - `xn--vk1bp48b3wb.kr` (Punycode 권장 — 호환성 최대)
-   - `www.xn--vk1bp48b3wb.kr`
+   - `xn--bb0bw4xzve3ni.kr` (Punycode 권장 — 호환성 최대)
+   - `www.xn--bb0bw4xzve3ni.kr`
    - 또는 `골목상점.kr` 입력해도 자동 변환됨
 5. Railway가 표시하는 **CNAME 값** 복사 (예: `xxxxx.up.railway.app`)
 
@@ -69,10 +69,10 @@
 ### 확인 방법
 ```bash
 # 한글 도메인은 Punycode로 조회
-nslookup xn--vk1bp48b3wb.kr 8.8.8.8
+nslookup xn--bb0bw4xzve3ni.kr 8.8.8.8
 
 # 또는 온라인 도구
-# https://dnschecker.org/#CNAME/xn--vk1bp48b3wb.kr
+# https://dnschecker.org/#CNAME/xn--bb0bw4xzve3ni.kr
 ```
 
 ---
@@ -90,7 +90,7 @@ nslookup xn--vk1bp48b3wb.kr 8.8.8.8
 ## 5. 한글 도메인 운영 시 주의
 
 ### Punycode 노출 케이스
-일부 메신저/이메일에서 `xn--vk1bp48b3wb.kr` 처럼 노출됨. 대응 전략:
+일부 메신저/이메일에서 `xn--bb0bw4xzve3ni.kr` 처럼 노출됨. 대응 전략:
 
 1. **카톡 공유 시**: 한글 그대로 보냄 → 카톡은 한글로 표시
 2. **텔레그램·디스코드**: Punycode 노출 가능 → 한글 도메인 + 설명 함께 보냄

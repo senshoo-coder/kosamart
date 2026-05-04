@@ -74,7 +74,7 @@ zustand          — 클라이언트 상태관리
 | 호스팅 | Railway |
 | 레포지토리 | https://github.com/senshoo-coder/kosamart |
 | 브랜치 | main (push 시 자동 배포) |
-| 배포 URL (메인) | https://골목상점.kr — Punycode `xn--vk1bp48b3wb.kr`, 등록·DNS 설정 후 활성화 |
+| 배포 URL (메인) | https://골목상점.kr — Punycode `xn--bb0bw4xzve3ni.kr`, 등록·DNS 설정 후 활성화 |
 | 배포 URL (백업) | https://kosamart-production.up.railway.app |
 | Supabase 프로젝트 | https://fvklcspgzwtqjvcbkdhu.supabase.co |
 

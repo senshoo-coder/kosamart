@@ -121,26 +121,6 @@ export default function CustomerProfilePage() {
         >
           로그아웃
         </button>
-
-        {/* 스태프 로그인 */}
-        <div className="bg-white rounded-[8px] p-4">
-          <p className="text-[11px] text-[#a3a3a3] mb-3 font-medium">스태프 전용</p>
-          <div className="flex gap-2">
-            {[
-              { label: '👔 사장님', role: 'owner' },
-              { label: '🏍️ 기사님', role: 'driver' },
-              { label: '🛡️ 관리자', role: 'admin' },
-            ].map(({ label, role }) => (
-              <a
-                key={role}
-                href={`/login?role=${role}`}
-                className="flex-1 py-2 text-center text-[12px] text-[#3c4a42] rounded-[8px] border border-[#e8e8e8] hover:border-[#10b981] hover:text-[#10b981] transition-colors"
-              >
-                {label}
-              </a>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   )

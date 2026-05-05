@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { STORES } from '@/lib/market-data'
 
+type DisplayStatus = 'visible' | 'hidden' | 'coming_soon'
+
 interface StoreDisplay {
   id: string
   name: string
@@ -16,9 +18,22 @@ interface StoreDisplay {
   deliveryFee: number
   accentColor: string
   is_active: boolean
+  display_status: DisplayStatus
+  sort_order: number
   isCustom: boolean
   product_count?: number
   owner_nickname?: string
+}
+
+const STATUS_LABEL: Record<DisplayStatus, string> = {
+  visible: '노출',
+  hidden: '숨김',
+  coming_soon: '입점예정',
+}
+const STATUS_COLOR: Record<DisplayStatus, { bg: string; text: string; border: string }> = {
+  visible:     { bg: '#ede9fe', text: '#6d28d9', border: '#ddd6fe' },
+  hidden:      { bg: '#f3f4f6', text: '#6b7280', border: '#e5e7eb' },
+  coming_soon: { bg: '#fef3c7', text: '#b45309', border: '#fde68a' },
 }
 
 interface StoresConfig {
@@ -51,15 +66,33 @@ const DEFAULT_STORE = {
   deliveryFee: 0, accentColor: '#10b981', bank_account: '', telegram_chat_id: '',
 }
 
-function Toggle({ checked, onChange, disabled }: { checked: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
+function StatusSelect({ value, onChange, disabled, size = 'md' }: {
+  value: DisplayStatus
+  onChange: (v: DisplayStatus) => void
+  disabled?: boolean
+  size?: 'sm' | 'md'
+}) {
+  const opts: DisplayStatus[] = ['visible', 'hidden', 'coming_soon']
+  const padX = size === 'sm' ? 'px-2 py-0.5' : 'px-2.5 py-1'
+  const fontSize = size === 'sm' ? 'text-[10px]' : 'text-[11px]'
   return (
-    <button type="button" role="switch" aria-checked={checked} disabled={disabled}
-      onClick={() => onChange(!checked)}
-      className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-      style={{ background: checked ? '#8B5CF6' : '#d1d5db' }}>
-      <span className="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform duration-200"
-        style={{ transform: checked ? 'translateX(20px)' : 'translateX(0)' }} />
-    </button>
+    <div className={`inline-flex bg-[#f2f4f6] rounded-[6px] p-0.5 ${disabled ? 'opacity-60' : ''}`}>
+      {opts.map(s => {
+        const active = value === s
+        const color = STATUS_COLOR[s]
+        return (
+          <button key={s} type="button" disabled={disabled}
+            onClick={() => onChange(s)}
+            className={`${padX} ${fontSize} font-semibold rounded-[5px] transition-colors`}
+            style={active
+              ? { background: '#fff', color: color.text, boxShadow: '0 1px 2px rgba(0,0,0,0.06)' }
+              : { background: 'transparent', color: '#6b7280' }
+            }>
+            {STATUS_LABEL[s]}
+          </button>
+        )
+      })}
+    </div>
   )
 }
 
@@ -94,8 +127,10 @@ export default function AdminStoresPage() {
 
       if (configData.data) setConfig(configData.data)
 
-      const storeList: StoreDisplay[] = (marketData.data || []).map((s: any) => ({
+      const storeList: StoreDisplay[] = (marketData.data || []).map((s: any, i: number) => ({
         ...s,
+        display_status: (s.display_status as DisplayStatus) || (s.is_active ? 'visible' : 'hidden'),
+        sort_order: typeof s.sort_order === 'number' ? s.sort_order : i,
         product_count: 0,
         owner_nickname: undefined,
       }))
@@ -114,17 +149,24 @@ export default function AdminStoresPage() {
         })
       }
 
-      // 어드민 store-settings(is_active) 덮어쓰기
+      // 어드민 store-settings 덮어쓰기 (display_status, sort_order)
       try {
         const settingsRes = await fetch('/api/admin/stores')
         const settings = await settingsRes.json()
         if (settings.data) {
           settings.data.forEach((s: any) => {
             const store = storeList.find(st => st.id === s.store_id)
-            if (store && s.is_active !== undefined) store.is_active = s.is_active
+            if (store) {
+              if (s.display_status) store.display_status = s.display_status
+              if (typeof s.sort_order === 'number') store.sort_order = s.sort_order
+              store.is_active = store.display_status !== 'hidden'
+            }
           })
         }
       } catch {}
+
+      // sort_order로 정렬
+      storeList.sort((a, b) => (a.sort_order ?? 9999) - (b.sort_order ?? 9999))
 
       setStores(storeList)
     } catch (e) {
@@ -133,15 +175,35 @@ export default function AdminStoresPage() {
     setLoading(false)
   }
 
-  async function toggleActive(store_id: string, is_active: boolean) {
+  async function setDisplayStatus(store_id: string, display_status: DisplayStatus) {
     setToggling(store_id)
+    setStores(prev => prev.map(s =>
+      s.id === store_id ? { ...s, display_status, is_active: display_status !== 'hidden' } : s
+    ))
     await fetch('/api/admin/stores', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ store_id, is_active }),
+      body: JSON.stringify({ store_id, display_status }),
     }).catch(() => {})
-    setStores(prev => prev.map(s => s.id === store_id ? { ...s, is_active } : s))
     setToggling(null)
+  }
+
+  async function moveStore(store_id: string, direction: 'up' | 'down') {
+    const idx = stores.findIndex(s => s.id === store_id)
+    const swap = direction === 'up' ? idx - 1 : idx + 1
+    if (idx < 0 || swap < 0 || swap >= stores.length) return
+
+    // 자리 바꾸고 sort_order 0..N으로 재번호
+    const next = [...stores]
+    ;[next[idx], next[swap]] = [next[swap], next[idx]]
+    const renumbered = next.map((s, i) => ({ ...s, sort_order: i }))
+    setStores(renumbered)
+
+    await fetch('/api/admin/stores', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orders: renumbered.map(s => ({ store_id: s.id, sort_order: s.sort_order })) }),
+    }).catch(() => {})
   }
 
   function openAdd() {
@@ -210,7 +272,9 @@ export default function AdminStoresPage() {
     await loadAll()
   }
 
-  const activeCount = stores.filter(s => s.is_active).length
+  const visibleCount = stores.filter(s => s.display_status === 'visible').length
+  const comingCount = stores.filter(s => s.display_status === 'coming_soon').length
+  const hiddenCount = stores.filter(s => s.display_status === 'hidden').length
 
   return (
     <div className="p-5 space-y-4">
@@ -219,7 +283,7 @@ export default function AdminStoresPage() {
         <div>
           <h1 className="text-[20px] font-bold text-[#1a1c1c]">상점가 가게 관리</h1>
           <p className="text-[12px] text-[#a3a3a3] mt-0.5">
-            전체 {stores.length}개 · 고객 화면 노출 <span className="text-[#8B5CF6] font-semibold">{activeCount}개</span>
+            전체 {stores.length}개 · 노출 <span className="text-[#6d28d9] font-semibold">{visibleCount}</span> · 입점예정 <span className="text-[#b45309] font-semibold">{comingCount}</span> · 숨김 <span className="text-[#6b7280] font-semibold">{hiddenCount}</span>
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -236,7 +300,7 @@ export default function AdminStoresPage() {
       <div className="flex items-start gap-3 px-4 py-3 rounded-[10px] bg-[#ede9fe] border border-[#ddd6fe]">
         <span className="material-symbols-outlined text-[18px] text-[#8B5CF6] mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>info</span>
         <p className="text-[12px] text-[#6d28d9] leading-[18px]">
-          노출 토글로 고객 화면 노출 여부를 제어할 수 있습니다. ✏️ 버튼으로 가게 정보를 수정하고, 🗑️ 버튼으로 삭제할 수 있습니다.
+          ▲▼ 버튼으로 노출 순서를 바꿔요. 고객 노출은 <b>노출 / 입점예정 / 숨김</b> 중 선택. ✏️ 버튼으로 가게 정보를 수정하고, 🗑️ 버튼으로 삭제할 수 있습니다.
         </p>
       </div>
 
@@ -251,14 +315,24 @@ export default function AdminStoresPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[#f5f5f5]">
-                  {['가게', '카테고리', '영업시간', '영업상태', '고객 노출', '최소주문', '배달비', '상품', '담당사장님', '관리'].map(h => (
+                  {['순서', '가게', '카테고리', '영업시간', '영업상태', '고객 노출', '최소주문', '배달비', '상품', '담당사장님', '관리'].map(h => (
                     <th key={h} className="text-left px-4 py-3 text-[11px] text-[#a3a3a3] font-medium">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {stores.map(store => (
+                {stores.map((store, idx) => (
                   <tr key={store.id} className="border-b border-[#f9f9f9] hover:bg-[#f9f9f9] transition-colors">
+                    <td className="px-2 py-3">
+                      <div className="flex flex-col items-center gap-0">
+                        <button onClick={() => moveStore(store.id, 'up')} disabled={idx === 0}
+                          className="w-6 h-5 flex items-center justify-center text-[11px] text-[#888] hover:text-[#8B5CF6] disabled:opacity-25 disabled:cursor-not-allowed"
+                          title="위로">▲</button>
+                        <button onClick={() => moveStore(store.id, 'down')} disabled={idx === stores.length - 1}
+                          className="w-6 h-5 flex items-center justify-center text-[11px] text-[#888] hover:text-[#8B5CF6] disabled:opacity-25 disabled:cursor-not-allowed"
+                          title="아래로">▼</button>
+                      </div>
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <span className="text-lg">{store.emoji}</span>
@@ -280,12 +354,9 @@ export default function AdminStoresPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <Toggle checked={store.is_active} onChange={(v) => toggleActive(store.id, v)} disabled={toggling === store.id} />
-                        <span className={`text-[11px] font-medium ${store.is_active ? 'text-[#8B5CF6]' : 'text-[#a3a3a3]'}`}>
-                          {store.is_active ? '노출' : '숨김'}
-                        </span>
-                      </div>
+                      <StatusSelect value={store.display_status}
+                        onChange={(v) => setDisplayStatus(store.id, v)}
+                        disabled={toggling === store.id} />
                     </td>
                     <td className="px-4 py-3 text-[12px] text-[#3c4a42]">{store.minOrder.toLocaleString()}원</td>
                     <td className="px-4 py-3 text-[12px] text-[#3c4a42]">{store.deliveryFee === 0 ? '무료' : `${store.deliveryFee.toLocaleString()}원`}</td>
@@ -316,7 +387,7 @@ export default function AdminStoresPage() {
 
           {/* 모바일 카드 */}
           <div className="md:hidden space-y-3">
-            {stores.map(store => (
+            {stores.map((store, idx) => (
               <div key={store.id} className="bg-white rounded-[8px] p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">
@@ -330,6 +401,12 @@ export default function AdminStoresPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
+                    <button onClick={() => moveStore(store.id, 'up')} disabled={idx === 0}
+                      className="p-1.5 rounded-[6px] bg-[#f2f4f6] text-[#888] disabled:opacity-25"
+                      title="위로">▲</button>
+                    <button onClick={() => moveStore(store.id, 'down')} disabled={idx === stores.length - 1}
+                      className="p-1.5 rounded-[6px] bg-[#f2f4f6] text-[#888] disabled:opacity-25"
+                      title="아래로">▼</button>
                     <button onClick={() => openEdit(store)} className="p-1.5 rounded-[6px] bg-[#f2f4f6] text-[#8B5CF6]">
                       <span className="material-symbols-outlined text-[16px]">edit</span>
                     </button>
@@ -340,11 +417,17 @@ export default function AdminStoresPage() {
                 </div>
 
                 <div className="flex items-center justify-between py-2 px-3 rounded-[8px] mb-3"
-                  style={{ background: store.is_active ? '#faf5ff' : '#f9fafb', border: `1px solid ${store.is_active ? '#ddd6fe' : '#e5e7eb'}` }}>
-                  <span className="text-[12px] font-medium" style={{ color: store.is_active ? '#6d28d9' : '#6b7280' }}>
-                    {store.is_active ? '고객 화면 노출중' : '고객 화면 숨김'}
+                  style={{
+                    background: STATUS_COLOR[store.display_status].bg,
+                    border: `1px solid ${STATUS_COLOR[store.display_status].border}`
+                  }}>
+                  <span className="text-[12px] font-medium" style={{ color: STATUS_COLOR[store.display_status].text }}>
+                    고객 화면: <b>{STATUS_LABEL[store.display_status]}</b>
                   </span>
-                  <Toggle checked={store.is_active} onChange={(v) => toggleActive(store.id, v)} disabled={toggling === store.id} />
+                  <StatusSelect value={store.display_status}
+                    onChange={(v) => setDisplayStatus(store.id, v)}
+                    disabled={toggling === store.id}
+                    size="sm" />
                 </div>
 
                 <div className="flex items-center justify-between text-[11px]">

@@ -35,10 +35,14 @@ const PARTICIPANTS: Record<string, number> = {
   'bakery':        19,
 }
 
+type DisplayStatus = 'visible' | 'hidden' | 'coming_soon'
+
 interface DynamicStore {
   id: string; name: string; emoji: string; category: string; description: string
   isOpen: boolean; badge?: string; hours?: string; minOrder: number
   deliveryFee: number; accentColor: string; is_active: boolean; isCustom: boolean
+  display_status?: DisplayStatus
+  sort_order?: number
 }
 
 function NeighborhoodIllustration() {
@@ -228,7 +232,9 @@ export default function MarketPage() {
   }))
 
   const filteredStores = baseStores.filter(store => {
-    if (!store.is_active) return false
+    // hidden은 고객 화면에서 완전히 숨김. coming_soon은 표시하되 클릭 잠금.
+    if (store.display_status === 'hidden') return false
+    if (!store.display_status && !store.is_active) return false
     if (activeCategory === '전체') return true
     const short = CATEGORY_MAP[store.category] || store.category
     return short === activeCategory
@@ -340,88 +346,119 @@ export default function MarketPage() {
             const storeCartCount = cart.getStoreItemCount(store.id)
             const imgHeight = (store as any).image_height || 176
             const imgPosition = (store as any).image_position || 'center'
+            const isComing = store.display_status === 'coming_soon'
 
-            return (
-              <Link key={store.id} href={`/market/${store.id}`} className="block">
+            const cardBody = (
+              <div
+                className="bg-white overflow-hidden"
+                style={{
+                  borderRadius: 16,
+                  boxShadow: '0 2px 14px rgba(0,0,0,0.08)',
+                  position: 'relative',
+                }}
+              >
+                {/* 이미지 */}
                 <div
-                  className="bg-white overflow-hidden"
-                  style={{ borderRadius: 16, boxShadow: '0 2px 14px rgba(0,0,0,0.08)' }}
+                  className="w-full relative overflow-hidden flex items-center justify-center"
+                  style={{ height: imgHeight, background: storeImage ? undefined : gradient }}
                 >
-                  {/* 이미지 */}
+                  {storeImage ? (
+                    <img
+                      src={storeImage}
+                      alt={store.name}
+                      className="w-full h-full object-contain"
+                      style={{ objectPosition: imgPosition, filter: isComing ? 'grayscale(60%)' : undefined }}
+                    />
+                  ) : (
+                    <span className="text-[72px] opacity-50 select-none">{store.emoji}</span>
+                  )}
+
+                  {/* 카테고리 뱃지 */}
                   <div
-                    className="w-full relative overflow-hidden flex items-center justify-center"
-                    style={{ height: imgHeight, background: storeImage ? undefined : gradient }}
+                    className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-semibold"
+                    style={{ background: 'rgba(0,0,0,0.42)', color: '#fff', backdropFilter: 'blur(4px)' }}
                   >
-                    {storeImage ? (
-                      <img
-                        src={storeImage}
-                        alt={store.name}
-                        className="w-full h-full object-contain"
-                        style={{ objectPosition: imgPosition }}
-                      />
-                    ) : (
-                      <span className="text-[72px] opacity-50 select-none">{store.emoji}</span>
-                    )}
-
-                    {/* 카테고리 뱃지 */}
-                    <div
-                      className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[11px] font-semibold"
-                      style={{ background: 'rgba(0,0,0,0.42)', color: '#fff', backdropFilter: 'blur(4px)' }}
-                    >
-                      {shortCat}
-                    </div>
-
-                    {/* 장바구니 뱃지 */}
-                    {storeCartCount > 0 && (
-                      <div
-                        className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full text-[12px] font-bold text-white shadow-lg"
-                        style={{ background: '#2d5a3d' }}
-                      >
-                        🛒 {storeCartCount}
-                      </div>
-                    )}
-
-                    {/* 하단 그라데이션 */}
-                    <div className="absolute bottom-0 left-0 right-0 h-12" style={{
-                      background: 'linear-gradient(to top, rgba(0,0,0,0.22), transparent)',
-                    }} />
+                    {shortCat}
                   </div>
 
-                  {/* 정보 */}
-                  <div className="px-4 pt-3.5 pb-4">
-                    <div className="flex items-start justify-between mb-1.5">
-                      <p className="text-[17px] font-bold" style={{ color: '#1a1c1c' }}>{store.name}</p>
-                      <span className="text-[11px] mt-0.5 flex-shrink-0 ml-2" style={{ color: '#8c9688' }}>
-                        {store.hours || '09:00~18:00'}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2 mb-2.5">
-                      <span className="text-[12px]" style={{ color: '#8c9688' }}>
-                        👥 {participants}명 참여중
-                      </span>
-                    </div>
-
-                    <p className="text-[13px] leading-[20px] line-clamp-2 mb-3.5" style={{ color: '#6c7a71' }}>
-                      {store.description}
-                    </p>
-
+                  {/* 입점예정 뱃지 */}
+                  {isComing && (
                     <div
-                      className="flex items-center justify-between pt-3"
-                      style={{ borderTop: '1px solid #f0ebe3' }}
+                      className="absolute top-3 right-3 px-3 py-1.5 rounded-full text-[12px] font-bold shadow-lg"
+                      style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #fde68a' }}
                     >
-                      <span className="text-[11px]" style={{ color: '#8c9688' }}>
-                        최소주문 {store.minOrder.toLocaleString()}원
-                      </span>
-                      <div
-                        className="px-4 py-2 rounded-[8px] text-[12px] font-semibold text-white"
-                        style={{ background: '#2d5a3d' }}
-                      >
-                        구매하기
-                      </div>
+                      🚧 입점예정
+                    </div>
+                  )}
+
+                  {/* 장바구니 뱃지 (입점예정 아닐 때) */}
+                  {!isComing && storeCartCount > 0 && (
+                    <div
+                      className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full text-[12px] font-bold text-white shadow-lg"
+                      style={{ background: '#2d5a3d' }}
+                    >
+                      🛒 {storeCartCount}
+                    </div>
+                  )}
+
+                  {/* 하단 그라데이션 */}
+                  <div className="absolute bottom-0 left-0 right-0 h-12" style={{
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.22), transparent)',
+                  }} />
+
+                  {/* 입점예정 오버레이 */}
+                  {isComing && (
+                    <div className="absolute inset-0" style={{ background: 'rgba(255,255,255,0.25)' }} />
+                  )}
+                </div>
+
+                {/* 정보 */}
+                <div className="px-4 pt-3.5 pb-4">
+                  <div className="flex items-start justify-between mb-1.5">
+                    <p className="text-[17px] font-bold" style={{ color: isComing ? '#8c9688' : '#1a1c1c' }}>{store.name}</p>
+                    <span className="text-[11px] mt-0.5 flex-shrink-0 ml-2" style={{ color: '#8c9688' }}>
+                      {store.hours || '09:00~18:00'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 mb-2.5">
+                    <span className="text-[12px]" style={{ color: '#8c9688' }}>
+                      {isComing ? '✨ 곧 만나요!' : `👥 ${participants}명 참여중`}
+                    </span>
+                  </div>
+
+                  <p className="text-[13px] leading-[20px] line-clamp-2 mb-3.5" style={{ color: '#6c7a71' }}>
+                    {store.description}
+                  </p>
+
+                  <div
+                    className="flex items-center justify-between pt-3"
+                    style={{ borderTop: '1px solid #f0ebe3' }}
+                  >
+                    <span className="text-[11px]" style={{ color: '#8c9688' }}>
+                      {isComing ? '주문은 입점 후 가능' : `최소주문 ${store.minOrder.toLocaleString()}원`}
+                    </span>
+                    <div
+                      className="px-4 py-2 rounded-[8px] text-[12px] font-semibold"
+                      style={isComing
+                        ? { background: '#e5e7eb', color: '#6b7280' }
+                        : { background: '#2d5a3d', color: '#fff' }
+                      }
+                    >
+                      {isComing ? '오픈 준비중' : '구매하기'}
                     </div>
                   </div>
                 </div>
+              </div>
+            )
+
+            return isComing ? (
+              <div key={store.id} className="block cursor-not-allowed" aria-disabled="true">
+                {cardBody}
+              </div>
+            ) : (
+              <Link key={store.id} href={`/market/${store.id}`} className="block">
+                {cardBody}
               </Link>
             )
           })}

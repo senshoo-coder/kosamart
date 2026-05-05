@@ -547,7 +547,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
   <div class="header-top">
     <div>
       <h1>⚙️ 관리자 매뉴얼</h1>
-      <p>관리자 전용 운영 가이드 &nbsp;·&nbsp; 최종 업데이트: 2026.04.24</p>
+      <p>관리자 전용 운영 가이드 &nbsp;·&nbsp; 골목상점.kr &nbsp;·&nbsp; 최종 업데이트: 2026.05.04</p>
     </div>
     <button class="btn-pdf" id="btnPdf" onclick="downloadPDF()">⬇️ PDF</button>
   </div>
@@ -558,7 +558,23 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
 
   <div class="welcome-card" style="background: linear-gradient(135deg, #4a148c, #6a1b9a);">
     <h2>👋 관리자 매뉴얼이에요!</h2>
-    <p>시스템 전반을 관리하는 역할이에요.</p>
+    <p>시스템 전반을 관리하는 역할이에요. 이 페이지는 <b>관리자 로그인 후에만 접근 가능</b>합니다 (URL: /manual-admin).</p>
+  </div>
+
+  <!-- 매뉴얼 구조 안내 -->
+  <div class="section">
+    <div class="section-header open" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#ede9fe">📚</div>
+      <div class="section-title"><h2>매뉴얼 구조</h2><p>공개 매뉴얼과 관리자 매뉴얼이 분리되어 있어요</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body open">
+      <div class="info">ℹ️ <b>이 매뉴얼은 관리자 전용</b>입니다. 일반 사용자가 보면 안 되는 운영 정보·승인 절차·보안 정책이 포함되어 있어요.</div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>공개 매뉴얼</strong><p>고객·사장님·배달기사 안내. 누구나 접근 가능 (<code>/manual.html</code>). 가입 전 사용자도 미리 볼 수 있어요.</p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>관리자 매뉴얼 (지금 이 페이지)</strong><p>로그인 필수 (<code>/manual-admin</code>). 관리자 계정으로 로그인된 상태에서만 접근. 비관리자가 URL을 알아도 자동으로 로그인 페이지로 리다이렉트됩니다.</p></div></li>
+      </ul>
+    </div>
   </div>
 
   <!-- 관리자 로그인 -->
@@ -711,10 +727,108 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
       </div>
 
       <ul class="steps">
-        <li><div class="step-num">1</div><div class="step-text"><strong>사용자 목록 확인</strong><p>역할별 탭으로 필터링해서 볼 수 있어요.</p></div></li>
+        <li><div class="step-num">1</div><div class="step-text"><strong>사용자 목록 확인</strong><p>역할별 탭으로 필터링해서 볼 수 있어요. 첫 진입 시 <b>"승인 대기"</b> 탭이 기본 선택돼요.</p></div></li>
         <li><div class="step-num">2</div><div class="step-text"><strong>오른쪽 상단 <kbd>+ 추가</kbd>로 신규 계정 생성</strong><p>사장님이나 기사님 계정을 직접 만들어 줄 수 있어요.</p></div></li>
-        <li><div class="step-num">3</div><div class="step-text"><strong>계정 탭 → 비밀번호 재설정·상태 변경</strong></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>계정 탭 → 비밀번호 재설정·상태 변경</strong><p>비밀번호는 영문·숫자·특수기호만 (한글 차단). 임시 비번 발급 후 안전한 채널로 사용자에게 전달.</p></div></li>
       </ul>
+    </div>
+  </div>
+
+  <!-- 신규 가입 승인 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#fef3c7">✅</div>
+      <div class="section-title"><h2>신규 가입 승인 절차</h2><p>사장님·배달기사 가입 신청을 검토하고 승인해요</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <div class="info">ℹ️ <b>고객은 가입 즉시 활성화</b>되지만, <b>사장님·배달기사는 관리자 승인 후 로그인 가능</b>합니다.</div>
+
+      <h3 style="font-size:14px;font-weight:700;color:#4a148c;margin:14px 0 6px;">📋 승인 흐름</h3>
+      <div class="flow">
+        <div class="flow-item">사용자 가입신청</div><span class="flow-arrow">→</span>
+        <div class="flow-item">DB에 pending</div><span class="flow-arrow">→</span>
+        <div class="flow-item">텔레그램 알림</div><span class="flow-arrow">→</span>
+        <div class="flow-item">관리자 승인</div><span class="flow-arrow">→</span>
+        <div class="flow-item">로그인 가능</div>
+      </div>
+
+      <!-- 텔레그램 알림 예시 -->
+      <div class="mockup-wrap">
+        <div class="mockup-label">📱 신규 가입 시 관리자 텔레그램 알림</div>
+        <div class="phone">
+          <div class="phone-screen" style="background:#e5ddd5;">
+            <div style="background:#075e54;color:white;padding:10px 12px;font-size:12px;font-weight:700;">📢 코사마트 관리방</div>
+            <div style="padding:10px 8px;">
+              <div style="background:white;border-radius:8px;border-top-left-radius:0;padding:10px;box-shadow:0 1px 2px rgba(0,0,0,0.1);">
+                <div style="font-size:11px;font-weight:700;color:#075e54;margin-bottom:4px;">🆕 [신규 가입 신청]</div>
+                <div style="font-size:10px;color:#333;line-height:1.7;">
+                  역할: <b>사장님</b><br>
+                  닉네임: <b>김반찬</b><br>
+                  연락처: 010-1234-5678<br>
+                  신청 시각: 2026.05.04 21:50<br><br>
+                  → 관리자 화면 → 사용자 관리 → 승인 대기 탭에서 승인 처리해 주세요.
+                </div>
+                <div style="font-size:9px;color:#aaa;margin-top:4px;text-align:right;">오후 9:50</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>텔레그램 알림 수신</strong><p>사장님/기사가 가입 신청하면 즉시 관리자 그룹 채팅방으로 알림이 옵니다 (env: <code>TELEGRAM_ADMIN_CHAT_ID</code>).</p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>관리자 화면 → 사용자 관리 → 승인 대기 탭</strong><p>탭 옆 빨간 카운트 배지로 대기 건수를 확인할 수 있어요.</p></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>본인 확인 후 <kbd>승인</kbd> 버튼</strong><p>의심스러우면 신청자에게 직접 연락해 본인 확인 후 승인. 가짜 가입은 <kbd>정지</kbd>로 처리.</p></div></li>
+        <li><div class="step-num">4</div><div class="step-text"><strong>승인 후 사용자 로그인 가능</strong><p>사장님 계정인 경우 <kbd>가게 배정</kbd>도 같이 해줘야 해요 (사용자 관리 → 해당 계정 → store_id 지정).</p></div></li>
+      </ul>
+
+      <div class="warn">⚠️ 승인되지 않은 계정으로 로그인 시도 시 사용자 화면에 "승인 대기 중인 계정입니다" 메시지가 표시되어 자연스럽게 차단됩니다.</div>
+    </div>
+  </div>
+
+  <!-- 비밀번호 찾기 처리 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#fce4ec">🔑</div>
+      <div class="section-title"><h2>비밀번호 찾기 요청 처리</h2><p>사용자의 비밀번호 재설정 요청을 처리해요</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <div class="info">ℹ️ 코사마트는 이메일·SMS 인프라가 없어 <b>관리자가 직접 비밀번호 재설정</b>을 도와줍니다. 신청 즉시 텔레그램으로 알림이 옵니다.</div>
+
+      <!-- 비번 찾기 알림 예시 -->
+      <div class="mockup-wrap">
+        <div class="mockup-label">📱 비밀번호 재설정 요청 알림</div>
+        <div class="phone">
+          <div class="phone-screen" style="background:#e5ddd5;">
+            <div style="background:#075e54;color:white;padding:10px 12px;font-size:12px;font-weight:700;">📢 코사마트 관리방</div>
+            <div style="padding:10px 8px;">
+              <div style="background:white;border-radius:8px;border-top-left-radius:0;padding:10px;box-shadow:0 1px 2px rgba(0,0,0,0.1);">
+                <div style="font-size:11px;font-weight:700;color:#075e54;margin-bottom:4px;">🔑 [비밀번호 재설정 요청]</div>
+                <div style="font-size:10px;color:#333;line-height:1.7;">
+                  닉네임: <b>김반찬</b><br>
+                  역할: 사장님<br>
+                  연락처: 010-1234-5678<br>
+                  메모: 반찬가게입니다<br><br>
+                  → 관리자 화면 → 사용자 관리에서 비밀번호 재설정 후 본인 확인 절차에 따라 전달해 주세요.
+                </div>
+                <div style="font-size:9px;color:#aaa;margin-top:4px;text-align:right;">오후 10:15</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>텔레그램 알림 확인</strong><p>닉네임·역할·연락처(선택)·메모(선택)가 포함됩니다. 보안상 사용자 존재 여부와 무관하게 항상 알림이 옵니다 (열거 공격 방지).</p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>본인 확인</strong><p>제공된 연락처로 직접 연락하여 본인 여부를 확인. 추가 정보 (가게명·기존 주문 내역 등)로 검증 권장.</p></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>관리자 화면 → 사용자 관리 → 해당 계정 검색</strong></div></li>
+        <li><div class="step-num">4</div><div class="step-text"><strong>비밀번호 초기화 버튼 → 임시 비번 입력 → 변경</strong><p>임시 비번도 영문·숫자·특수기호만 가능 (한글 차단).</p></div></li>
+        <li><div class="step-num">5</div><div class="step-text"><strong>안전한 채널로 임시 비번 전달</strong><p>전화·문자 등으로 직접 전달. 텔레그램 답장은 보안상 권장하지 않음.</p></div></li>
+      </ul>
+
+      <div class="tip">💡 사용자에게 임시 비번 받은 즉시 본인이 다시 변경하도록 안내해 주세요.</div>
     </div>
   </div>
 
@@ -827,6 +941,9 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
         <div class="notif-row"><span class="notif-emoji">🍪</span><div class="notif-text"><strong>보안 쿠키 인증</strong><span>로그인 정보는 httpOnly·Secure 쿠키로 저장돼요. JavaScript로 접근하거나 중간에서 가로채기가 불가능해요.</span></div></div>
         <div class="notif-row"><span class="notif-emoji">📁</span><div class="notif-text"><strong>파일 업로드 제한</strong><span>이미지 업로드는 JPEG·PNG·WebP·GIF 형식만 허용되고, 파일 크기는 10MB 이하로 제한돼요.</span></div></div>
         <div class="notif-row"><span class="notif-emoji">💰</span><div class="notif-text"><strong>입력값 검증</strong><span>가격·재고 등 숫자 필드는 음수 입력을 차단합니다.</span></div></div>
+        <div class="notif-row"><span class="notif-emoji">🔤</span><div class="notif-text"><strong>비밀번호 형식 제한</strong><span>비밀번호는 영문·숫자·특수기호(ASCII printable)만 허용. 한글 입력 시 자동 차단되며 서버에서도 검증합니다. 한국어 IME 토글 실수로 인한 로그인 불가 사고를 방지.</span></div></div>
+        <div class="notif-row"><span class="notif-emoji">🚪</span><div class="notif-text"><strong>역할 기반 로그인 게이트</strong><span>로그인 시 선택한 탭(역할)과 실제 계정 역할이 달라야 차단. 보안상 실제 역할은 노출하지 않음 ("사장님 계정이 아닙니다"만 표시).</span></div></div>
+        <div class="notif-row"><span class="notif-emoji">📚</span><div class="notif-text"><strong>매뉴얼 분리</strong><span>공개 매뉴얼(/manual.html)과 관리자 매뉴얼(/manual-admin)이 분리. 관리자 매뉴얼은 관리자 로그인 시에만 접근 가능.</span></div></div>
         <div class="notif-row"><span class="notif-emoji">🤖</span><div class="notif-text"><strong>웹훅 보안</strong><span>텔레그램 알림 웹훅은 비밀 키(WEBHOOK_SECRET)로 인증돼요. 외부에서 위조 요청을 보낼 수 없어요.</span></div></div>
         <div class="notif-row"><span class="notif-emoji">👤</span><div class="notif-text"><strong>개인정보 자동 파기</strong><span>고객의 전화번호·주소·닉네임 등 개인정보는 일정 기간 후 자동 익명화돼요 (PII 자동 purge 정책).</span></div></div>
       </div>
@@ -839,6 +956,30 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
     </div>
   </div>
 
+  <!-- 도메인 / 호스팅 운영 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#e0f2fe">🌐</div>
+      <div class="section-title"><h2>도메인 / 호스팅 운영</h2><p>골목상점.kr 도메인 및 인프라 정보</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin:8px 0;">
+        <tr><td style="padding:6px 8px;border:1px solid #eee;font-weight:700;width:35%;">메인 도메인</td><td style="padding:6px 8px;border:1px solid #eee;">https://골목상점.kr</td></tr>
+        <tr><td style="padding:6px 8px;border:1px solid #eee;font-weight:700;">Punycode</td><td style="padding:6px 8px;border:1px solid #eee;"><code>xn--bb0bw4xzve3ni.kr</code></td></tr>
+        <tr><td style="padding:6px 8px;border:1px solid #eee;font-weight:700;">백업 URL</td><td style="padding:6px 8px;border:1px solid #eee;">https://kosamart-production.up.railway.app</td></tr>
+        <tr><td style="padding:6px 8px;border:1px solid #eee;font-weight:700;">도메인 등록사</td><td style="padding:6px 8px;border:1px solid #eee;">후이즈 (whois.co.kr)</td></tr>
+        <tr><td style="padding:6px 8px;border:1px solid #eee;font-weight:700;">DNS 호스팅</td><td style="padding:6px 8px;border:1px solid #eee;">Cloudflare (무료) — melody.ns / rory.ns.cloudflare.com</td></tr>
+        <tr><td style="padding:6px 8px;border:1px solid #eee;font-weight:700;">웹 호스팅</td><td style="padding:6px 8px;border:1px solid #eee;">Railway (auto deploy on main push)</td></tr>
+        <tr><td style="padding:6px 8px;border:1px solid #eee;font-weight:700;">SSL 인증서</td><td style="padding:6px 8px;border:1px solid #eee;">Let's Encrypt (Railway 자동 발급·갱신)</td></tr>
+        <tr><td style="padding:6px 8px;border:1px solid #eee;font-weight:700;">소스 저장소</td><td style="padding:6px 8px;border:1px solid #eee;">github.com/senshoo-coder/kosamart</td></tr>
+      </table>
+
+      <div class="warn">⚠️ 도메인 자동 갱신 ON 확인 필수 (후이즈 마이페이지). 만료 시 사이트 전체 다운.</div>
+      <div class="info">ℹ️ 한국 KT 사용자가 처음 도메인 변경 후 접속 안 될 수 있어요. 이때는 PC DNS를 1.1.1.1로 변경하면 즉시 해결됩니다 (자세한 내용은 docs/DOMAIN_SETUP.md 참조).</div>
+    </div>
+  </div>
+
   <!-- 관리자 FAQ -->
   <div class="section">
     <div class="section-header" onclick="toggleSection(this)">
@@ -847,11 +988,16 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
       <span class="chevron">▶</span>
     </div>
     <div class="section-body">
-      <div class="faq-item"><div class="faq-q">텔레그램 알림이 안 와요</div><div class="faq-a">Chat ID가 올바르게 입력됐는지, 봇이 그룹에 초대됐는지 확인하세요. 봇은 메시지 전송 권한이 있어야 해요.</div></div>
+      <div class="faq-item"><div class="faq-q">신규 가입 알림이 안 와요</div><div class="faq-a"><code>TELEGRAM_ADMIN_CHAT_ID</code> 환경변수가 Railway에 설정되어 있는지 확인하세요. 봇이 해당 그룹에 초대되어 있고 메시지 전송 권한이 있어야 합니다.</div></div>
+      <div class="faq-item"><div class="faq-q">텔레그램 알림이 안 와요 (가게방)</div><div class="faq-a">가게 설정에서 텔레그램 Chat ID가 올바르게 입력됐는지, 봇이 그룹에 초대됐는지 확인하세요.</div></div>
       <div class="faq-item"><div class="faq-q">사장님이 영업시간 설정했는데 반영이 안 돼요</div><div class="faq-a">저장 후 새로고침을 해보세요. 형식이 맞아야 해요: HH:MM-HH:MM</div></div>
-      <div class="faq-item"><div class="faq-q">새 가게를 추가하고 싶어요</div><div class="faq-a">관리자 화면 또는 Supabase 관리 패널에서 신규 가게를 등록할 수 있어요.</div></div>
+      <div class="faq-item"><div class="faq-q">새 가게를 추가하고 싶어요</div><div class="faq-a">관리자 화면 또는 Supabase 관리 패널에서 신규 가게를 등록할 수 있어요. 가게 생성 후 사장님 계정에 store_id 배정 필수.</div></div>
       <div class="faq-item"><div class="faq-q">주문 상태를 직접 수정하고 싶어요</div><div class="faq-a">관리자 주문 상세 화면에서 상태를 직접 변경할 수 있어요.</div></div>
+      <div class="faq-item"><div class="faq-q">사장님/기사가 비밀번호를 잊었어요</div><div class="faq-a">텔레그램으로 [비밀번호 재설정 요청] 알림을 받으면, 본인 확인 후 사용자 관리 → 해당 계정 → 비밀번호 초기화. 임시 비번을 안전한 채널로 전달.</div></div>
+      <div class="faq-item"><div class="faq-q">왜 비밀번호에 한글이 안 들어가요?</div><div class="faq-a">한국어 IME 토글로 인한 사고를 방지하기 위해 ASCII printable(영문·숫자·특수기호)만 허용. 클라이언트에서 자동 필터링 + 서버에서 재검증합니다.</div></div>
+      <div class="faq-item"><div class="faq-q">관리자 매뉴얼은 누구나 볼 수 있나요?</div><div class="faq-a">아니요. /manual-admin은 관리자 로그인 시에만 접근 가능합니다. 비관리자는 자동으로 로그인 페이지로 리다이렉트됩니다.</div></div>
       <div class="faq-item"><div class="faq-q">WEBHOOK_SECRET은 어떻게 설정하나요?</div><div class="faq-a">Railway 대시보드 → Variables → WEBHOOK_SECRET에 임의의 긴 문자열을 입력하면 돼요. DB 트리거 설정 시 x-webhook-secret 헤더에 같은 값을 넣어야 해요.</div></div>
+      <div class="faq-item"><div class="faq-q">도메인 만료가 다가오는데 어떻게 갱신하나요?</div><div class="faq-a">후이즈 마이페이지에서 자동 갱신 ON 확인. 수동 갱신은 만료 30일 전부터 가능. 갱신 후 별도 작업 불필요.</div></div>
     </div>
   </div>
 

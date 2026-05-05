@@ -547,7 +547,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
   <div class="header-top">
     <div>
       <h1>⚙️ 관리자 매뉴얼</h1>
-      <p>관리자 전용 운영 가이드 &nbsp;·&nbsp; 골목상점.kr &nbsp;·&nbsp; 최종 업데이트: 2026.05.04</p>
+      <p>관리자 전용 운영 가이드 &nbsp;·&nbsp; 골목상점.kr &nbsp;·&nbsp; 최종 업데이트: 2026.05.05</p>
     </div>
     <button class="btn-pdf" id="btnPdf" onclick="downloadPDF()">⬇️ PDF</button>
   </div>

@@ -211,6 +211,31 @@ export default function AdminStoresPage() {
     setIsNewStore(true)
   }
 
+  // 일회성: 2026.05.05 가게 명단 마이그레이션
+  const [migrating, setMigrating] = useState(false)
+  async function runMigration() {
+    if (!confirm('가게 명단을 새 스펙으로 일괄 업데이트합니다.\n\n' +
+      '• 이름 변경: 중앙슈퍼→코사마트 평창점, 홈앤미트 평창점→홈앤미트, 페리카나 치킨→페리카나, 반찬가게→옥김치, 빵집→베이커리\n' +
+      '• 신규 추가: 옥김치(도시락), 분식\n' +
+      '• 입점예정: 분식·베이커리·본죽\n' +
+      '• 숨김: 프랭크버거\n' +
+      '• 순서: 표 기준\n\n진행할까요?')) return
+    setMigrating(true)
+    try {
+      const res = await fetch('/api/admin/_migrate-store-roster', { method: 'POST' })
+      const json = await res.json()
+      if (json.error) {
+        alert('실패: ' + json.error)
+      } else {
+        alert('✅ 완료\n' + JSON.stringify(json.data, null, 2))
+        await loadAll()
+      }
+    } catch (e: any) {
+      alert('오류: ' + e.message)
+    }
+    setMigrating(false)
+  }
+
   function openEdit(store: StoreDisplay) {
     setEditingStore({
       id: store.id,
@@ -287,6 +312,11 @@ export default function AdminStoresPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button onClick={runMigration} disabled={migrating}
+            className="h-[36px] px-3 rounded-[10px] bg-[#fef3c7] text-[#b45309] text-[11px] font-semibold border border-[#fde68a] disabled:opacity-50"
+            title="2026.05.05 가게 명단 일괄 업데이트 (1회용)">
+            {migrating ? '실행 중...' : '🔄 가게 명단 일괄 업데이트'}
+          </button>
           <button onClick={loadAll} className="h-[36px] px-4 rounded-[10px] bg-[#f2f4f6] text-[#3c4a42] text-[12px] font-medium border border-[#e8e8e8]">새로고침</button>
           <button onClick={openAdd}
             className="h-[36px] px-4 rounded-[10px] text-[12px] font-semibold text-white flex items-center gap-1.5"

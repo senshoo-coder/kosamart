@@ -209,9 +209,29 @@ function NeighborhoodIllustration() {
   )
 }
 
+interface SearchProduct {
+  id: string
+  store_id: string
+  store_name: string
+  store_emoji: string
+  store_color?: string
+  name: string
+  description?: string
+  price: number
+  original_price?: number | null
+  unit?: string
+  emoji?: string
+  image_url?: string | null
+  is_available?: boolean
+  display_status?: 'visible' | 'hidden' | 'coming_soon'
+}
+
 export default function MarketPage() {
   const [activeCategory, setActiveCategory] = useState('전체')
   const [dynamicStores, setDynamicStores] = useState<DynamicStore[] | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [allProducts, setAllProducts] = useState<SearchProduct[] | null>(null)
+  const [loadingSearch, setLoadingSearch] = useState(false)
   const storeIds = useMemo(() => (dynamicStores ?? STORES).map(s => s.id), [dynamicStores])
   const allImages = useAllStoreImages(storeIds)
   const cart = useMarketCart()
@@ -223,6 +243,59 @@ export default function MarketPage() {
       .then(({ data }) => { if (data) setDynamicStores(data) })
       .catch(() => {})
   }, [])
+
+  // 검색어가 입력되면 전체 상품 한 번 로드 (이후 캐시 사용)
+  useEffect(() => {
+    if (!searchQuery.trim()) return
+    if (allProducts !== null) return
+    if (!dynamicStores) return
+    setLoadingSearch(true)
+    fetch('/api/store/products?store_id=__all__')
+      .then(r => r.json())
+      .then(({ data }) => {
+        if (!Array.isArray(data)) return
+        const storeMap: Record<string, DynamicStore> = {}
+        dynamicStores.forEach(s => { storeMap[s.id] = s })
+        const products: SearchProduct[] = data
+          .filter((p: any) => storeMap[p.store_id]) // 알려진 가게만
+          .map((p: any) => {
+            const store = storeMap[p.store_id]
+            return {
+              id: p.id,
+              store_id: p.store_id,
+              store_name: store?.name || p.store_id,
+              store_emoji: store?.emoji || '🏪',
+              store_color: store?.accentColor,
+              name: p.name,
+              description: p.description,
+              price: p.price,
+              original_price: p.original_price,
+              unit: p.unit,
+              emoji: p.emoji,
+              image_url: p.image_url,
+              is_available: p.is_available,
+              display_status: store?.display_status,
+            }
+          })
+        setAllProducts(products)
+      })
+      .catch(() => {})
+      .finally(() => setLoadingSearch(false))
+  }, [searchQuery, dynamicStores, allProducts])
+
+  const searchResults = useMemo<SearchProduct[]>(() => {
+    if (!searchQuery.trim() || !allProducts) return []
+    const q = searchQuery.trim().toLowerCase()
+    return allProducts.filter(p => {
+      if (!p.is_available) return false
+      // 입점예정 가게 상품은 검색 결과에서도 제외
+      if (p.display_status === 'coming_soon' || p.display_status === 'hidden') return false
+      const haystack = `${p.name} ${p.description || ''} ${p.store_name}`.toLowerCase()
+      return haystack.includes(q)
+    })
+  }, [searchQuery, allProducts])
+
+  const isSearching = !!searchQuery.trim()
 
   const baseStores: DynamicStore[] = dynamicStores ?? STORES.map(s => ({
     id: s.id, name: s.name, emoji: s.emoji, category: s.category,
@@ -311,7 +384,79 @@ export default function MarketPage() {
       {/* 메인 콘텐츠 */}
       <div className={`flex flex-col gap-0 ${cart.totalItems > 0 ? 'pb-[88px]' : 'pb-8'}`}>
 
-        {/* 카테고리 칩 */}
+        {/* 통합 상품 검색 */}
+        <div className="px-5 pt-5">
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8c9688] text-[15px] pointer-events-none">🔍</span>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="전체 상점에서 상품 검색"
+              className="w-full bg-white border border-[rgba(0,0,0,0.08)] rounded-full pl-11 pr-10 py-3 text-[13px] outline-none focus:border-[#2d5a3d]"
+              style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#e5dfd5] text-[#4a6358] text-[14px] flex items-center justify-center hover:bg-[#d4ccbf]"
+                aria-label="검색 지우기">×</button>
+            )}
+          </div>
+        </div>
+
+        {/* 검색 모드: 결과 표시 */}
+        {isSearching && (
+          <div className="px-5 pt-4">
+            {loadingSearch && allProducts === null ? (
+              <div className="py-12 text-center text-[13px]" style={{ color: '#8c9688' }}>검색 중...</div>
+            ) : searchResults.length === 0 ? (
+              <div className="py-12 text-center text-[13px]" style={{ color: '#8c9688' }}>
+                "<b>{searchQuery}</b>" 검색 결과가 없습니다
+              </div>
+            ) : (
+              <>
+                <p className="text-[12px] mb-3" style={{ color: '#6c7a71' }}>
+                  <b style={{ color: '#2d5a3d' }}>{searchResults.length}건</b>의 상품 검색 결과
+                </p>
+                <div className="flex flex-col gap-2.5">
+                  {searchResults.map(p => (
+                    <Link key={`${p.store_id}-${p.id}`} href={`/market/${p.store_id}`}
+                      className="bg-white rounded-xl p-3 flex items-center gap-3"
+                      style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+                      {/* 썸네일 */}
+                      <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-[#f0ebe3] flex items-center justify-center">
+                        {p.image_url
+                          ? <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" />
+                          : <span className="text-2xl">{p.emoji || '🛒'}</span>
+                        }
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold"
+                            style={{ background: '#e5dfd5', color: '#4a6358' }}>
+                            {p.store_emoji} {p.store_name}
+                          </span>
+                        </div>
+                        <p className="text-[13px] font-bold leading-tight truncate" style={{ color: '#1a1c1c' }}>{p.name}</p>
+                        {p.description && (
+                          <p className="text-[11px] mt-0.5 line-clamp-1" style={{ color: '#8c9688' }}>{p.description}</p>
+                        )}
+                        <p className="text-[13px] font-bold mt-1" style={{ color: p.store_color || '#2d5a3d' }}>
+                          {p.price.toLocaleString()}원
+                        </p>
+                      </div>
+                      <span className="text-[#94a3b8] text-[18px] flex-shrink-0">›</span>
+                    </Link>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* 카테고리 칩 + 가게 목록 (검색 모드 아닐 때만) */}
+        {!isSearching && (
+        <>
         <div className="px-5 pt-5 pb-4">
           <div className="flex gap-2 overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
             {CATEGORIES.map(cat => (
@@ -469,6 +614,8 @@ export default function MarketPage() {
             </div>
           )}
         </div>
+        </>
+        )}
       </div>
 
       {/* 플로팅 장바구니 바 */}

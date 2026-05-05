@@ -16,6 +16,7 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
   const cart = useMarketCart()
 
   const [activeCategory, setActiveCategory] = useState('전체')
+  const [searchQuery, setSearchQuery] = useState('')
   const storeImages = useStoreImages(storeId)
 
   // 동적 가게 정보 로드 (이름 변경 반영)
@@ -102,9 +103,16 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
     return cats.length > 0 ? ['전체', ...cats] : store.subcategories ? ['전체', ...store.subcategories] : ['전체']
   }, [products, store])
 
-  const displayedProducts = products.filter(p =>
-    p.isAvailable && (activeCategory === '전체' || p.subcategory === activeCategory)
-  )
+  const displayedProducts = products.filter(p => {
+    if (!p.isAvailable) return false
+    if (activeCategory !== '전체' && p.subcategory !== activeCategory) return false
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase()
+      const haystack = `${p.name} ${p.description || ''} ${p.subcategory || ''} ${p.tag || ''}`.toLowerCase()
+      if (!haystack.includes(q)) return false
+    }
+    return true
+  })
 
   function handleAdd(product: StoreProduct & { imageUrl?: string }) {
     cart.addItem({
@@ -222,9 +230,28 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
         })()}
       </div>
 
+      {/* 상품 검색 */}
+      <div className="px-4 pt-4">
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94a3b8] text-[15px] pointer-events-none">🔍</span>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="이 가게 상품 검색"
+            className="w-full bg-white border border-[#e5e7eb] rounded-full pl-10 pr-10 py-2.5 text-[13px] outline-none focus:border-[#94a3b8]"
+          />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[#f0f0f0] text-[#6b7280] text-[12px] flex items-center justify-center hover:bg-[#e5e7eb]"
+              aria-label="지우기">×</button>
+          )}
+        </div>
+      </div>
+
       {/* 카테고리 */}
       {subcats.length > 1 && (
-        <div className="px-4 pt-4 pb-2 overflow-x-auto flex gap-2" style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
+        <div className="px-4 pt-3 pb-2 overflow-x-auto flex gap-2" style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
           {subcats.map(cat => (
             <button key={cat} onClick={() => setActiveCategory(cat)}
               className="flex-shrink-0 px-4 py-2 rounded-full text-[13px] font-semibold transition-all"
@@ -285,7 +312,11 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
           )
         })}
         {displayedProducts.length === 0 && (
-          <div className="col-span-2 py-16 text-center text-[#94a3b8] text-sm">해당 카테고리 상품이 없습니다</div>
+          <div className="col-span-2 py-16 text-center text-[#94a3b8] text-sm">
+            {searchQuery.trim()
+              ? <>"<b>{searchQuery}</b>" 검색 결과가 없습니다</>
+              : '해당 카테고리 상품이 없습니다'}
+          </div>
         )}
       </div>
 

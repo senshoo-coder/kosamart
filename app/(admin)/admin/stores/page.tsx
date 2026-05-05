@@ -222,7 +222,7 @@ export default function AdminStoresPage() {
       '• 순서: 표 기준\n\n진행할까요?')) return
     setMigrating(true)
     try {
-      const res = await fetch('/api/admin/_migrate-store-roster', { method: 'POST' })
+      const res = await fetch('/api/admin/migrate-store-roster', { method: 'POST' })
       const json = await res.json()
       if (json.error) {
         alert('실패: ' + json.error)

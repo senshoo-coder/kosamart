@@ -242,7 +242,7 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
           const imgSrc = (product as any).imageUrl || storeImages[product.id]
           return (
             <div key={product.id} className="bg-white rounded-xl shadow-sm overflow-hidden">
-              <div className="relative h-36" style={{ background: imgSrc ? undefined : 'linear-gradient(135deg, #1a1c1c 0%, #2d3748 100%)' }}>
+              <div className="relative aspect-square" style={{ background: imgSrc ? undefined : 'linear-gradient(135deg, #1a1c1c 0%, #2d3748 100%)' }}>
                 {imgSrc ? (
                   <img src={imgSrc} alt={product.name} className="w-full h-full object-cover" />
                 ) : (
@@ -257,6 +257,9 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
               </div>
               <div className="p-3">
                 <p className="text-[13px] font-semibold text-[#1a1c1c] mb-1 leading-tight line-clamp-2 min-h-[36px]">{product.name}</p>
+                {product.description && (
+                  <p className="text-[11px] text-[#6c7a71] mb-2 leading-snug line-clamp-2">{product.description}</p>
+                )}
                 {product.originalPrice && (
                   <p className="text-[11px] text-[#94a3b8] line-through mb-0.5">{product.originalPrice.toLocaleString()}원</p>
                 )}

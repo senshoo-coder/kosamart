@@ -8,6 +8,7 @@ const MOBILE_NAV = [
   { href: '/admin/stores',    icon: 'storefront',      label: 'Stores' },
   { href: '/admin/orders',    icon: 'receipt_long',    label: 'Orders' },
   { href: '/admin/drivers',   icon: 'directions_bike', label: 'Drivers' },
+  { href: '/admin/profile',   icon: 'person',          label: 'Me' },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

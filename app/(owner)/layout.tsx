@@ -8,6 +8,7 @@ const MOBILE_NAV = [
   { href: '/owner/orders',    icon: 'receipt_long', label: 'Orders' },
   { href: '/owner/store',     icon: 'storefront',   label: 'Store' },
   { href: '/owner/analytics', icon: 'bar_chart',    label: 'Stats' },
+  { href: '/owner/profile',   icon: 'person',       label: 'Me' },
 ]
 
 export default function OwnerLayout({ children }: { children: React.ReactNode }) {

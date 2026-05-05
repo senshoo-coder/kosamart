@@ -8,6 +8,7 @@ const NAV = [
   { href: '/owner/orders',    icon: 'receipt_long', label: '주문 관리' },
   { href: '/owner/store',     icon: 'storefront',   label: '내 가게' },
   { href: '/owner/analytics', icon: 'bar_chart',    label: '매출 분석' },
+  { href: '/owner/profile',   icon: 'person',       label: '내 프로필' },
 ]
 
 export function OwnerSidebar() {

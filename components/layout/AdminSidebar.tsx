@@ -17,6 +17,7 @@ const BOTTOM_NAV = [
   { href: '/admin/delivery',  icon: 'local_shipping',  label: '배달 관리' },
   { href: '/admin/products',  icon: 'sell',            label: '공구 상품' },
   { href: '/admin/analytics', icon: 'bar_chart',       label: '전체 분석' },
+  { href: '/admin/profile',   icon: 'person',          label: '내 프로필' },
 ]
 
 interface StoreItem { id: string; name: string; emoji: string }

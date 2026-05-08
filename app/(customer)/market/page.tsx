@@ -557,13 +557,13 @@ export default function MarketPage() {
                   </div>
 
                   <div className="flex items-center gap-2 mb-2.5">
-                    <span className="text-[12px]" style={{ color: '#8c9688' }}>
-                      {isComing
-                        ? '✨ 곧 만나요!'
-                        : store.deliveryFee === 0
-                          ? '🚚 배달비 무료'
-                          : `🚚 배달비 ${store.deliveryFee.toLocaleString()}원`}
-                    </span>
+                    {isComing ? (
+                      <span className="text-[12px]" style={{ color: '#8c9688' }}>✨ 곧 만나요!</span>
+                    ) : store.isOpen ? (
+                      <span className="text-[12px] font-semibold" style={{ color: '#10b981' }}>🟢 영업중</span>
+                    ) : (
+                      <span className="text-[12px] font-semibold" style={{ color: '#94a3b8' }}>⏸️ 영업종료</span>
+                    )}
                   </div>
 
                   <p className="text-[13px] leading-[20px] line-clamp-2 mb-3.5" style={{ color: '#6c7a71' }}>

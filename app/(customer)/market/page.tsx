@@ -316,8 +316,17 @@ export default function MarketPage() {
           평창동 상점가
         </span>
         <div className="flex items-center gap-2">
-          <button className="w-9 h-9 flex items-center justify-center rounded-full text-[18px]" style={{ color: '#4a6358' }}>
-            🔔
+          <button
+            onClick={async () => {
+              await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
+              localStorage.removeItem('cosmart_nickname')
+              localStorage.removeItem('cosmart_user')
+              window.location.href = '/login'
+            }}
+            className="px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all"
+            style={{ background: '#e5dfd5', color: '#4a6358' }}
+          >
+            로그아웃
           </button>
           <button
             onClick={() => router.push('/market/cart')}

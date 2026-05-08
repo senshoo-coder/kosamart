@@ -547,7 +547,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
   <div class="header-top">
     <div>
       <h1>⚙️ 관리자 매뉴얼</h1>
-      <p>관리자 전용 운영 가이드 &nbsp;·&nbsp; 골목상점.kr &nbsp;·&nbsp; 최종 업데이트: 2026.05.05</p>
+      <p>관리자 전용 운영 가이드 &nbsp;·&nbsp; 골목상점.kr &nbsp;·&nbsp; 최종 업데이트: 2026.05.06</p>
     </div>
     <button class="btn-pdf" id="btnPdf" onclick="downloadPDF()">⬇️ PDF</button>
   </div>
@@ -559,6 +559,35 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
   <div class="welcome-card" style="background: linear-gradient(135deg, #4a148c, #6a1b9a);">
     <h2>👋 관리자 매뉴얼이에요!</h2>
     <p>시스템 전반을 관리하는 역할이에요. 이 페이지는 <b>관리자 로그인 후에만 접근 가능</b>합니다 (URL: /manual-admin).</p>
+  </div>
+
+  <!-- 접속 정보 -->
+  <div class="section">
+    <div class="section-header open" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#ede9fe">🌐</div>
+      <div class="section-title"><h2>접속 주소 / 화면 구성</h2><p>관리자 모드 로그인과 메뉴</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body open">
+      <div style="text-align:center;background:#f5f3ff;border:1px solid #ddd6fe;border-radius:12px;padding:18px;margin-bottom:10px;">
+        <p style="font-size:11px;color:#6d28d9;letter-spacing:1.5px;margin-bottom:6px;">관리자 접속 주소</p>
+        <p style="font-size:20px;font-weight:800;color:#5b21b6;">골목상점.kr</p>
+        <p style="font-size:12px;color:#3c4a42;margin-top:6px;">https://골목상점.kr/login?role=admin</p>
+      </div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>주소창에 <kbd>골목상점.kr</kbd> 입력</strong></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>로그인 화면 상단 탭에서 <b>⚙️ 관리자</b> 선택</strong></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>관리자 계정으로 로그인</strong></div></li>
+      </ul>
+      <h3 style="font-size:14px;font-weight:700;color:#6a1b9a;margin:14px 0 6px;">하단 메뉴 (모바일)</h3>
+      <p style="font-size:13px;color:#3c4a42;line-height:1.7;">
+        <b>대시보드</b> · <b>가게</b> · <b>주문</b> · <b>기사</b> · <b>프로필</b> 5개 탭. PC는 좌측 사이드바에서 추가 메뉴 (가입자 관리, 배달 관리, 공구 상품, 전체 분석 등).
+      </p>
+      <h3 style="font-size:14px;font-weight:700;color:#6a1b9a;margin:14px 0 6px;">관리자 매뉴얼 접속</h3>
+      <p style="font-size:13px;color:#3c4a42;">
+        지금 보고 계신 이 페이지는 <code>/manual-admin</code> 입니다. 관리자 로그인 상태에서만 접근 가능. 비관리자는 자동으로 로그인 페이지로 이동.
+      </p>
+    </div>
   </div>
 
   <!-- 매뉴얼 구조 안내 -->
@@ -879,8 +908,10 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
       </div>
 
       <ul class="steps">
-        <li><div class="step-num">1</div><div class="step-text"><strong>가게 설정에서 모든 항목 수정 가능</strong><p>영업시간, 배달비, 공지사항, 휴무일 등을 직접 설정할 수 있어요.</p></div></li>
-        <li><div class="step-num">2</div><div class="step-text"><strong>텔레그램 Chat ID 입력 (관리자 전용)</strong><p>각 가게의 텔레그램 그룹 Chat ID를 입력하면, 배달 이벤트마다 그 그룹으로 알림이 가요.</p></div></li>
+        <li><div class="step-num">1</div><div class="step-text"><strong>가게 설정에서 모든 항목 수정 가능</strong><p>영업시간, 배달비, 공지사항, 휴무일, 가게 대표 이미지 등을 직접 설정할 수 있어요.</p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>가게 전화번호 입력</strong><p>예) <kbd>02-123-4567</kbd>. 입력하면 고객 가게 화면에 파란 박스로 표시되고 탭하면 즉시 전화 연결. 사장님이 직접 못 들어가는 신규 가게 대신 관리자가 입력해 줄 수도 있어요.</p></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>계좌이체 정보 입력</strong><p>예) <kbd>국민은행 123-456-789012 (홍길동)</kbd>. 미입력 시 고객 결제 안내 팝업이 빈 칸으로 떠서 송금 불가 → 가입 직후 반드시 등록.</p></div></li>
+        <li><div class="step-num">4</div><div class="step-text"><strong>텔레그램 Chat ID 입력 (관리자 전용)</strong><p>각 가게의 텔레그램 그룹 Chat ID를 입력하면, 배달 이벤트마다 그 그룹으로 알림이 가요.</p></div></li>
       </ul>
       <div class="info">ℹ️ Chat ID는 관리자 화면에서만 보여요. 사장님 화면에는 표시되지 않아요.</div>
     </div>

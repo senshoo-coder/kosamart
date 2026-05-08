@@ -547,7 +547,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
   <div class="header-top">
     <div>
       <h1>🛒 코사마트 이용 안내</h1>
-      <p>역할을 선택하면 해당 매뉴얼을 볼 수 있어요 &nbsp;·&nbsp; 골목상점.kr &nbsp;·&nbsp; 최종 업데이트: 2026.05.05</p>
+      <p>역할을 선택하면 해당 매뉴얼을 볼 수 있어요 &nbsp;·&nbsp; 골목상점.kr &nbsp;·&nbsp; 최종 업데이트: 2026.05.06</p>
     </div>
     <button class="btn-pdf" id="btnPdf" onclick="downloadPDF()">⬇️ PDF</button>
   </div>
@@ -564,6 +564,24 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
   <div class="welcome-card">
     <h2>👋 고객 매뉴얼에 오신 걸 환영해요!</h2>
     <p>앱 설치 없이 브라우저에서 바로 이용할 수 있어요. 주문하려면 회원가입이 필요해요.</p>
+  </div>
+
+  <!-- 접속 정보 -->
+  <div class="section">
+    <div class="section-header open" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#dbeafe">🌐</div>
+      <div class="section-title"><h2>접속 주소</h2><p>휴대폰·PC 어디서든 같은 주소로 접속</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body open">
+      <div style="text-align:center;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:18px;margin-bottom:10px;">
+        <p style="font-size:11px;color:#15803d;letter-spacing:1.5px;margin-bottom:6px;">웹 주소</p>
+        <p style="font-size:20px;font-weight:800;color:#2d6a4f;">골목상점.kr</p>
+        <p style="font-size:12px;color:#3c4a42;margin-top:6px;">https://골목상점.kr</p>
+      </div>
+      <div class="tip">💡 <b>홈 화면에 추가</b>: 휴대폰 브라우저에서 한 번 추가해 두면 앱처럼 바로 열 수 있어요. (크롬·사파리 메뉴 → "홈 화면에 추가")</div>
+      <div class="info">ℹ️ 카카오톡으로 가족·이웃에게 공유 가능. 한글 주소가 그대로 보입니다.</div>
+    </div>
   </div>
 
   <div class="quick-grid">
@@ -712,8 +730,9 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
       </div>
 
       <ul class="steps">
-        <li><div class="step-num">2</div><div class="step-text"><strong>영업 상태 확인</strong><p><span class="badge badge-green">영업중</span> 인 가게에서만 주문 가능해요. <span class="badge badge-gray">영업종료</span> 가게는 운영시간에 다시 방문해 주세요.</p></div></li>
-        <li><div class="step-num">3</div><div class="step-text"><strong>가게 카드 탭 → 상품 목록 확인</strong></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>영업 상태 확인</strong><p>각 카드 정보 영역에 <b>🟢 영업중</b> / <b>⏸️ 영업종료</b> 가 표시됩니다. <b>입점예정</b> 가게는 🚧 노란 뱃지가 붙고 클릭이 잠겨 있어요.</p></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>점포명 또는 상품명으로 검색</strong><p>상단 <b>"점포명 또는 상품 검색"</b> 입력칸에 원하는 가게 이름이나 상품명을 입력하면 결과가 카드로 표시되고, 어느 가게 상품인지도 함께 보여줍니다.</p></div></li>
+        <li><div class="step-num">4</div><div class="step-text"><strong>가게 카드 탭 → 상품 목록 확인</strong></div></li>
       </ul>
 
       <!-- 📱 상품 목록 -->
@@ -766,6 +785,8 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
       </div>
 
       <div class="info">ℹ️ 영업 시간이 지나면 자동으로 <b>영업종료</b>로 바뀌어요. 별도로 끄지 않아도 돼요!</div>
+      <div class="info">📞 가게 정보 카드 아래에 <b>가게 전화번호</b>가 있는 가게는 파란 박스로 표시돼요. <b>탭하면 즉시 전화 다이얼러가 열립니다</b> (휴대폰).</div>
+      <div class="tip">💡 가게 페이지에도 <b>"이 가게 상품 검색"</b> 입력칸이 있어 가게 안에서도 상품을 빠르게 찾을 수 있어요. 카테고리 필터와 함께 사용 가능.</div>
     </div>
   </div>
 
@@ -978,6 +999,32 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
   <div class="welcome-card" style="background: linear-gradient(135deg, #1565c0, #1976d2);">
     <h2>👋 사장님 매뉴얼이에요!</h2>
     <p>주문 관리와 가게 설정을 도와드려요. 대시보드의 통계 카드를 탭하면 해당 주문 목록으로 바로 이동할 수 있어요!</p>
+  </div>
+
+  <!-- 접속 정보 -->
+  <div class="section">
+    <div class="section-header open" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#dbeafe">🌐</div>
+      <div class="section-title"><h2>접속 주소 / 화면 구성</h2><p>로그인하고 사장님 모드로 들어가는 법</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body open">
+      <div style="text-align:center;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:18px;margin-bottom:10px;">
+        <p style="font-size:11px;color:#1d4ed8;letter-spacing:1.5px;margin-bottom:6px;">사장님 접속 주소</p>
+        <p style="font-size:20px;font-weight:800;color:#1e40af;">골목상점.kr</p>
+        <p style="font-size:12px;color:#3c4a42;margin-top:6px;">https://골목상점.kr/login?role=owner</p>
+      </div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>주소창에 <kbd>골목상점.kr</kbd> 입력</strong><p>휴대폰·PC 어디서나 같은 주소.</p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>로그인 화면 상단 탭에서 <b>🏪 사장님</b> 선택</strong><p>다른 탭에서 사장님 계정 입력 시 차단됩니다.</p></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>닉네임/비밀번호 입력 후 로그인</strong></div></li>
+      </ul>
+      <h3 style="font-size:14px;font-weight:700;color:#1976d2;margin:14px 0 6px;">하단 메뉴 (모바일)</h3>
+      <p style="font-size:13px;color:#3c4a42;line-height:1.7;">
+        <b>대시보드</b> · <b>주문</b> · <b>내 가게</b> · <b>매출</b> · <b>프로필</b> 5개 탭으로 구성됩니다. PC 버전은 좌측 사이드바.
+      </p>
+      <div class="tip">💡 휴대폰 브라우저에서 <b>홈 화면에 추가</b>하면 앱처럼 한 번에 열 수 있어요.</div>
+    </div>
   </div>
 
   <!-- 로그인 -->
@@ -1340,6 +1387,32 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
   <div class="welcome-card" style="background: linear-gradient(135deg, #e65100, #f57c00);">
     <h2>👋 배달기사 매뉴얼이에요!</h2>
     <p>배달 수락부터 완료까지 안내해 드려요.</p>
+  </div>
+
+  <!-- 접속 정보 -->
+  <div class="section">
+    <div class="section-header open" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#fed7aa">🌐</div>
+      <div class="section-title"><h2>접속 주소 / 화면 구성</h2><p>기사님 모드 로그인 방법</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body open">
+      <div style="text-align:center;background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:18px;margin-bottom:10px;">
+        <p style="font-size:11px;color:#c2410c;letter-spacing:1.5px;margin-bottom:6px;">기사님 접속 주소</p>
+        <p style="font-size:20px;font-weight:800;color:#9a3412;">골목상점.kr</p>
+        <p style="font-size:12px;color:#3c4a42;margin-top:6px;">https://골목상점.kr/login?role=driver</p>
+      </div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>주소창에 <kbd>골목상점.kr</kbd> 입력</strong></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>로그인 화면 상단 탭에서 <b>🚚 기사님</b> 선택</strong></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>닉네임/비밀번호 입력 후 로그인</strong></div></li>
+      </ul>
+      <h3 style="font-size:14px;font-weight:700;color:#e65100;margin:14px 0 6px;">하단 메뉴 (모바일)</h3>
+      <p style="font-size:13px;color:#3c4a42;line-height:1.7;">
+        <b>배달</b> · <b>내역</b> · <b>프로필</b> 3개 탭으로 구성됩니다.
+      </p>
+      <div class="tip">💡 휴대폰에서 <b>홈 화면에 추가</b>하면 배달 진행 중 앱처럼 빠르게 접속 가능.</div>
+    </div>
   </div>
 
   <!-- 로그인 -->

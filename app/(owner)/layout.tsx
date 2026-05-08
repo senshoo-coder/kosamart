@@ -4,11 +4,11 @@ import { OwnerSidebar } from '@/components/layout/OwnerSidebar'
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav'
 
 const MOBILE_NAV = [
-  { href: '/owner/dashboard', icon: 'dashboard',   label: 'Dash' },
-  { href: '/owner/orders',    icon: 'receipt_long', label: 'Orders' },
-  { href: '/owner/store',     icon: 'storefront',   label: 'Store' },
-  { href: '/owner/analytics', icon: 'bar_chart',    label: 'Stats' },
-  { href: '/owner/profile',   icon: 'person',       label: 'Me' },
+  { href: '/owner/dashboard', icon: 'dashboard',   label: '대시보드' },
+  { href: '/owner/orders',    icon: 'receipt_long', label: '주문' },
+  { href: '/owner/store',     icon: 'storefront',   label: '내 가게' },
+  { href: '/owner/analytics', icon: 'bar_chart',    label: '매출' },
+  { href: '/owner/profile',   icon: 'person',       label: '프로필' },
 ]
 
 export default function OwnerLayout({ children }: { children: React.ReactNode }) {

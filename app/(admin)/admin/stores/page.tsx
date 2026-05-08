@@ -63,7 +63,7 @@ function buildHours(start: number, end: number): string {
 const DEFAULT_STORE = {
   id: '', name: '', emoji: '🏪', category: '기타', description: '',
   isOpen: true, badge: '', hours: '09:00~18:00', minOrder: 10000,
-  deliveryFee: 0, accentColor: '#10b981', bank_account: '', telegram_chat_id: '',
+  deliveryFee: 0, accentColor: '#10b981', bank_account: '', telegram_chat_id: '', phone: '',
 }
 
 function StatusSelect({ value, onChange, disabled, size = 'md' }: {
@@ -227,6 +227,7 @@ export default function AdminStoresPage() {
       accentColor: store.accentColor,
       bank_account: (store as any).bank_account || '',
       telegram_chat_id: (store as any).telegram_chat_id || '',
+      phone: (store as any).phone || '',
       weekly_closed: (store as any).weekly_closed || [],
       closed_dates: (store as any).closed_dates || [],
       isCustom: store.isCustom,
@@ -567,6 +568,15 @@ export default function AdminStoresPage() {
                       style={{ background: color, borderColor: editingStore.accentColor === color ? '#1a1c1c' : 'transparent', transform: editingStore.accentColor === color ? 'scale(1.2)' : 'scale(1)' }} />
                   ))}
                 </div>
+              </div>
+
+              {/* 가게 전화번호 */}
+              <div>
+                <label className="text-[12px] font-semibold text-[#1a1c1c] mb-1.5 block">가게 전화번호 (선택)</label>
+                <input type="tel" value={editingStore.phone || ''} onChange={e => setEditingStore({ ...editingStore, phone: e.target.value })}
+                  placeholder="예: 02-123-4567"
+                  className="w-full border border-[#e0e0e0] rounded-[8px] px-4 py-2.5 text-[14px] text-[#1a1c1c] placeholder-[#c0c0c0] outline-none focus:border-[#8B5CF6]" />
+                <p className="text-[11px] text-[#a3a3a3] mt-1">고객이 가게 화면에서 탭하면 바로 전화 연결</p>
               </div>
 
               {/* 계좌이체 정보 */}

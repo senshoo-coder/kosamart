@@ -31,6 +31,7 @@ export interface StoreData {
   accentColor: string
   bank_account?: string       // 계좌이체 정보 (예: "국민은행 123-456-789012 (홍길동)")
   telegram_chat_id?: string   // 가게방 텔레그램 Chat ID
+  phone?: string              // 가게 대표 전화번호 (예: "02-123-4567")
 }
 
 async function readConfig(): Promise<StoresConfig> {

@@ -76,7 +76,7 @@ export default function OwnerStorePage() {
   const [loading, setLoading] = useState(true)
   const [products, setProducts] = useState<DBProduct[]>([])
   const [editingInfo, setEditingInfo] = useState(false)
-  const [infoForm, setInfoForm] = useState({ name: '', description: '', hours: '', minOrder: 0, deliveryFee: 0, bank_account: '', telegram_chat_id: '', weekly_closed: [] as string[], closed_dates: [] as string[] })
+  const [infoForm, setInfoForm] = useState({ name: '', description: '', hours: '', minOrder: 0, deliveryFee: 0, bank_account: '', telegram_chat_id: '', phone: '', weekly_closed: [] as string[], closed_dates: [] as string[] })
   const [closedDateInput, setClosedDateInput] = useState('')
   const [savingInfo, setSavingInfo] = useState(false)
   const [images, setImages] = useState<ImageMap>({})
@@ -128,6 +128,7 @@ export default function OwnerStorePage() {
       deliveryFee: store?.deliveryFee || 0,
       bank_account: (store as any)?.bank_account || '',
       telegram_chat_id: (store as any)?.telegram_chat_id || '',
+      phone: (store as any)?.phone || '',
       weekly_closed: (store as any)?.weekly_closed || [],
       closed_dates: (store as any)?.closed_dates || [],
     })
@@ -539,6 +540,18 @@ export default function OwnerStorePage() {
                   />
                 </div>
               </div>
+              <div>
+                <label className="text-[11px] text-[#a3a3a3] font-medium block mb-1">가게 전화번호</label>
+                <input
+                  type="tel"
+                  value={infoForm.phone}
+                  onChange={e => setInfoForm(f => ({ ...f, phone: e.target.value }))}
+                  placeholder="예) 02-123-4567"
+                  className="w-full border border-[#e0e0e0] rounded-[8px] px-3 py-2 text-[13px] text-[#1a1c1c] focus:outline-none focus:border-[#0058be]"
+                />
+                <p className="text-[11px] text-[#a3a3a3] mt-1">고객이 가게 화면에서 탭하면 바로 전화 연결됩니다</p>
+              </div>
+
               <div>
                 <label className="text-[11px] text-[#a3a3a3] font-medium block mb-1">계좌이체 정보</label>
                 <input

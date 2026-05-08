@@ -11,7 +11,7 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
   const { storeId } = use(params)
   const router = useRouter()
   const staticStore = getStore(storeId)
-  const [dynamicInfo, setDynamicInfo] = useState<{ name?: string; emoji?: string; description?: string; bank_account?: string; hours?: string; minOrder?: number; deliveryFee?: number; weekly_closed?: string[]; closed_dates?: string[] } | null>(null)
+  const [dynamicInfo, setDynamicInfo] = useState<{ name?: string; emoji?: string; description?: string; bank_account?: string; phone?: string; hours?: string; minOrder?: number; deliveryFee?: number; weekly_closed?: string[]; closed_dates?: string[] } | null>(null)
   const { products: dbProducts } = useStoreProducts(storeId)
   const cart = useMarketCart()
 
@@ -32,6 +32,7 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
             if (found.emoji !== undefined) info.emoji = found.emoji
             if (found.description !== undefined) info.description = found.description
             if (found.bank_account) info.bank_account = found.bank_account
+            if (found.phone) info.phone = found.phone
             if (found.hours) info.hours = found.hours
             if (found.minOrder !== undefined && found.minOrder !== null) info.minOrder = found.minOrder
             if (found.deliveryFee !== undefined && found.deliveryFee !== null) info.deliveryFee = found.deliveryFee
@@ -199,6 +200,19 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
           <span className="text-xl">🚚</span>
           <p className="text-[12px] text-[#3c4a42] leading-relaxed">여러 가게 상품을 장바구니에 담아 <b className="text-[#10b981]">묶음배송</b> 가능</p>
         </div>
+        {(store as any).phone && (
+          <a
+            href={`tel:${String((store as any).phone).replace(/[^0-9+]/g, '')}`}
+            className="mt-3 flex items-center gap-3 bg-[#eff6ff] border border-[#bfdbfe] rounded-xl px-4 py-3 hover:bg-[#dbeafe] transition-colors active:scale-[0.99]"
+          >
+            <span className="text-xl">📞</span>
+            <div className="flex-1">
+              <p className="text-[10px] text-[#94a3b8] mb-0.5">가게 전화</p>
+              <p className="text-[14px] font-bold text-[#1d4ed8]">{(store as any).phone}</p>
+            </div>
+            <span className="text-[12px] text-[#1d4ed8] font-semibold">바로 통화 →</span>
+          </a>
+        )}
         {(store as any).bank_account && (
           <div className="mt-3 bg-[#fffbeb] border border-[#fde68a] rounded-xl px-4 py-3">
             <p className="text-[11px] text-[#92400e] mb-1 font-medium">💳 계좌이체 안내</p>

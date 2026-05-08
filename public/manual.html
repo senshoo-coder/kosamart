@@ -7,12 +7,17 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif;
   background: #f4f6f8;
   color: #1a1c1c;
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.7;
 }
+.step-text strong { font-size: 15px; }
+.step-text p      { font-size: 14px; line-height: 1.65; }
+.faq-q            { font-size: 15px; }
+.faq-a            { font-size: 14px; line-height: 1.7; }
+.tip, .warn, .info { font-size: 14px; }
 
 /* ── Header ── */
 .header {
@@ -547,7 +552,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
   <div class="header-top">
     <div>
       <h1>🛒 코사마트 이용 안내</h1>
-      <p>역할을 선택하면 해당 매뉴얼을 볼 수 있어요 &nbsp;·&nbsp; 골목상점.kr &nbsp;·&nbsp; 최종 업데이트: 2026.05.06</p>
+      <p>역할을 선택하면 해당 매뉴얼을 볼 수 있어요 &nbsp;·&nbsp; 골목상점.kr &nbsp;·&nbsp; 최종 업데이트: 2026.05.07</p>
     </div>
     <button class="btn-pdf" id="btnPdf" onclick="downloadPDF()">⬇️ PDF</button>
   </div>
@@ -563,7 +568,30 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
 
   <div class="welcome-card">
     <h2>👋 고객 매뉴얼에 오신 걸 환영해요!</h2>
-    <p>앱 설치 없이 브라우저에서 바로 이용할 수 있어요. 주문하려면 회원가입이 필요해요.</p>
+    <p>앱 설치 없이 휴대폰·컴퓨터 인터넷 창에서 바로 이용할 수 있어요. 주문하려면 회원가입이 필요해요.</p>
+  </div>
+
+  <!-- 어르신을 위한 사용 팁 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#fef9c3">👵</div>
+      <div class="section-title"><h2>처음 쓰시는 분께</h2><p>천천히 따라 하시면 누구나 쓸 수 있어요</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <div class="tip" style="font-size:15px;">
+        💡 <b>한 번에 한 단계씩</b> 따라 해 주세요. 잘못 누르셔도 다시 돌아올 수 있어요!
+      </div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>글씨가 작으면 키울 수 있어요</strong><p>휴대폰: 두 손가락으로 화면을 살짝 벌리면 글씨가 커집니다.<br>컴퓨터: 키보드의 <kbd>Ctrl</kbd> 누르고 <kbd>+</kbd> 키를 누르면 커집니다.</p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>"누르다" = 손가락이나 마우스로 한 번 톡 치는 것</strong><p>이 매뉴얼에서 "누르세요"라고 나오면 화면을 한 번 톡 치시면 돼요.</p></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>"뒤로" 버튼은 항상 화면 왼쪽 위에 있어요</strong><p>실수로 다른 화면으로 갔어도 <b>← 화살표</b>를 누르면 다시 돌아옵니다.</p></div></li>
+        <li><div class="step-num">4</div><div class="step-text"><strong>모르는 게 있으면 가게에 직접 전화하세요</strong><p>가게 화면에 <b>📞 전화번호</b>가 있는 곳은 누르면 바로 통화 연결돼요.</p></div></li>
+      </ul>
+      <div class="info" style="font-size:15px;">
+        🆘 그래도 안 되시면 가족이나 이웃분께 한 번만 도움 요청하세요. 한 번 익숙해지면 그 다음부터는 쉽습니다!
+      </div>
+    </div>
   </div>
 
   <!-- 접속 정보 -->
@@ -683,8 +711,11 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
     </div>
     <div class="section-body">
       <ul class="steps">
-        <li><div class="step-num">1</div><div class="step-text"><strong>로그인 후 마켓 화면</strong><p>여러 가게가 카드 형태로 보여요. 각 카드에 영업 상태가 표시돼요.</p></div></li>
+        <li><div class="step-num">1</div><div class="step-text"><strong>로그인하면 가게 목록이 나타나요</strong><p>여러 가게가 큰 카드 모양으로 줄지어 보여요. 화면을 위아래로 손가락으로 밀면 더 많은 가게를 볼 수 있어요.</p></div></li>
       </ul>
+      <div class="info" style="font-size:14px;">
+        🛒 화면 맨 위 오른쪽에 <b>장바구니</b>와 <b>로그아웃</b> 버튼이 있어요. 이용을 다 마치시면 <b>로그아웃</b>을 누르면 안전하게 끝낼 수 있어요.
+      </div>
 
       <!-- 📱 마켓 화면 -->
       <div class="mockup-wrap">
@@ -986,6 +1017,10 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
       <div class="faq-item"><div class="faq-q">주문 취소는 어떻게 하나요?</div><div class="faq-a">앱 내 취소 기능은 없어요. 가게에 직접 연락해서 취소 요청해 주세요.</div></div>
       <div class="faq-item"><div class="faq-q">희망 시간 선택을 안 해도 되나요?</div><div class="faq-a">네, 선택하지 않으면 시간 제약 없이 빠르게 배달돼요.</div></div>
       <div class="faq-item"><div class="faq-q">비밀번호를 잊어버렸어요</div><div class="faq-a">로그인 화면 하단 <b>"비밀번호를 잊으셨나요?"</b> 링크를 눌러 닉네임을 입력하면 관리자에게 자동으로 재설정 요청이 가요. 보통 영업일 기준 1일 이내 회신됩니다.</div></div>
+      <div class="faq-item"><div class="faq-q">로그아웃은 어떻게 하나요?</div><div class="faq-a">화면 맨 위 오른쪽에 <b>로그아웃</b> 버튼이 있어요. 누르시면 끝납니다. 다음에 다시 들어오실 때 닉네임과 비밀번호를 다시 입력하시면 돼요.</div></div>
+      <div class="faq-item"><div class="faq-q">실수로 다른 곳을 눌렀어요</div><div class="faq-a">화면 왼쪽 위 <b>← 뒤로 화살표</b>를 누르면 이전 화면으로 돌아갑니다. 어디로 가도 메인 화면(가게 목록)으로 다시 갈 수 있으니 걱정 마세요.</div></div>
+      <div class="faq-item"><div class="faq-q">화면 글씨가 너무 작아요</div><div class="faq-a">휴대폰: 두 손가락으로 화면을 살짝 벌리면 커집니다. 컴퓨터: <kbd>Ctrl</kbd> 누른 채로 <kbd>+</kbd> 키를 누르면 커지고, <kbd>-</kbd>는 작아져요.</div></div>
+      <div class="faq-item"><div class="faq-q">어떻게 하는지 모르겠어요</div><div class="faq-a">가게 화면에 <b>📞 전화번호</b>가 있는 곳은 누르면 바로 가게로 전화 연결돼요. 직접 물어보셔도 됩니다.</div></div>
       <div class="faq-item"><div class="faq-q">로그인 시 "역할 계정이 아닙니다"라고 떠요</div><div class="faq-a">로그인 화면 상단 탭(고객/사장님/기사님/관리자) 중 본인 계정 종류와 일치하는 탭을 선택해야 해요. 예) 고객 계정인데 사장님 탭에서 로그인 시도 시 차단됩니다.</div></div>
       <div class="faq-item"><div class="faq-q">비밀번호에 한글이 안 들어가요</div><div class="faq-a">코사마트는 보안을 위해 비밀번호에 영문·숫자·특수기호만 허용합니다. 한국어 입력기가 켜져 있어도 한글은 자동으로 차단돼요.</div></div>
     </div>

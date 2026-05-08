@@ -392,7 +392,7 @@ export default function MarketPage() {
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="전체 상점에서 상품 검색"
+              placeholder="점포명 또는 상품 검색"
               className="w-full bg-white border border-[rgba(0,0,0,0.08)] rounded-full pl-11 pr-10 py-3 text-[13px] outline-none focus:border-[#2d5a3d]"
               style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
             />

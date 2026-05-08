@@ -26,15 +26,6 @@ const STORE_GRADIENTS: Record<string, string> = {
   'bakery':        'linear-gradient(150deg, #713f12 0%, #422006 100%)',
 }
 
-const PARTICIPANTS: Record<string, number> = {
-  'central-super': 23,
-  'banchan':       45,
-  'butcher':       12,
-  'bonjuk':        8,
-  'chicken':       31,
-  'bakery':        19,
-}
-
 type DisplayStatus = 'visible' | 'hidden' | 'coming_soon'
 
 interface DynamicStore {
@@ -485,7 +476,6 @@ export default function MarketPage() {
         <div className="px-4 flex flex-col gap-4">
           {filteredStores.map(store => {
             const shortCat = CATEGORY_MAP[store.category] || store.category
-            const participants = PARTICIPANTS[store.id] || 0
             const gradient = STORE_GRADIENTS[store.id] || 'linear-gradient(150deg, #1e293b, #0f172a)'
             const storeImage = allImages[store.id]?.store
             const storeCartCount = cart.getStoreItemCount(store.id)
@@ -568,7 +558,11 @@ export default function MarketPage() {
 
                   <div className="flex items-center gap-2 mb-2.5">
                     <span className="text-[12px]" style={{ color: '#8c9688' }}>
-                      {isComing ? '✨ 곧 만나요!' : `👥 ${participants}명 참여중`}
+                      {isComing
+                        ? '✨ 곧 만나요!'
+                        : store.deliveryFee === 0
+                          ? '🚚 배달비 무료'
+                          : `🚚 배달비 ${store.deliveryFee.toLocaleString()}원`}
                     </span>
                   </div>
 

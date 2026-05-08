@@ -317,6 +317,17 @@ export default function MarketPage() {
         </span>
         <div className="flex items-center gap-2">
           <button
+            onClick={() => router.push('/market/cart')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-semibold transition-all"
+            style={cart.totalItems > 0
+              ? { background: '#2d5a3d', color: '#fff' }
+              : { background: '#e5dfd5', color: '#4a6358' }
+            }
+          >
+            <span>🛒</span>
+            {cart.totalItems > 0 && <span>{cart.totalItems}</span>}
+          </button>
+          <button
             onClick={async () => {
               await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
               localStorage.removeItem('cosmart_nickname')
@@ -327,17 +338,6 @@ export default function MarketPage() {
             style={{ background: '#e5dfd5', color: '#4a6358' }}
           >
             로그아웃
-          </button>
-          <button
-            onClick={() => router.push('/market/cart')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-semibold transition-all"
-            style={cart.totalItems > 0
-              ? { background: '#2d5a3d', color: '#fff' }
-              : { background: '#e5dfd5', color: '#4a6358' }
-            }
-          >
-            <span>🛒</span>
-            {cart.totalItems > 0 && <span>{cart.totalItems}</span>}
           </button>
         </div>
       </header>

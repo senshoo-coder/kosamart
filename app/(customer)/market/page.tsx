@@ -387,7 +387,7 @@ export default function MarketPage() {
         {/* 타 지역 배송 안내 */}
         <div className="px-5 pt-4">
           <a
-            href="tel:0233954152"
+            href="tel:023954152"
             className="block bg-white rounded-xl px-4 py-3 border border-[#e5dfd5] hover:bg-[#fafaf6] transition-colors active:scale-[0.99]"
             style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
           >

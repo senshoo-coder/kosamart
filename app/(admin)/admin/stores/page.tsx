@@ -211,6 +211,34 @@ export default function AdminStoresPage() {
     setIsNewStore(true)
   }
 
+  // 일회성: 홈앤미트 상품 일괄 추가
+  const [butcherBusy, setButcherBusy] = useState(false)
+  async function runButcherProductsMigration() {
+    if (!confirm('홈앤미트에 한우·한돈 상품 8개를 일괄 추가합니다.\n\n' +
+      '• 한우 6종 (등심/채끝/안심/양지/국거리/불고기)\n' +
+      '• 한돈 2종 (오겹살/목살)\n' +
+      '모두 100g 단위.\n\n' +
+      '※ 이름이 같은 상품은 건너뜁니다. 진행할까요?')) return
+    setButcherBusy(true)
+    try {
+      const res = await fetch('/api/admin/migrate-butcher-products', { method: 'POST' })
+      const json = await res.json()
+      if (json.error) {
+        alert('실패: ' + json.error)
+      } else {
+        alert(
+          '✅ 완료\n' +
+          `추가: ${json.data.added_count}개\n` +
+          `건너뜀(중복): ${json.data.skipped_count}개\n` +
+          `현재 가게 상품 총: ${json.data.final_product_count}개`
+        )
+      }
+    } catch (e: any) {
+      alert('오류: ' + e.message)
+    }
+    setButcherBusy(false)
+  }
+
   function openEdit(store: StoreDisplay) {
     setEditingStore({
       id: store.id,
@@ -288,6 +316,11 @@ export default function AdminStoresPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button onClick={runButcherProductsMigration} disabled={butcherBusy}
+            className="h-[36px] px-3 rounded-[10px] bg-[#fef3c7] text-[#b45309] text-[11px] font-semibold border border-[#fde68a] disabled:opacity-50"
+            title="홈앤미트 상품 8개 일괄 추가 (1회용)">
+            {butcherBusy ? '실행 중...' : '🔄 홈앤미트 상품 일괄 추가'}
+          </button>
           <button onClick={loadAll} className="h-[36px] px-4 rounded-[10px] bg-[#f2f4f6] text-[#3c4a42] text-[12px] font-medium border border-[#e8e8e8]">새로고침</button>
           <button onClick={openAdd}
             className="h-[36px] px-4 rounded-[10px] text-[12px] font-semibold text-white flex items-center gap-1.5"

@@ -384,33 +384,8 @@ export default function MarketPage() {
       {/* 메인 콘텐츠 */}
       <div className={`flex flex-col gap-0 ${cart.totalItems > 0 ? 'pb-[88px]' : 'pb-8'}`}>
 
-        {/* 타 지역 배송 안내 */}
-        <div className="px-5 pt-4">
-          <a
-            href="tel:023954152"
-            className="block bg-white rounded-xl px-4 py-3 border border-[#e5dfd5] hover:bg-[#fafaf6] transition-colors active:scale-[0.99]"
-            style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-[20px] flex-shrink-0">🚚</span>
-              <div className="flex-1 min-w-0">
-                <p className="text-[12px] font-semibold leading-tight" style={{ color: '#2d5a3d' }}>
-                  타 지역 배송은 <b>배달맨</b>
-                </p>
-                <p className="text-[11px] mt-0.5" style={{ color: '#6c7a71' }}>
-                  평창동에서 다른 곳으로 퀵택배 보내실 때!
-                </p>
-              </div>
-              <div className="flex-shrink-0 text-right">
-                <p className="text-[10px]" style={{ color: '#94a3b8' }}>문의</p>
-                <p className="text-[13px] font-bold" style={{ color: '#1d4ed8' }}>02-395-4152</p>
-              </div>
-            </div>
-          </a>
-        </div>
-
         {/* 통합 상품 검색 */}
-        <div className="px-5 pt-3">
+        <div className="px-5 pt-5">
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8c9688] text-[15px] pointer-events-none">🔍</span>
             <input
@@ -428,6 +403,33 @@ export default function MarketPage() {
             )}
           </div>
         </div>
+
+        {/* 타 지역 배송 안내 (배달맨) */}
+        {!isSearching && (
+          <div className="px-5 pt-3">
+            <a
+              href="tel:023954152"
+              className="block bg-white rounded-xl px-4 py-3 border border-[#e5dfd5] hover:bg-[#fafaf6] transition-colors active:scale-[0.99]"
+              style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-[20px] flex-shrink-0">🚚</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[12px] font-semibold leading-tight" style={{ color: '#2d5a3d' }}>
+                    타 지역 배송은 <b>배달맨</b>
+                  </p>
+                  <p className="text-[11px] mt-0.5" style={{ color: '#6c7a71' }}>
+                    평창동에서 다른 곳으로 퀵택배 보내실 때!
+                  </p>
+                </div>
+                <div className="flex-shrink-0 text-right">
+                  <p className="text-[10px]" style={{ color: '#94a3b8' }}>문의</p>
+                  <p className="text-[13px] font-bold" style={{ color: '#1d4ed8' }}>02-395-4152</p>
+                </div>
+              </div>
+            </a>
+          </div>
+        )}
 
         {/* 검색 모드: 결과 표시 */}
         {isSearching && (

@@ -211,35 +211,6 @@ export default function AdminStoresPage() {
     setIsNewStore(true)
   }
 
-  // 일회성: 코사마트 평창점 상품 일괄 추가
-  const [centralBusy, setCentralBusy] = useState(false)
-  async function runCentralProductsMigration() {
-    if (!confirm('코사마트 평창점에 상품 32개를 일괄 추가합니다.\n\n' +
-      '• 동영방앗간 4종 (참기름/들기름)\n' +
-      '• 보성농협 16종 (잡곡류)\n' +
-      '• 신영김치 5종\n' +
-      '• 유기농 7종 (상하 우유·요거트)\n\n' +
-      '※ 이름이 같은 상품은 건너뜁니다. 진행할까요?')) return
-    setCentralBusy(true)
-    try {
-      const res = await fetch('/api/admin/migrate-central-super-products', { method: 'POST' })
-      const json = await res.json()
-      if (json.error) {
-        alert('실패: ' + json.error)
-      } else {
-        alert(
-          '✅ 완료\n' +
-          `추가: ${json.data.added_count}개\n` +
-          `건너뜀(중복): ${json.data.skipped_count}개\n` +
-          `현재 가게 상품 총: ${json.data.final_product_count}개`
-        )
-      }
-    } catch (e: any) {
-      alert('오류: ' + e.message)
-    }
-    setCentralBusy(false)
-  }
-
   function openEdit(store: StoreDisplay) {
     setEditingStore({
       id: store.id,
@@ -317,11 +288,6 @@ export default function AdminStoresPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={runCentralProductsMigration} disabled={centralBusy}
-            className="h-[36px] px-3 rounded-[10px] bg-[#fef3c7] text-[#b45309] text-[11px] font-semibold border border-[#fde68a] disabled:opacity-50"
-            title="코사마트 평창점 상품 32개 일괄 추가 (1회용)">
-            {centralBusy ? '실행 중...' : '🔄 코사마트 상품 일괄 추가'}
-          </button>
           <button onClick={loadAll} className="h-[36px] px-4 rounded-[10px] bg-[#f2f4f6] text-[#3c4a42] text-[12px] font-medium border border-[#e8e8e8]">새로고침</button>
           <button onClick={openAdd}
             className="h-[36px] px-4 rounded-[10px] text-[12px] font-semibold text-white flex items-center gap-1.5"

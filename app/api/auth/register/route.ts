@@ -8,7 +8,7 @@ import { isValidPasswordFormat } from '@/lib/utils/password'
 const ROLE_LABELS_REG: Record<string, string> = {
   customer: '고객',
   owner: '사장님',
-  driver: '배달기사',
+  driver: '배달맨',
 }
 
 export async function POST(req: NextRequest) {
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
 
   const password_hash = await bcrypt.hash(password, 10)
 
-  // 고객은 즉시 활성, 사장님/기사는 승인 대기
+  // 고객은 즉시 활성, 사장님/배달맨은 승인 대기
   const status = role === 'customer' ? 'active' : 'pending'
 
   const { data: user, error } = await supabase

@@ -7,7 +7,7 @@ const MOBILE_NAV = [
   { href: '/admin/dashboard', icon: 'dashboard',       label: '대시보드' },
   { href: '/admin/stores',    icon: 'storefront',      label: '가게' },
   { href: '/admin/orders',    icon: 'receipt_long',    label: '주문' },
-  { href: '/admin/drivers',   icon: 'directions_bike', label: '기사' },
+  { href: '/admin/drivers',   icon: 'directions_bike', label: '배달맨' },
   { href: '/admin/profile',   icon: 'person',          label: '프로필' },
 ]
 

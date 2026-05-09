@@ -27,7 +27,7 @@ export default function AdminDriversPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [deliveryStats, setDeliveryStats] = useState<Record<string, { total: number; active: number; completed: number }>>({})
 
-  // 새 기사 추가 모달
+  // 새 배달맨 추가 모달
   const [showCreate, setShowCreate] = useState(false)
   const [form, setForm] = useState({ nickname: '', password: '', phone: '' })
   const [createLoading, setCreateLoading] = useState(false)
@@ -110,7 +110,7 @@ export default function AdminDriversPage() {
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[20px] font-bold text-[#1a1c1c]">배달기사 관리</h1>
+          <h1 className="text-[20px] font-bold text-[#1a1c1c]">배달맨 관리</h1>
           <p className="text-[12px] text-[#a3a3a3] mt-0.5">
             활성 {activeCount}명{pendingCount > 0 ? ` · 승인대기 ${pendingCount}명` : ''}
           </p>
@@ -123,7 +123,7 @@ export default function AdminDriversPage() {
             onClick={() => setShowCreate(true)}
             className="h-[36px] px-4 rounded-[10px] bg-[#6d28d9] text-white text-[12px] font-semibold"
           >
-            + 기사 추가
+            + 배달맨 추가
           </button>
         </div>
       </div>
@@ -131,7 +131,7 @@ export default function AdminDriversPage() {
       {/* 통계 카드 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="bg-white rounded-[8px] p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-          <p className="text-[11px] text-[#a3a3a3] mb-1">전체 기사</p>
+          <p className="text-[11px] text-[#a3a3a3] mb-1">전체 배달맨</p>
           <p className="text-[20px] font-bold text-[#1a1c1c]">{drivers.length}명</p>
         </div>
         <div className="bg-white rounded-[8px] p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
@@ -174,7 +174,7 @@ export default function AdminDriversPage() {
         ))}
       </div>
 
-      {/* 기사 목록 */}
+      {/* 배달맨 목록 */}
       {loading ? (
         <div className="flex justify-center py-16">
           <div className="w-8 h-8 border-2 border-[#6d28d9]/30 border-t-[#6d28d9] rounded-full animate-spin" />
@@ -186,14 +186,14 @@ export default function AdminDriversPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[#f5f5f5]">
-                  {['기사', '연락처', '상태', '진행중 배달', '완료 배달', '가입일', '관리'].map(h => (
+                  {['배달맨', '연락처', '상태', '진행중 배달', '완료 배달', '가입일', '관리'].map(h => (
                     <th key={h} className="text-left px-4 py-3 text-[11px] text-[#a3a3a3] font-medium">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {drivers.length === 0 ? (
-                  <tr><td colSpan={7} className="text-center py-10 text-[#a3a3a3] text-[13px]">배달기사가 없습니다</td></tr>
+                  <tr><td colSpan={7} className="text-center py-10 text-[#a3a3a3] text-[13px]">배달맨가 없습니다</td></tr>
                 ) : drivers.map(driver => {
                   const stats = deliveryStats[driver.id] || { total: 0, active: 0, completed: 0 }
                   const st = STATUS_STYLE[driver.status] || STATUS_STYLE.active
@@ -245,7 +245,7 @@ export default function AdminDriversPage() {
             {drivers.length === 0 ? (
               <div className="flex flex-col items-center py-16 gap-2">
                 <span className="text-4xl">🚴</span>
-                <p className="text-[14px] font-semibold text-[#1a1c1c]">배달기사가 없습니다</p>
+                <p className="text-[14px] font-semibold text-[#1a1c1c]">배달맨가 없습니다</p>
               </div>
             ) : drivers.map(driver => {
               const stats = deliveryStats[driver.id] || { total: 0, active: 0, completed: 0 }
@@ -304,12 +304,12 @@ export default function AdminDriversPage() {
         </>
       )}
 
-      {/* 기사 추가 모달 */}
+      {/* 배달맨 추가 모달 */}
       {showCreate && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center" onClick={() => setShowCreate(false)}>
           <div className="absolute inset-0 bg-black/50" />
           <div className="relative bg-white rounded-[16px] p-6 mx-5 max-w-sm w-full" onClick={e => e.stopPropagation()}>
-            <h3 className="text-[16px] font-bold text-[#1a1c1c] mb-4">배달기사 추가</h3>
+            <h3 className="text-[16px] font-bold text-[#1a1c1c] mb-4">배달맨 추가</h3>
             <div className="space-y-3">
               <div>
                 <label className="text-[12px] text-[#a3a3a3] mb-1 block">닉네임 *</label>
@@ -317,7 +317,7 @@ export default function AdminDriversPage() {
                   value={form.nickname}
                   onChange={e => setForm(f => ({ ...f, nickname: e.target.value }))}
                   className="w-full border border-[#e0e0e0] rounded-[8px] px-4 py-2.5 text-[14px] outline-none focus:border-[#6d28d9]"
-                  placeholder="배달기사 닉네임"
+                  placeholder="배달맨 닉네임"
                 />
               </div>
               <div>

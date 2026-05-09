@@ -9,7 +9,7 @@ const isDemoMode = !process.env.NEXT_PUBLIC_SUPABASE_URL ||
 const ROLE_LABELS: Record<string, string> = {
   customer: '고객',
   owner: '사장님',
-  driver: '배달기사',
+  driver: '배달맨',
   admin: '관리자',
 }
 

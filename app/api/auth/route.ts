@@ -16,14 +16,14 @@ const DEMO_ACCOUNTS = [
   { id: 'demo-owner-004',    nickname: '본죽사장님',     password: 'demo1234', role: 'owner',    device_uuid: 'demo-uuid-owner-bonjuk',  store_id: 'bonjuk' },
   { id: 'demo-owner-005',    nickname: '치킨사장님',     password: 'demo1234', role: 'owner',    device_uuid: 'demo-uuid-owner-chicken', store_id: 'chicken' },
   { id: 'demo-owner-006',    nickname: '빵집사장님',     password: 'demo1234', role: 'owner',    device_uuid: 'demo-uuid-owner-bakery',  store_id: 'bakery' },
-  { id: 'demo-driver-001',   nickname: '배달기사',       password: 'demo1234', role: 'driver',   device_uuid: 'demo-uuid-driver' },
+  { id: 'demo-driver-001',   nickname: '배달맨',       password: 'demo1234', role: 'driver',   device_uuid: 'demo-uuid-driver' },
   { id: 'demo-admin-001',    nickname: '관리자',      password: 'demo1234', role: 'admin', device_uuid: 'demo-uuid-admin' },
 ]
 
 const ROLE_LABELS: Record<string, string> = {
   customer: '고객',
   owner: '사장님',
-  driver: '배달기사',
+  driver: '배달맨',
   admin: '관리자',
 }
 

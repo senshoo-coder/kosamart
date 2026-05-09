@@ -57,7 +57,7 @@ export async function notifyAdmin(text: string) {
   if (chatId) await sendTelegramMessage(chatId, text)
 }
 
-// 배달방 (관리자+관리팀+배달기사)
+// 배달방 (관리자+관리팀+배달맨)
 export async function notifyDriver(text: string, driverChatId?: number) {
   const chatId = driverChatId ?? process.env.TELEGRAM_DRIVER_CHAT_ID
   if (chatId) await sendTelegramMessage(chatId, text)

@@ -16,7 +16,7 @@ const DEMO_USERS = {
   },
   driver: {
     id: 'demo-driver-001',
-    nickname: '배달기사',
+    nickname: '배달맨',
     device_uuid: 'demo-uuid-driver',
     role: 'driver' as const,
   },

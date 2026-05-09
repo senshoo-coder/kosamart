@@ -90,7 +90,7 @@ export default function OwnerDeliveryPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-[20px] font-bold text-[#1a1c1c]">배달 관리</h1>
-          <p className="text-[12px] text-[#a3a3a3]">배달 현황 모니터링 및 기사 배정</p>
+          <p className="text-[12px] text-[#a3a3a3]">배달 현황 모니터링 및 배달맨 배정</p>
         </div>
         <button
           onClick={loadDeliveries}
@@ -144,7 +144,7 @@ export default function OwnerDeliveryPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[#f5f5f5]">
-                  {['주문번호', '고객명', '배달주소', '기사', '상태', '배정시간', '액션'].map(h => (
+                  {['주문번호', '고객명', '배달주소', '배달맨', '상태', '배정시간', '액션'].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-[11px] text-[#a3a3a3] font-medium">{h}</th>
                   ))}
                 </tr>
@@ -160,7 +160,7 @@ export default function OwnerDeliveryPage() {
                     <td className="px-4 py-3 text-[11px] text-[#a3a3a3]">{delivery.assigned_at ? formatDateTime(delivery.assigned_at) : '—'}</td>
                     <td className="px-4 py-3">
                       {delivery.status === 'pending' && (
-                        <Button size="sm" onClick={() => openAssignModal(delivery.id, delivery.order?.order_number ?? delivery.id)}>기사 배정</Button>
+                        <Button size="sm" onClick={() => openAssignModal(delivery.id, delivery.order?.order_number ?? delivery.id)}>배달맨 배정</Button>
                       )}
                       {delivery.status === 'failed' && (
                         <span className="text-[11px] text-[#b91c1c]">{delivery.failed_reason ?? '실패'}</span>
@@ -195,14 +195,14 @@ export default function OwnerDeliveryPage() {
                     <p className="text-[13px] text-[#3c4a42]">📍 {delivery.order.delivery_address}</p>
                   )}
                   <p className="text-[12px] text-[#a3a3a3]">
-                    기사: <span className="text-[#1a1c1c] font-medium">{delivery.driver?.nickname ?? '미배정'}</span>
+                    배달맨: <span className="text-[#1a1c1c] font-medium">{delivery.driver?.nickname ?? '미배정'}</span>
                   </p>
                   {delivery.assigned_at && (
                     <p className="text-[11px] text-[#a3a3a3]">배정: {formatDateTime(delivery.assigned_at)}</p>
                   )}
                   {delivery.status === 'delivered' && (delivery as any).driver_memo && (
                     <p className="text-[12px] text-[#b45309] bg-[#fef3c7] rounded px-2 py-1 mt-1">
-                      📝 기사 메모: {(delivery as any).driver_memo}
+                      📝 배달맨 메모: {(delivery as any).driver_memo}
                     </p>
                   )}
                   {delivery.status === 'failed' && delivery.failed_reason && (
@@ -212,7 +212,7 @@ export default function OwnerDeliveryPage() {
                 {/* 액션 */}
                 {delivery.status === 'pending' && (
                   <Button size="sm" onClick={() => openAssignModal(delivery.id, delivery.order?.order_number ?? delivery.id)}>
-                    기사 배정
+                    배달맨 배정
                   </Button>
                 )}
               </div>
@@ -221,7 +221,7 @@ export default function OwnerDeliveryPage() {
         </>
       )}
 
-      {/* 기사 선택 모달 */}
+      {/* 배달맨 선택 모달 */}
       {assignModal && (
         <div
           className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center px-4 pb-4"
@@ -229,7 +229,7 @@ export default function OwnerDeliveryPage() {
         >
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <div className="relative w-full max-w-sm bg-white rounded-[16px] p-6">
-            <h3 className="text-[16px] font-bold text-[#1a1c1c] mb-1">기사 배정</h3>
+            <h3 className="text-[16px] font-bold text-[#1a1c1c] mb-1">배달맨 배정</h3>
             <p className="text-[11px] text-[#a3a3a3] mb-4 font-mono">{assignModal.orderNumber}</p>
 
             {driversLoading ? (
@@ -238,7 +238,7 @@ export default function OwnerDeliveryPage() {
               </div>
             ) : drivers.length === 0 ? (
               <div className="text-center py-6">
-                <p className="text-[#3c4a42] text-[13px]">등록된 기사가 없습니다</p>
+                <p className="text-[#3c4a42] text-[13px]">등록된 배달맨이 없습니다</p>
                 <p className="text-[#a3a3a3] text-[11px] mt-1">role=driver 계정을 먼저 등록해주세요</p>
               </div>
             ) : (

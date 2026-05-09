@@ -333,7 +333,7 @@ table td:first-child { font-weight: 600; color: #1a1c1c; width: 30%; }
     </div>
     <div class="role-card">
       <div class="icon">🚚</div>
-      <h4>배달기사</h4>
+      <h4>배달맨</h4>
       <p>지역 배달 파트너. 첫 수락 우선 배정 방식.</p>
       <div class="feats"><ul>
         <li>대기 배달 수락</li>
@@ -362,7 +362,7 @@ table td:first-child { font-weight: 600; color: #1a1c1c; width: 30%; }
     <div class="flow-step">고객 주문</div><span class="flow-arrow">→</span>
     <div class="flow-step">계좌이체</div><span class="flow-arrow">→</span>
     <div class="flow-step">사장님 입금확인·승인</div><span class="flow-arrow">→</span>
-    <div class="flow-step">기사 수락·픽업</div><span class="flow-arrow">→</span>
+    <div class="flow-step">배달맨 수락·픽업</div><span class="flow-arrow">→</span>
     <div class="flow-step">배달 완료</div>
   </div>
 
@@ -376,7 +376,7 @@ table td:first-child { font-weight: 600; color: #1a1c1c; width: 30%; }
   </div>
 
   <div class="box info">
-    📡 매 단계마다 <b>텔레그램 봇</b>이 관리자·해당 가게·기사 그룹에 자동 알림을 발송합니다 (DB 트리거 기반).
+    📡 매 단계마다 <b>텔레그램 봇</b>이 관리자·해당 가게·배달맨 그룹에 자동 알림을 발송합니다 (DB 트리거 기반).
   </div>
 </div>
 
@@ -447,7 +447,7 @@ table td:first-child { font-weight: 600; color: #1a1c1c; width: 30%; }
     <tr><td>웹훅 보안</td><td>WEBHOOK_SECRET 헤더 검증으로 외부 위조 차단</td></tr>
     <tr><td>입력 검증</td><td>가격·재고 음수 차단, 파일 업로드 10MB / 이미지 MIME 화이트리스트</td></tr>
     <tr><td>PII 자동 파기</td><td>완료된 주문의 전화번호·주소·닉네임을 일정 기간 후 자동 익명화 (pg_cron)</td></tr>
-    <tr><td>역할 격리</td><td>고객은 본인 주문만, 기사는 본인 배달만, 사장님은 본인 가게 주문만 조회</td></tr>
+    <tr><td>역할 격리</td><td>고객은 본인 주문만, 배달맨은 본인 배달만, 사장님은 본인 가게 주문만 조회</td></tr>
     <tr><td>로깅</td><td>주문 상태 전이는 order_status_logs에 감사 기록</td></tr>
   </table>
   <div class="box">
@@ -461,7 +461,7 @@ table td:first-child { font-weight: 600; color: #1a1c1c; width: 30%; }
 
   <h3>📖 시나리오 A — 평창동 주민 김씨의 저녁 반찬</h3>
   <p style="font-size:13px;color:#444;">
-    저녁 7시, 김씨는 카톡으로 받은 코사마트 링크를 열어 가입한다. 반찬가게에서 시금치나물·고등어조림을 담고, 평창동 주소 입력 후 "주문하기". 가게 계좌로 18,500원을 이체하고 닉네임을 입력자명으로 보낸다. 5분 뒤 사장님의 입금확인이 떨어지고, 동네 기사가 수락. 7시 35분, 문 앞에 도착 사진과 함께 배달 완료.
+    저녁 7시, 김씨는 카톡으로 받은 코사마트 링크를 열어 가입한다. 반찬가게에서 시금치나물·고등어조림을 담고, 평창동 주소 입력 후 "주문하기". 가게 계좌로 18,500원을 이체하고 닉네임을 입력자명으로 보낸다. 5분 뒤 사장님의 입금확인이 떨어지고, 동네 배달맨이 수락. 7시 35분, 문 앞에 도착 사진과 함께 배달 완료.
   </p>
 
   <h3>📖 시나리오 B — 빵집 사장님 박씨의 새 메뉴 등록</h3>
@@ -482,7 +482,7 @@ table td:first-child { font-weight: 600; color: #1a1c1c; width: 30%; }
     <tr><th>단계</th><th>주요 항목</th></tr>
     <tr><td>Phase 1 (현재)</td><td>4-Role 운영, 종로구 5개 동, 6+ 입점 가게, 텔레그램 알림, 그룹 공구</td></tr>
     <tr><td>Phase 2 (단기)</td><td>매출 정산 리포트 자동화, 단골 리워드, 카드결제 연동 검토</td></tr>
-    <tr><td>Phase 3 (중기)</td><td>인근 동(부암·홍지 외) 추가 확장, 기사 인센티브 시스템, 공구 캘린더</td></tr>
+    <tr><td>Phase 3 (중기)</td><td>인근 동(부암·홍지 외) 추가 확장, 배달맨 인센티브 시스템, 공구 캘린더</td></tr>
     <tr><td>Phase 4 (장기)</td><td>지자체·동네 단체와의 연계, 비영리 공구 모델, 다국어 (외국인 주민) 지원</td></tr>
   </table>
 </div>

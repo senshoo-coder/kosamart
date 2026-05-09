@@ -38,7 +38,7 @@ const ROLES = [
   },
   {
     role: 'driver',
-    label: '배달기사',
+    label: '배달맨',
     icon: '🏍️',
     desc: '배달 목록 확인 · 픽업/완료/이슈 처리',
     dest: '/driver/deliveries',

@@ -9,7 +9,7 @@ function getSupabase() {
   return createSupabaseClient(url, key)
 }
 
-// GET /api/admin/driver-stats — 배달기사별 배달 통계
+// GET /api/admin/driver-stats — 배달맨별 배달 통계
 export async function GET(req: NextRequest) {
   const cookieStore = await cookies()
   if (cookieStore.get('cosmart_role')?.value !== 'admin') {
@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // 모든 배달기사의 배달 목록 조회
+    // 모든 배달맨의 배달 목록 조회
     const { data: deliveries } = await supabase
       .from('deliveries')
       .select('driver_id, status')

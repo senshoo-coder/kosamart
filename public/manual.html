@@ -552,14 +552,14 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
   <div class="header-top">
     <div>
       <h1>🛒 코사마트 이용 안내</h1>
-      <p>역할을 선택하면 해당 매뉴얼을 볼 수 있어요 &nbsp;·&nbsp; 골목상점.kr &nbsp;·&nbsp; 최종 업데이트: 2026.05.08</p>
+      <p>역할을 선택하면 해당 매뉴얼을 볼 수 있어요 &nbsp;·&nbsp; 골목상점.kr &nbsp;·&nbsp; 최종 업데이트: 2026.05.09</p>
     </div>
     <button class="btn-pdf" id="btnPdf" onclick="downloadPDF()">⬇️ PDF</button>
   </div>
   <div class="tabs">
     <button class="tab active" onclick="showTab('customer', this)">🧑 고객</button>
     <button class="tab" onclick="showTab('owner', this)">🏪 사장님</button>
-    <button class="tab" onclick="showTab('driver', this)">🚚 배달기사</button>
+    <button class="tab" onclick="showTab('driver', this)">🚚 배달맨</button>
   </div>
 </div>
 
@@ -645,7 +645,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
             <div class="s-tabs">
               <div class="s-tab active">🧑 고객</div>
               <div class="s-tab">🏪 사장님</div>
-              <div class="s-tab">🚚 기사님</div>
+              <div class="s-tab">🚚 배달맨</div>
               <div class="s-tab">⚙️ 관리자</div>
             </div>
             <div style="padding:10px 10px 0;">
@@ -679,7 +679,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
               <div style="display:flex;gap:6px;margin-bottom:8px;">
                 <div style="flex:1;text-align:center;background:#e8f5e9;border:2px solid #2d6a4f;border-radius:8px;padding:7px 4px;font-size:11px;font-weight:700;color:#2d6a4f;">🧑<br>고객</div>
                 <div style="flex:1;text-align:center;background:#f9f9f9;border:1px solid #eee;border-radius:8px;padding:7px 4px;font-size:11px;color:#999;">🏪<br>사장님</div>
-                <div style="flex:1;text-align:center;background:#f9f9f9;border:1px solid #eee;border-radius:8px;padding:7px 4px;font-size:11px;color:#999;">🚚<br>기사님</div>
+                <div style="flex:1;text-align:center;background:#f9f9f9;border:1px solid #eee;border-radius:8px;padding:7px 4px;font-size:11px;color:#999;">🚚<br>배달맨</div>
               </div>
               <div class="s-label">닉네임</div>
               <div class="s-input placeholder">예) 홍길동</div>
@@ -990,7 +990,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
         <div style="font-size:12px;font-weight:700;color:#2d6a4f;padding:8px 0 4px;">🚚 배달 주문 상태</div>
         <div class="notif-row"><span class="notif-emoji">🆕</span><div class="notif-text"><strong>주문접수</strong><span>주문이 접수됐어요. 입금을 기다리고 있어요.</span></div></div>
         <div class="notif-row"><span class="notif-emoji">✅</span><div class="notif-text"><strong>주문확인·배달준비</strong><span>가게에서 입금을 확인하고 배달을 준비해요.</span></div></div>
-        <div class="notif-row"><span class="notif-emoji">🚚</span><div class="notif-text"><strong>배달중</strong><span>배달기사가 상품을 픽업하고 출발했어요!</span></div></div>
+        <div class="notif-row"><span class="notif-emoji">🚚</span><div class="notif-text"><strong>배달중</strong><span>배달맨가 상품을 픽업하고 출발했어요!</span></div></div>
         <div class="notif-row"><span class="notif-emoji">🎉</span><div class="notif-text"><strong>배달완료</strong><span>배달이 완료됐어요.</span></div></div>
         <div class="notif-row"><span class="notif-emoji">❌</span><div class="notif-text"><strong>배달실패</strong><span>배달에 문제가 생겼어요. 가게에 문의해 주세요.</span></div></div>
 
@@ -1025,7 +1025,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
       <div class="faq-item"><div class="faq-q">실수로 다른 곳을 눌렀어요</div><div class="faq-a">화면 왼쪽 위 <b>← 뒤로 화살표</b>를 누르면 이전 화면으로 돌아갑니다. 어디로 가도 메인 화면(가게 목록)으로 다시 갈 수 있으니 걱정 마세요.</div></div>
       <div class="faq-item"><div class="faq-q">화면 글씨가 너무 작아요</div><div class="faq-a">휴대폰: 두 손가락으로 화면을 살짝 벌리면 커집니다. 컴퓨터: <kbd>Ctrl</kbd> 누른 채로 <kbd>+</kbd> 키를 누르면 커지고, <kbd>-</kbd>는 작아져요.</div></div>
       <div class="faq-item"><div class="faq-q">어떻게 하는지 모르겠어요</div><div class="faq-a">가게 화면에 <b>📞 전화번호</b>가 있는 곳은 누르면 바로 가게로 전화 연결돼요. 직접 물어보셔도 됩니다.</div></div>
-      <div class="faq-item"><div class="faq-q">로그인 시 "역할 계정이 아닙니다"라고 떠요</div><div class="faq-a">로그인 화면 상단 탭(고객/사장님/기사님/관리자) 중 본인 계정 종류와 일치하는 탭을 선택해야 해요. 예) 고객 계정인데 사장님 탭에서 로그인 시도 시 차단됩니다.</div></div>
+      <div class="faq-item"><div class="faq-q">로그인 시 "역할 계정이 아닙니다"라고 떠요</div><div class="faq-a">로그인 화면 상단 탭(고객/사장님/배달맨/관리자) 중 본인 계정 종류와 일치하는 탭을 선택해야 해요. 예) 고객 계정인데 사장님 탭에서 로그인 시도 시 차단됩니다.</div></div>
       <div class="faq-item"><div class="faq-q">비밀번호에 한글이 안 들어가요</div><div class="faq-a">코사마트는 보안을 위해 비밀번호에 영문·숫자·특수기호만 허용합니다. 한국어 입력기가 켜져 있어도 한글은 자동으로 차단돼요.</div></div>
     </div>
   </div>
@@ -1086,7 +1086,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
             <div class="s-tabs">
               <div class="s-tab">🧑 고객</div>
               <div class="s-tab active">🏪 사장님</div>
-              <div class="s-tab">🚚 기사님</div>
+              <div class="s-tab">🚚 배달맨</div>
               <div class="s-tab">⚙️ 관리자</div>
             </div>
             <div style="padding:10px 10px 0;">
@@ -1208,7 +1208,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
         <li><div class="step-num">4</div><div class="step-text"><strong>주문 거부가 필요한 경우</strong><p>재고 소진 등 사유가 있으면 거부 처리할 수 있어요. 사유를 입력해야 해요.</p></div></li>
       </ul>
       <div class="warn">⚠️ 고객이 입금했어도 <b>입금확인·승인</b> 버튼을 눌러야 배달이 진행돼요!</div>
-      <div class="info">ℹ️ <b>매장 픽업 주문</b>은 배달기사가 배정되지 않아요. 고객이 직접 방문할 때까지 기다려 주세요. 고객 픽업 완료 시 상세 화면에서 <kbd>픽업완료 처리</kbd>를 눌러주세요.</div>
+      <div class="info">ℹ️ <b>매장 픽업 주문</b>은 배달맨가 배정되지 않아요. 고객이 직접 방문할 때까지 기다려 주세요. 고객 픽업 완료 시 상세 화면에서 <kbd>픽업완료 처리</kbd>를 눌러주세요.</div>
       <div class="info">ℹ️ 텔레그램 알림이 설정되면 새 배달 이벤트마다 알림을 받을 수 있어요.</div>
     </div>
   </div>
@@ -1388,8 +1388,8 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
         </div>
       </div>
 
-      <div class="notif-row"><span class="notif-emoji">📋</span><div class="notif-text"><strong>배달 배정</strong><span>기사님이 배달을 수락했을 때</span></div></div>
-      <div class="notif-row"><span class="notif-emoji">🚚</span><div class="notif-text"><strong>배달 출발</strong><span>기사님이 픽업 완료하고 출발했을 때</span></div></div>
+      <div class="notif-row"><span class="notif-emoji">📋</span><div class="notif-text"><strong>배달 배정</strong><span>배달맨이 배달을 수락했을 때</span></div></div>
+      <div class="notif-row"><span class="notif-emoji">🚚</span><div class="notif-text"><strong>배달 출발</strong><span>배달맨이 픽업 완료하고 출발했을 때</span></div></div>
       <div class="notif-row"><span class="notif-emoji">✅</span><div class="notif-text"><strong>배달 완료</strong><span>고객에게 전달 완료됐을 때</span></div></div>
       <div class="notif-row"><span class="notif-emoji">❌</span><div class="notif-text"><strong>배달 실패</strong><span>배달에 문제가 생겼을 때</span></div></div>
       <div class="tip">💡 텔레그램 앱을 설치하고 관리자에게 가게 그룹에 초대해 달라고 요청하세요!</div>
@@ -1420,11 +1420,11 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
 
 </div>
 
-<!-- ═══════════════ 배달기사 ═══════════════ -->
+<!-- ═══════════════ 배달맨 ═══════════════ -->
 <div id="tab-driver" class="content">
 
   <div class="welcome-card" style="background: linear-gradient(135deg, #e65100, #f57c00);">
-    <h2>👋 배달기사 매뉴얼이에요!</h2>
+    <h2>👋 배달맨 매뉴얼이에요!</h2>
     <p>배달 수락부터 완료까지 안내해 드려요.</p>
   </div>
 
@@ -1432,18 +1432,18 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
   <div class="section">
     <div class="section-header open" onclick="toggleSection(this)">
       <div class="section-icon" style="background:#fed7aa">🌐</div>
-      <div class="section-title"><h2>접속 주소 / 화면 구성</h2><p>기사님 모드 로그인 방법</p></div>
+      <div class="section-title"><h2>접속 주소 / 화면 구성</h2><p>배달맨 모드 로그인 방법</p></div>
       <span class="chevron">▶</span>
     </div>
     <div class="section-body open">
       <div style="text-align:center;background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:18px;margin-bottom:10px;">
-        <p style="font-size:11px;color:#c2410c;letter-spacing:1.5px;margin-bottom:6px;">기사님 접속 주소</p>
+        <p style="font-size:11px;color:#c2410c;letter-spacing:1.5px;margin-bottom:6px;">배달맨 접속 주소</p>
         <p style="font-size:20px;font-weight:800;color:#9a3412;">골목상점.kr</p>
         <p style="font-size:12px;color:#3c4a42;margin-top:6px;">https://골목상점.kr/login?role=driver</p>
       </div>
       <ul class="steps">
         <li><div class="step-num">1</div><div class="step-text"><strong>주소창에 <kbd>골목상점.kr</kbd> 입력</strong></div></li>
-        <li><div class="step-num">2</div><div class="step-text"><strong>로그인 화면 상단 탭에서 <b>🚚 기사님</b> 선택</strong></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>로그인 화면 상단 탭에서 <b>🚚 배달맨</b> 선택</strong></div></li>
         <li><div class="step-num">3</div><div class="step-text"><strong>닉네임/비밀번호 입력 후 로그인</strong></div></li>
       </ul>
       <h3 style="font-size:14px;font-weight:700;color:#e65100;margin:14px 0 6px;">하단 메뉴 (모바일)</h3>
@@ -1458,12 +1458,12 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
   <div class="section">
     <div class="section-header" onclick="toggleSection(this)">
       <div class="section-icon" style="background:#fff3e0">🔑</div>
-      <div class="section-title"><h2>기사님 로그인</h2><p>기사님 탭에서 시작해요</p></div>
+      <div class="section-title"><h2>배달맨 로그인</h2><p>배달맨 탭에서 시작해요</p></div>
       <span class="chevron">▶</span>
     </div>
     <div class="section-body">
       <div class="mockup-wrap">
-        <div class="mockup-label">📱 기사님 탭 선택 후 로그인</div>
+        <div class="mockup-label">📱 배달맨 탭 선택 후 로그인</div>
         <div class="phone">
           <div class="phone-screen">
             <div class="s-topbar" style="text-align:center;padding:14px 12px 10px;">
@@ -1473,7 +1473,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
             <div class="s-tabs">
               <div class="s-tab">🧑 고객</div>
               <div class="s-tab">🏪 사장님</div>
-              <div class="s-tab active">🚚 기사님</div>
+              <div class="s-tab active">🚚 배달맨</div>
               <div class="s-tab">⚙️ 관리자</div>
             </div>
             <div style="padding:10px 10px 0;">
@@ -1483,15 +1483,15 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
               <div class="s-input placeholder">비밀번호를 입력하세요</div>
             </div>
             <div class="s-btn s-btn-orange">로그인</div>
-            <div class="s-link" style="color:#e65100">기사 가입 신청 →</div>
+            <div class="s-link" style="color:#e65100">배달맨 가입 신청 →</div>
           </div>
         </div>
       </div>
       <ul class="steps">
-        <li><div class="step-num">1</div><div class="step-text"><strong>로그인 화면 상단 <kbd>기사님</kbd> 탭 선택</strong><p>⚠️ 다른 탭에서 기사 계정 입력 시 차단됩니다.</p></div></li>
-        <li><div class="step-num">2</div><div class="step-text"><strong>계정으로 로그인 또는 가입 신청</strong><p>관리자에게 받은 계정으로 로그인하거나 <b>기사 가입 신청</b>으로 신청하세요.</p></div></li>
+        <li><div class="step-num">1</div><div class="step-text"><strong>로그인 화면 상단 <kbd>배달맨</kbd> 탭 선택</strong><p>⚠️ 다른 탭에서 배달맨 계정 입력 시 차단됩니다.</p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>계정으로 로그인 또는 가입 신청</strong><p>관리자에게 받은 계정으로 로그인하거나 <b>배달맨 가입 신청</b>으로 신청하세요.</p></div></li>
       </ul>
-      <div class="info">ℹ️ <b>기사 가입 신청은 관리자 승인이 필요해요.</b> 가입 즉시 관리자 텔레그램으로 알림이 가서 빠르게 검토됩니다 (보통 영업일 기준 1일 이내).</div>
+      <div class="info">ℹ️ <b>배달맨 가입 신청은 관리자 승인이 필요해요.</b> 가입 즉시 관리자 텔레그램으로 알림이 가서 빠르게 검토됩니다 (보통 영업일 기준 1일 이내).</div>
       <div class="warn">⚠️ 비밀번호는 <b>영문·숫자·특수기호만</b> 사용 가능 (한글 입력 불가). 비밀번호 분실 시 로그인 화면의 <b>"비밀번호를 잊으셨나요?"</b> 링크로 관리자에게 재설정을 요청하세요.</div>
     </div>
   </div>
@@ -1546,7 +1546,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
         <li><div class="step-num">2</div><div class="step-text"><strong>주소·금액 확인 후 <kbd>수락하기</kbd> 탭</strong><p>수락하면 내 배달로 배정돼요. 동시에 다른 기사가 수락하면 먼저 누른 쪽에 배정돼요.</p></div></li>
       </ul>
       <div class="warn">⚠️ 수락 후에는 반드시 배달을 완료해 주세요!</div>
-      <div class="info">ℹ️ 배달 목록에는 <b>배달 주문만</b> 표시돼요. 매장 픽업 주문은 고객이 직접 가게에 방문해 수령하므로 기사님 배달 목록에 나타나지 않아요.</div>
+      <div class="info">ℹ️ 배달 목록에는 <b>배달 주문만</b> 표시돼요. 매장 픽업 주문은 고객이 직접 가게에 방문해 수령하므로 배달맨 배달 목록에 나타나지 않아요.</div>
     </div>
   </div>
 
@@ -1731,7 +1731,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
       <div class="faq-item"><div class="faq-q">수락했는데 다른 기사에게 배정됐어요</div><div class="faq-a">동시에 수락하면 더 빠른 쪽에 배정돼요. 다른 배달을 찾아보세요!</div></div>
       <div class="faq-item"><div class="faq-q">어느 가게로 가야 하나요?</div><div class="faq-a">배달 카드에 🏪 파란 글씨로 가게 이름이 표시돼요. 그 가게로 찾아가서 픽업하면 돼요.</div></div>
       <div class="faq-item"><div class="faq-q">완료 처리가 안 돼요</div><div class="faq-a">인터넷 연결을 확인하고 다시 시도해 보세요. 계속 안 되면 관리자에게 연락하세요.</div></div>
-      <div class="faq-item"><div class="faq-q">가입 신청했는데 로그인이 안 돼요</div><div class="faq-a">기사 가입은 관리자 승인 후에 로그인 가능해요. "승인 대기 중인 계정입니다" 메시지가 뜨면 관리자에게 문의해 주세요.</div></div>
+      <div class="faq-item"><div class="faq-q">가입 신청했는데 로그인이 안 돼요</div><div class="faq-a">배달맨 가입은 관리자 승인 후에 로그인 가능해요. "승인 대기 중인 계정입니다" 메시지가 뜨면 관리자에게 문의해 주세요.</div></div>
       <div class="faq-item"><div class="faq-q">비밀번호를 잊어버렸어요</div><div class="faq-a">로그인 화면 하단 "비밀번호를 잊으셨나요?" 링크 → 닉네임 입력 → 관리자에게 재설정 요청 자동 발송.</div></div>
     </div>
   </div>
@@ -1743,7 +1743,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
 </div>
 
 <script>
-const ROLE_LABELS = { customer:'고객', owner:'사장님', driver:'배달기사' };
+const ROLE_LABELS = { customer:'고객', owner:'사장님', driver:'배달맨' };
 let currentRole = 'customer';
 
 function showTab(role, el) {

@@ -17,7 +17,7 @@ interface UserRow {
   created_at: string
 }
 
-const ROLE_LABELS: Record<string, string> = { customer: '고객', owner: '사장님', driver: '배달기사', admin: '최고관리자' }
+const ROLE_LABELS: Record<string, string> = { customer: '고객', owner: '사장님', driver: '배달맨', admin: '최고관리자' }
 const STATUS_STYLE: Record<string, { bg: string; text: string }> = {
   active:    { bg: '#d1fae5', text: '#065f46' },
   pending:   { bg: '#fef3c7', text: '#b45309' },

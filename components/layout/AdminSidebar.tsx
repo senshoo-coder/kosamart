@@ -13,7 +13,7 @@ const TOP_NAV = [
 ]
 
 const BOTTOM_NAV = [
-  { href: '/admin/drivers',   icon: 'directions_bike', label: '배달기사' },
+  { href: '/admin/drivers',   icon: 'directions_bike', label: '배달맨' },
   { href: '/admin/delivery',  icon: 'local_shipping',  label: '배달 관리' },
   { href: '/admin/products',  icon: 'sell',            label: '공구 상품' },
   { href: '/admin/analytics', icon: 'bar_chart',       label: '전체 분석' },
@@ -144,8 +144,8 @@ export function AdminSidebar() {
           )}
         </div>
 
-        {/* 배달기사 */}
-        <NavLink href="/admin/drivers" icon="directions_bike" label="배달기사" />
+        {/* 배달맨 */}
+        <NavLink href="/admin/drivers" icon="directions_bike" label="배달맨" />
 
         {/* ── 주문 현황 (expandable) ── */}
         <div className="mt-1">

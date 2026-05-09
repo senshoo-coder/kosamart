@@ -358,7 +358,7 @@ function OwnerOrdersContent() {
                 <button
                   onClick={() => setPhotoModal({ url: '', orderNumber: order.order_number, driverMemo: getDelivery(order)?.driver_memo })}
                   className="flex-1 text-[12px] py-1.5 rounded-[8px] bg-[#fef3c7] text-[#b45309] font-medium"
-                >📝 기사 메모</button>
+                >📝 배달맨 메모</button>
               )}
               {!isTerminal && (
                 <button
@@ -386,7 +386,7 @@ function OwnerOrdersContent() {
           <div className="relative w-full max-w-md bg-white rounded-[16px] overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3 border-b border-[#f5f5f5]">
               <div>
-                <p className="text-[14px] font-bold text-[#1a1c1c]">{photoModal.url ? '배달 완료 사진' : '기사 메모'}</p>
+                <p className="text-[14px] font-bold text-[#1a1c1c]">{photoModal.url ? '배달 완료 사진' : '배달맨 메모'}</p>
                 <p className="text-[11px] text-[#a3a3a3] font-mono">{photoModal.orderNumber}</p>
               </div>
               <button
@@ -405,7 +405,7 @@ function OwnerOrdersContent() {
             )}
             {photoModal.driverMemo && (
               <div className="mx-4 my-3 px-3 py-2 bg-[#fef3c7] rounded-[8px]">
-                <p className="text-[11px] text-[#b45309] font-semibold mb-0.5">기사 메모</p>
+                <p className="text-[11px] text-[#b45309] font-semibold mb-0.5">배달맨 메모</p>
                 <p className="text-[12px] text-[#b45309]">{photoModal.driverMemo}</p>
               </div>
             )}

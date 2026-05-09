@@ -120,7 +120,7 @@ function DeliveryCard({ order }: { order: Order }) {
           <p className="text-[12px] text-[#3c4a42] leading-snug">{order.delivery_address}</p>
         </div>
 
-        {/* 배달 기사 메모 (있을 경우) */}
+        {/* 배달 배달맨 메모 (있을 경우) */}
         {order.owner_memo && (
           <div className="mt-3 bg-[#fef3c7] rounded-[8px] p-3">
             <p className="text-[12px] text-amber-700">💬 {order.owner_memo}</p>

@@ -9,7 +9,7 @@ interface Props {
 
 const ROLE_INFO: Record<string, { label: string; icon: string; bg: string; accent: string; redirectAfterLogout: string }> = {
   owner:  { label: '사장님',   icon: '👔', bg: 'linear-gradient(135deg, #dbeafe, #bfdbfe)', accent: '#1d4ed8', redirectAfterLogout: '/login?role=owner' },
-  driver: { label: '배달기사', icon: '🏍️', bg: 'linear-gradient(135deg, #fef3c7, #fde68a)', accent: '#b45309', redirectAfterLogout: '/login?role=driver' },
+  driver: { label: '배달맨', icon: '🏍️', bg: 'linear-gradient(135deg, #fef3c7, #fde68a)', accent: '#b45309', redirectAfterLogout: '/login?role=driver' },
   admin:  { label: '관리자',   icon: '🛡️', bg: 'linear-gradient(135deg, #ede9fe, #ddd6fe)', accent: '#6d28d9', redirectAfterLogout: '/login?role=admin' },
 }
 

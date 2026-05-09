@@ -7,7 +7,7 @@ import Link from 'next/link'
 const ROLES = [
   { key: 'customer', label: '고객',   icon: 'person',          accent: '#006c49', container: '#10b981', bg: '#d1fae5' },
   { key: 'owner',    label: '사장님', icon: 'storefront',       accent: '#0058be', container: '#2170e4', bg: '#dbeafe' },
-  { key: 'driver',   label: '기사님', icon: 'directions_bike',  accent: '#855300', container: '#e29100', bg: '#fef3c7' },
+  { key: 'driver',   label: '배달맨', icon: 'directions_bike',  accent: '#855300', container: '#e29100', bg: '#fef3c7' },
   { key: 'admin',    label: '관리자', icon: 'shield',           accent: '#8B5CF6', container: '#C4B5FD', bg: '#ede9fe' },
 ]
 
@@ -242,9 +242,9 @@ function LoginForm() {
         )}
         {role === 'driver' && (
           <p className="mt-8 text-center text-sm text-[#3c4a42]">
-            배달기사로 합류하시겠어요?{' '}
+            배달맨로 합류하시겠어요?{' '}
             <Link href="/register?role=driver" className="font-bold hover:underline underline-offset-4" style={{ color: cfg.accent }}>
-              기사 가입 신청
+              배달맨 가입 신청
             </Link>
           </p>
         )}

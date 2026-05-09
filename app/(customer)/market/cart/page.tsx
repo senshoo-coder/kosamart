@@ -593,7 +593,7 @@ export default function CartPage() {
             <div>
               <p className="text-[13px] text-[#1a1c1c] font-medium">개인정보 수집·이용·제3자 제공 동의 <span className="text-[#dc2626]">(필수)</span></p>
               <p className="text-[11px] text-[#94a3b8] mt-1 leading-relaxed">
-                주문 처리를 위해 닉네임·연락처·배달주소를 수집하며, 배달 서비스 제공을 위해 배달 기사 및 가게 사장님에게 제공됩니다.
+                주문 처리를 위해 닉네임·연락처·배달주소를 수집하며, 배달 서비스 제공을 위해 배달맨 및 가게 사장님에게 제공됩니다.
               </p>
               <a
                 href="/market/privacy"

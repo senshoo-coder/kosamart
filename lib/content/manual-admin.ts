@@ -586,7 +586,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
       </ul>
       <h3 style="font-size:14px;font-weight:700;color:#6a1b9a;margin:14px 0 6px;">하단 메뉴 (모바일)</h3>
       <p style="font-size:13px;color:#3c4a42;line-height:1.7;">
-        <b>대시보드</b> · <b>가게</b> · <b>주문</b> · <b>기사</b> · <b>프로필</b> 5개 탭. PC는 좌측 사이드바에서 추가 메뉴 (가입자 관리, 배달 관리, 공구 상품, 전체 분석 등).
+        <b>대시보드</b> · <b>가게</b> · <b>주문</b> · <b>배달맨</b> · <b>프로필</b> 5개 탭. PC는 좌측 사이드바에서 추가 메뉴 (가입자 관리, 배달 관리, 공구 상품, 전체 분석 등).
       </p>
       <h3 style="font-size:14px;font-weight:700;color:#6a1b9a;margin:14px 0 6px;">관리자 매뉴얼 접속</h3>
       <p style="font-size:13px;color:#3c4a42;">
@@ -605,7 +605,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
     <div class="section-body open">
       <div class="info">ℹ️ <b>이 매뉴얼은 관리자 전용</b>입니다. 일반 사용자가 보면 안 되는 운영 정보·승인 절차·보안 정책이 포함되어 있어요.</div>
       <ul class="steps">
-        <li><div class="step-num">1</div><div class="step-text"><strong>공개 매뉴얼</strong><p>고객·사장님·배달기사 안내. 누구나 접근 가능 (<code>/manual.html</code>). 가입 전 사용자도 미리 볼 수 있어요.</p></div></li>
+        <li><div class="step-num">1</div><div class="step-text"><strong>공개 매뉴얼</strong><p>고객·사장님·배달맨 안내. 누구나 접근 가능 (<code>/manual.html</code>). 가입 전 사용자도 미리 볼 수 있어요.</p></div></li>
         <li><div class="step-num">2</div><div class="step-text"><strong>관리자 매뉴얼 (지금 이 페이지)</strong><p>로그인 필수 (<code>/manual-admin</code>). 관리자 계정으로 로그인된 상태에서만 접근. 비관리자가 URL을 알아도 자동으로 로그인 페이지로 리다이렉트됩니다.</p></div></li>
       </ul>
     </div>
@@ -630,7 +630,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
             <div class="s-tabs">
               <div class="s-tab">🧑 고객</div>
               <div class="s-tab">🏪 사장님</div>
-              <div class="s-tab">🚚 기사님</div>
+              <div class="s-tab">🚚 배달맨</div>
               <div class="s-tab active">⚙️ 관리자</div>
             </div>
             <div style="padding:10px 10px 0;">
@@ -712,7 +712,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
   <div class="section">
     <div class="section-header" onclick="toggleSection(this)">
       <div class="section-icon" style="background:#e3f2fd">👥</div>
-      <div class="section-title"><h2>사용자 관리</h2><p>고객·사장님·기사님 계정을 관리해요</p></div>
+      <div class="section-title"><h2>사용자 관리</h2><p>고객·사장님·배달맨 계정을 관리해요</p></div>
       <span class="chevron">▶</span>
     </div>
     <div class="section-body">
@@ -728,7 +728,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
               <div class="s-tab active" style="font-size:10px;">전체</div>
               <div class="s-tab" style="font-size:10px;">고객</div>
               <div class="s-tab" style="font-size:10px;">사장님</div>
-              <div class="s-tab" style="font-size:10px;">기사님</div>
+              <div class="s-tab" style="font-size:10px;">배달맨</div>
             </div>
             <div style="padding:4px 0;">
               <div class="s-admin-row">
@@ -743,7 +743,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
                 <div style="width:32px;height:32px;background:#e3f2fd;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🚚</div>
                 <div>
                   <div class="s-admin-label">driver01</div>
-                  <div class="s-admin-sub">기사님 · 김배달 · 활성</div>
+                  <div class="s-admin-sub">배달맨 · 김배달 · 활성</div>
                 </div>
                 <span class="s-badge s-badge-green" style="font-size:8px">활성</span>
               </div>
@@ -762,7 +762,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
 
       <ul class="steps">
         <li><div class="step-num">1</div><div class="step-text"><strong>사용자 목록 확인</strong><p>역할별 탭으로 필터링해서 볼 수 있어요. 첫 진입 시 <b>"승인 대기"</b> 탭이 기본 선택돼요.</p></div></li>
-        <li><div class="step-num">2</div><div class="step-text"><strong>오른쪽 상단 <kbd>+ 추가</kbd>로 신규 계정 생성</strong><p>사장님이나 기사님 계정을 직접 만들어 줄 수 있어요.</p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>오른쪽 상단 <kbd>+ 추가</kbd>로 신규 계정 생성</strong><p>사장님이나 배달맨 계정을 직접 만들어 줄 수 있어요.</p></div></li>
         <li><div class="step-num">3</div><div class="step-text"><strong>계정 탭 → 비밀번호 재설정·상태 변경</strong><p>비밀번호는 영문·숫자·특수기호만 (한글 차단). 임시 비번 발급 후 안전한 채널로 사용자에게 전달.</p></div></li>
       </ul>
     </div>
@@ -772,11 +772,11 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
   <div class="section">
     <div class="section-header" onclick="toggleSection(this)">
       <div class="section-icon" style="background:#fef3c7">✅</div>
-      <div class="section-title"><h2>신규 가입 승인 절차</h2><p>사장님·배달기사 가입 신청을 검토하고 승인해요</p></div>
+      <div class="section-title"><h2>신규 가입 승인 절차</h2><p>사장님·배달맨 가입 신청을 검토하고 승인해요</p></div>
       <span class="chevron">▶</span>
     </div>
     <div class="section-body">
-      <div class="info">ℹ️ <b>고객은 가입 즉시 활성화</b>되지만, <b>사장님·배달기사는 관리자 승인 후 로그인 가능</b>합니다.</div>
+      <div class="info">ℹ️ <b>고객은 가입 즉시 활성화</b>되지만, <b>사장님·배달맨는 관리자 승인 후 로그인 가능</b>합니다.</div>
 
       <h3 style="font-size:14px;font-weight:700;color:#4a148c;margin:14px 0 6px;">📋 승인 흐름</h3>
       <div class="flow">
@@ -972,7 +972,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
       <div class="warn">⚠️ 관리자 계정 정보는 절대 외부에 공유하지 마세요. 계정 탈취 시 전체 주문 데이터에 접근 가능해요.</div>
 
       <div style="padding:8px 0;">
-        <div class="notif-row"><span class="notif-emoji">🔑</span><div class="notif-text"><strong>역할 기반 접근 제어</strong><span>고객·사장님·기사님·관리자 역할별로 접근 가능한 기능이 엄격히 제한돼요. 타인의 주문 조회·수정이 불가능해요.</span></div></div>
+        <div class="notif-row"><span class="notif-emoji">🔑</span><div class="notif-text"><strong>역할 기반 접근 제어</strong><span>고객·사장님·배달맨·관리자 역할별로 접근 가능한 기능이 엄격히 제한돼요. 타인의 주문 조회·수정이 불가능해요.</span></div></div>
         <div class="notif-row"><span class="notif-emoji">🏪</span><div class="notif-text"><strong>사장님 가게 경계</strong><span>사장님은 본인 가게의 주문/상품만 처리할 수 있어요. 주문 승인·거부·픽업완료·상품 수정 시 store_id를 서버에서 검증합니다.</span></div></div>
         <div class="notif-row"><span class="notif-emoji">🍪</span><div class="notif-text"><strong>보안 쿠키 인증</strong><span>로그인 정보는 httpOnly·Secure 쿠키로 저장돼요. JavaScript로 접근하거나 중간에서 가로채기가 불가능해요.</span></div></div>
         <div class="notif-row"><span class="notif-emoji">📁</span><div class="notif-text"><strong>파일 업로드 제한</strong><span>이미지 업로드는 JPEG·PNG·WebP·GIF 형식만 허용되고, 파일 크기는 10MB 이하로 제한돼요.</span></div></div>

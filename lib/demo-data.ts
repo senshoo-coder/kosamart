@@ -220,7 +220,7 @@ export const DEMO_DELIVERIES = [
       ],
       customer: { phone: '010-9876-5432' },
     },
-    driver: { id: 'demo-driver-001', nickname: '배달기사', device_uuid: 'demo-uuid-driver' },
+    driver: { id: 'demo-driver-001', nickname: '배달맨', device_uuid: 'demo-uuid-driver' },
   },
   {
     id: 'demo-d-002',
@@ -246,7 +246,7 @@ export const DEMO_DELIVERIES = [
       ],
       customer: { phone: '010-5555-7777' },
     },
-    driver: { id: 'demo-driver-001', nickname: '배달기사', device_uuid: 'demo-uuid-driver' },
+    driver: { id: 'demo-driver-001', nickname: '배달맨', device_uuid: 'demo-uuid-driver' },
   },
 ]
 

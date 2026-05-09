@@ -10,7 +10,7 @@ import Link from 'next/link'
 const ROLES = [
   { value: 'customer', label: '고객',     icon: '🛍️', desc: '공구 주문 및 배달 서비스 이용' },
   { value: 'owner',    label: '마트 관리자', icon: '👔', desc: '주문 관리 및 배달 운영 (관리자 승인 필요)' },
-  { value: 'driver',   label: '배달기사',  icon: '🏍️', desc: '배달 업무 수행 (관리자 승인 필요)' },
+  { value: 'driver',   label: '배달맨',  icon: '🏍️', desc: '배달 업무 수행 (관리자 승인 필요)' },
 ]
 
 function RegisterForm() {

@@ -211,6 +211,33 @@ export default function AdminStoresPage() {
     setIsNewStore(true)
   }
 
+  // 일회성: 홈앤미트 카테고리 정리
+  const [butcherCatBusy, setButcherCatBusy] = useState(false)
+  async function runButcherCategoriesMigration() {
+    if (!confirm('홈앤미트 카테고리를 정리합니다.\n\n' +
+      '• 돼지고기 → 한돈 (병합)\n' +
+      '• 소고기 → 한우 (병합)\n' +
+      '• 닭볶음탕용 토막 → 닭고기 (신규)\n\n진행할까요?')) return
+    setButcherCatBusy(true)
+    try {
+      const res = await fetch('/api/admin/migrate-butcher-categories', { method: 'POST' })
+      const json = await res.json()
+      if (json.error) {
+        alert('실패: ' + json.error)
+      } else {
+        const cats = Object.entries(json.data.final_categories)
+          .map(([k, v]) => `${k}: ${v}개`).join('\n')
+        alert(
+          '✅ 완료 (변경 ' + json.data.changed_count + '건)\n\n' +
+          '【최종 카테고리】\n' + cats + '\n\n총 ' + json.data.total + '개'
+        )
+      }
+    } catch (e: any) {
+      alert('오류: ' + e.message)
+    }
+    setButcherCatBusy(false)
+  }
+
   function openEdit(store: StoreDisplay) {
     setEditingStore({
       id: store.id,
@@ -288,6 +315,11 @@ export default function AdminStoresPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button onClick={runButcherCategoriesMigration} disabled={butcherCatBusy}
+            className="h-[36px] px-3 rounded-[10px] bg-[#fef3c7] text-[#b45309] text-[11px] font-semibold border border-[#fde68a] disabled:opacity-50"
+            title="홈앤미트 카테고리 정리 (1회용)">
+            {butcherCatBusy ? '실행 중...' : '🔧 홈앤미트 카테고리 정리'}
+          </button>
           <button onClick={loadAll} className="h-[36px] px-4 rounded-[10px] bg-[#f2f4f6] text-[#3c4a42] text-[12px] font-medium border border-[#e8e8e8]">새로고침</button>
           <button onClick={openAdd}
             className="h-[36px] px-4 rounded-[10px] text-[12px] font-semibold text-white flex items-center gap-1.5"

@@ -27,6 +27,10 @@ function OwnerOrdersContent() {
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [rejectModal, setRejectModal] = useState<{ orderId: string; orderNumber: string } | null>(null)
   const [rejectReason, setRejectReason] = useState('')
+  const [retryModal, setRetryModal] = useState<{ orderId: string; orderNumber: string; failedReason: string } | null>(null)
+  const [retryNote, setRetryNote] = useState('')
+  const [closeModal, setCloseModal] = useState<{ orderId: string; orderNumber: string; failedReason: string } | null>(null)
+  const [closeReason, setCloseReason] = useState('')
 
   const loadOrders = useCallback(() => {
     setLoading(true)
@@ -102,7 +106,60 @@ function OwnerOrdersContent() {
     setActionLoading(null)
   }
 
+  async function handleRetry() {
+    if (!retryModal) return
+    setActionLoading(retryModal.orderId)
+    try {
+      const res = await fetch(`/api/orders/${retryModal.orderId}/retry-delivery`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ owner_note: retryNote.trim() }),
+      })
+      const json = await res.json()
+      if (!res.ok || json.error) {
+        alert(`재배달 요청 실패: ${json.error || '알 수 없는 오류'}`)
+        setActionLoading(null)
+        return
+      }
+    } catch {
+      alert('네트워크 오류가 발생했습니다')
+      setActionLoading(null)
+      return
+    }
+    setRetryModal(null)
+    setRetryNote('')
+    loadOrders()
+    setActionLoading(null)
+  }
+
+  async function handleCloseFailed() {
+    if (!closeModal || !closeReason.trim()) return
+    setActionLoading(closeModal.orderId)
+    try {
+      const res = await fetch(`/api/orders/${closeModal.orderId}/close-failed`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ close_reason: closeReason.trim() }),
+      })
+      const json = await res.json()
+      if (!res.ok || json.error) {
+        alert(`종료 처리 실패: ${json.error || '알 수 없는 오류'}`)
+        setActionLoading(null)
+        return
+      }
+    } catch {
+      alert('네트워크 오류가 발생했습니다')
+      setActionLoading(null)
+      return
+    }
+    setCloseModal(null)
+    setCloseReason('')
+    loadOrders()
+    setActionLoading(null)
+  }
+
   const pendingCount = orders.filter(o => o.status === 'pending').length
+  const failedCount = orders.filter(o => o.status === 'delivery_failed').length
   const paidCount = orders.filter(o => o.status === 'paid').length
 
   return (
@@ -116,6 +173,9 @@ function OwnerOrdersContent() {
           )}
           {pendingCount === 0 && paidCount > 0 && (
             <p className="text-[12px] text-[#10b981] mt-0.5">💰 입금완료 승인 대기 {paidCount}건</p>
+          )}
+          {failedCount > 0 && (
+            <p className="text-[12px] text-[#dc2626] mt-0.5 font-semibold">⚠ 배달실패 {failedCount}건 — 조치 필요</p>
           )}
         </div>
         <button
@@ -144,6 +204,9 @@ function OwnerOrdersContent() {
             )}
             {tab.key === 'paid' && paidCount > 0 && (
               <span className="ml-1 font-bold">({paidCount})</span>
+            )}
+            {tab.key === 'delivery_failed' && failedCount > 0 && (
+              <span className="ml-1 font-bold text-[#dc2626]">({failedCount})</span>
             )}
           </button>
         ))}
@@ -213,6 +276,21 @@ function OwnerOrdersContent() {
                     )}
                     {order.status === 'approved' && order.delivery_address !== '매장 픽업' && (
                       <span className="text-[11px] text-[#1d4ed8]">배달팀 대기</span>
+                    )}
+                    {order.status === 'delivery_failed' && (
+                      <div className="flex flex-col gap-1">
+                        {order.delivery?.failed_reason && (
+                          <p className="text-[11px] text-[#b91c1c] max-w-[180px] whitespace-pre-wrap break-words">⚠ {order.delivery.failed_reason}</p>
+                        )}
+                        <div className="flex gap-1.5">
+                          <Button size="sm" onClick={() => setRetryModal({ orderId: order.id, orderNumber: order.order_number, failedReason: order.delivery?.failed_reason || '' })}>
+                            🔄 재배달
+                          </Button>
+                          <Button size="sm" variant="danger" onClick={() => setCloseModal({ orderId: order.id, orderNumber: order.order_number, failedReason: order.delivery?.failed_reason || '' })}>
+                            🛑 종료
+                          </Button>
+                        </div>
+                      </div>
                     )}
                   </td>
                 </tr>
@@ -285,6 +363,24 @@ function OwnerOrdersContent() {
             {order.status === 'approved' && order.delivery_address !== '매장 픽업' && (
               <p className="text-[12px] text-center text-[#1d4ed8]">배달팀 배정 대기중</p>
             )}
+            {order.status === 'delivery_failed' && (
+              <div className="space-y-2" onClick={e => e.stopPropagation()}>
+                {order.delivery?.failed_reason && (
+                  <div className="rounded-[8px] bg-[#fef2f2] border border-[#fecaca] px-3 py-2">
+                    <p className="text-[11px] text-[#b91c1c] font-semibold mb-0.5">⚠ 배달맨 보고 사유</p>
+                    <p className="text-[12px] text-[#7f1d1d] whitespace-pre-wrap">{order.delivery.failed_reason}</p>
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <Button className="flex-1" size="sm" onClick={() => setRetryModal({ orderId: order.id, orderNumber: order.order_number, failedReason: order.delivery?.failed_reason || '' })}>
+                    🔄 재배달 시도
+                  </Button>
+                  <Button className="flex-1" size="sm" variant="danger" onClick={() => setCloseModal({ orderId: order.id, orderNumber: order.order_number, failedReason: order.delivery?.failed_reason || '' })}>
+                    🛑 종료
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -308,6 +404,70 @@ function OwnerOrdersContent() {
             <div className="flex gap-3 mt-4">
               <Button variant="secondary" className="flex-1" onClick={() => setRejectModal(null)}>닫기</Button>
               <Button variant="danger" className="flex-1" onClick={handleReject} loading={!!actionLoading}>취소 확정</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 재배달 시도 모달 */}
+      {retryModal && (
+        <div
+          className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center px-4 pb-4"
+          onClick={e => { if (e.target === e.currentTarget) setRetryModal(null) }}
+        >
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div className="relative w-full max-w-sm bg-white rounded-[16px] p-6">
+            <h3 className="text-[16px] font-bold text-[#1a1c1c] mb-1">재배달 시도</h3>
+            <p className="text-[11px] text-[#a3a3a3] mb-3 font-mono">{retryModal.orderNumber}</p>
+            {retryModal.failedReason && (
+              <div className="rounded-[8px] bg-[#fef2f2] border border-[#fecaca] px-3 py-2 mb-3">
+                <p className="text-[11px] text-[#b91c1c] font-semibold mb-0.5">⚠ 이전 실패 사유</p>
+                <p className="text-[12px] text-[#7f1d1d] whitespace-pre-wrap">{retryModal.failedReason}</p>
+              </div>
+            )}
+            <p className="text-[12px] text-[#3c4a42] mb-2">주문이 다시 배달팀에 배정 가능 상태가 됩니다.</p>
+            <textarea
+              value={retryNote}
+              onChange={e => setRetryNote(e.target.value)}
+              placeholder="배달맨에 전달할 메모 (선택) — 예: 도착 전 전화 부탁 / 옆집 맡겨주세요"
+              className="w-full bg-[#f2f4f6] border border-transparent rounded-[12px] px-4 py-3 text-[#1a1c1c] text-[14px] placeholder-[#a3a3a3] outline-none focus:border-[#10b981] focus:bg-white resize-none h-24"
+              maxLength={300}
+            />
+            <div className="flex gap-3 mt-4">
+              <Button variant="secondary" className="flex-1" onClick={() => { setRetryModal(null); setRetryNote('') }}>닫기</Button>
+              <Button className="flex-1" onClick={handleRetry} loading={!!actionLoading}>재배달 요청</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 배달실패 종료 모달 */}
+      {closeModal && (
+        <div
+          className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center px-4 pb-4"
+          onClick={e => { if (e.target === e.currentTarget) setCloseModal(null) }}
+        >
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div className="relative w-full max-w-sm bg-white rounded-[16px] p-6">
+            <h3 className="text-[16px] font-bold text-[#1a1c1c] mb-1">배달건 종료</h3>
+            <p className="text-[11px] text-[#a3a3a3] mb-3 font-mono">{closeModal.orderNumber}</p>
+            {closeModal.failedReason && (
+              <div className="rounded-[8px] bg-[#fef2f2] border border-[#fecaca] px-3 py-2 mb-3">
+                <p className="text-[11px] text-[#b91c1c] font-semibold mb-0.5">⚠ 실패 사유</p>
+                <p className="text-[12px] text-[#7f1d1d] whitespace-pre-wrap">{closeModal.failedReason}</p>
+              </div>
+            )}
+            <p className="text-[12px] text-[#b45309] mb-2">⚠ 종료 시 주문은 취소 처리되며 더 이상 재시도할 수 없습니다.</p>
+            <textarea
+              value={closeReason}
+              onChange={e => setCloseReason(e.target.value)}
+              placeholder="종료 사유 입력 (필수) — 예: 고객과 통화 후 환불 처리, 재배달 불가"
+              className="w-full bg-[#f2f4f6] border border-transparent rounded-[12px] px-4 py-3 text-[#1a1c1c] text-[14px] placeholder-[#a3a3a3] outline-none focus:border-[#dc2626] focus:bg-white resize-none h-24"
+              maxLength={300}
+            />
+            <div className="flex gap-3 mt-4">
+              <Button variant="secondary" className="flex-1" onClick={() => { setCloseModal(null); setCloseReason('') }}>닫기</Button>
+              <Button variant="danger" className="flex-1" onClick={handleCloseFailed} loading={!!actionLoading} disabled={!closeReason.trim()}>종료 확정</Button>
             </div>
           </div>
         </div>

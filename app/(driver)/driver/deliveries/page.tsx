@@ -25,6 +25,7 @@ export default function DriverDeliveriesPage() {
   const [issueModal, setIssueModal] = useState<Delivery | null>(null)
   const [driverMemo, setDriverMemo] = useState('')
   const [issueReason, setIssueReason] = useState('')
+  const [issueDetail, setIssueDetail] = useState('')
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
@@ -150,14 +151,22 @@ export default function DriverDeliveriesPage() {
 
   async function handleIssue() {
     if (!issueModal || !issueReason) return
+    if (issueReason === '기타' && !issueDetail.trim()) {
+      alert('기타 사유의 세부 내용을 입력해주세요')
+      return
+    }
+    const finalReason = issueReason === '기타'
+      ? `기타: ${issueDetail.trim()}`
+      : (issueDetail.trim() ? `${issueReason} — ${issueDetail.trim()}` : issueReason)
     setActionLoading(issueModal.id)
     await fetch(`/api/deliveries/${issueModal.id}/fail`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ failed_reason: issueReason }),
+      body: JSON.stringify({ failed_reason: finalReason }),
     })
     setIssueModal(null)
     setIssueReason('')
+    setIssueDetail('')
     loadAll()
     setActionLoading(null)
   }
@@ -367,9 +376,10 @@ export default function DriverDeliveriesPage() {
       {/* 이슈 보고 모달 */}
       {issueModal && (
         <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center px-4 pb-4">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIssueModal(null)} />
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => { setIssueModal(null); setIssueReason(''); setIssueDetail('') }} />
           <div className="relative w-full max-w-sm bg-white rounded-[16px] p-6">
-            <h3 className="text-[16px] font-bold text-[#1a1c1c] mb-4">배달 이슈 보고</h3>
+            <h3 className="text-[16px] font-bold text-[#1a1c1c] mb-1">배달 이슈 보고</h3>
+            <p className="text-[11px] text-[#a3a3a3] mb-4">사장님께 전달되어 재시도 또는 종료를 결정합니다</p>
             <div className="space-y-2 mb-4">
               {['수취인 부재', '공동현관 비밀번호 오류', '주소 오류 / 오배송', '기타'].map(reason => (
                 <label
@@ -392,9 +402,26 @@ export default function DriverDeliveriesPage() {
                 </label>
               ))}
             </div>
+            {issueReason && (
+              <div className="mb-4">
+                <label className="block text-[12px] text-[#3c4a42] font-semibold mb-1.5">
+                  {issueReason === '기타' ? '세부 내용 (필수)' : '추가 메모 (선택)'}
+                </label>
+                <textarea
+                  value={issueDetail}
+                  onChange={e => setIssueDetail(e.target.value)}
+                  placeholder={issueReason === '기타'
+                    ? '예) 엘리베이터 고장, 반려동물 짖음 등'
+                    : '사장님께 전달할 추가 정보가 있으면 입력'}
+                  rows={3}
+                  className="w-full bg-[#f9f9f9] border border-[#eee] rounded-[10px] px-3 py-2 text-[13px] text-[#1a1c1c] placeholder-[#a3a3a3] outline-none focus:border-[#f59e0b] focus:bg-white resize-none"
+                  maxLength={300}
+                />
+              </div>
+            )}
             <div className="flex gap-3">
               <button
-                onClick={() => setIssueModal(null)}
+                onClick={() => { setIssueModal(null); setIssueReason(''); setIssueDetail('') }}
                 className="flex-1 h-[48px] rounded-[12px] bg-[#f2f4f6] text-[#1a1c1c] text-[14px] font-medium border border-[#e8e8e8]"
               >
                 취소

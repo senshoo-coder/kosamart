@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { notifyAdmin, notifyStore, getStoreChatId, TelegramMessages } from '@/lib/telegram/messages'
 import { cookies } from 'next/headers'
+import { enrichLatestStatusLog } from '@/lib/audit/order-status-log'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const cookieStore = await cookies()
@@ -35,6 +36,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   if (data.order_id) {
     await supabase.from('orders').update({ status: 'delivery_failed' }).eq('id', data.order_id)
+    await enrichLatestStatusLog(data.order_id, 'delivery_failed', { note: reasonTrimmed })
   }
 
   const msg = data.order ? TelegramMessages.deliveryFailed(data.order, failed_reason) : ''

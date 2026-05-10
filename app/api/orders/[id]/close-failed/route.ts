@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { getOwnerStoreId } from '@/lib/auth/owner-store'
 import { notifyAdmin, notifyStore, getStoreChatId } from '@/lib/telegram/messages'
+import { enrichLatestStatusLog } from '@/lib/audit/order-status-log'
 
 // POST /api/orders/[id]/close-failed
 // 배달 실패 → 종료 (취소). 더 이상 재시도하지 않음.
@@ -51,6 +52,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!updated || updated.length === 0) {
     return NextResponse.json({ data: null, error: '이미 처리되었거나 상태가 변경되었습니다' }, { status: 409 })
   }
+  await enrichLatestStatusLog(id, 'cancelled', { note: `[배달실패 종료] ${closeReason}` })
 
   // 배달 레코드는 failed 유지 (이력 보존)
 

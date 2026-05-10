@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { notifyAdmin, notifyStore } from '@/lib/telegram/messages'
 import { cookies } from 'next/headers'
 import { getOwnerStoreId } from '@/lib/auth/owner-store'
+import { enrichLatestStatusLog } from '@/lib/audit/order-status-log'
 
 const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 const SUPA_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
@@ -64,15 +65,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ data: null, error: updateError.message }, { status: 500 })
   }
 
-  // 상태 이력 기록
-  try {
-    await supabase.from('order_status_logs').insert({
-      order_id: id,
-      from_status: 'approved',
-      to_status: 'picked_up_by_customer',
-      note: '매장 픽업 완료',
-    })
-  } catch {}
+  // 상태 이력에 actor 정보 보강 (자동 트리거가 from/to를 이미 기록함)
+  await enrichLatestStatusLog(id, 'picked_up_by_customer', { note: '매장 픽업 완료' })
 
   // 업데이트된 주문 조회
   const { data: updated } = await supabase

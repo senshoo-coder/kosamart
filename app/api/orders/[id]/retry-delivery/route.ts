@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { getOwnerStoreId } from '@/lib/auth/owner-store'
 import { notifyAdmin, notifyDriver } from '@/lib/telegram/messages'
+import { enrichLatestStatusLog } from '@/lib/audit/order-status-log'
 
 // POST /api/orders/[id]/retry-delivery
 // 배달 실패 → 재배달 시도. 주문을 approved로 되돌리고 배달 레코드를 pending으로 리셋.
@@ -52,6 +53,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!updated || updated.length === 0) {
     return NextResponse.json({ data: null, error: '이미 처리되었거나 상태가 변경되었습니다' }, { status: 409 })
   }
+  await enrichLatestStatusLog(id, 'approved', { note: ownerNote ? `[재배달] ${ownerNote}` : '[재배달]' })
 
   // 배달 레코드 리셋: 기존 failed 레코드를 pending으로 되돌리되 failed_reason은 보존
   // (새 배달맨이 이전 실패 맥락을 알 수 있도록)

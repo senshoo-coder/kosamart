@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { notifyAdmin, notifyStore, getStoreChatId } from '@/lib/telegram/messages'
 import { cookies } from 'next/headers'
+import { enrichLatestStatusLog } from '@/lib/audit/order-status-log'
 
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const cookieStore = await cookies()
@@ -25,6 +26,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
   // 주문 상태도 delivering으로 업데이트
   if (data.order_id) {
     await supabase.from('orders').update({ status: 'delivering' }).eq('id', data.order_id)
+    await enrichLatestStatusLog(data.order_id, 'delivering', { note: '배달맨 픽업 완료' })
   }
 
   const msg = `🚚 <b>[배달 출발]</b>\n주문자: ${data.order?.kakao_nickname}\n주소: ${data.order?.delivery_address}`

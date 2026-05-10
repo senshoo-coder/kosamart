@@ -36,7 +36,8 @@ function OwnerOrdersContent() {
   const [retryNote, setRetryNote] = useState('')
   const [closeModal, setCloseModal] = useState<{ orderId: string; orderNumber: string; failedReason: string } | null>(null)
   const [closeFailedReason, setCloseFailedReason] = useState('')
-  const [deleteModal, setDeleteModal] = useState<{ orderId: string; orderNumber: string } | null>(null)
+  const [deleteModal, setDeleteModal] = useState<{ orderId: string; orderNumber: string; status: string; failedReason?: string } | null>(null)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [photoModal, setPhotoModal] = useState<{ url: string; orderNumber: string; driverMemo?: string } | null>(null)
   const [photoLoading, setPhotoLoading] = useState<string | null>(null)
 
@@ -93,6 +94,7 @@ function OwnerOrdersContent() {
 
   async function handleDelete() {
     if (!deleteModal) return
+    if (deleteModal.status === 'delivery_failed' && deleteConfirmText !== '삭제') return
     setActionLoading(deleteModal.orderId)
     try {
       const res = await fetch(`/api/orders/${deleteModal.orderId}/delete`, { method: 'POST' })
@@ -101,6 +103,7 @@ function OwnerOrdersContent() {
         alert(`삭제 실패: ${d.error || '오류'}`)
       } else {
         setDeleteModal(null)
+        setDeleteConfirmText('')
         loadOrders()
       }
     } catch { alert('네트워크 오류가 발생했습니다') }
@@ -346,7 +349,7 @@ function OwnerOrdersContent() {
                         >취소</button>
                       )}
                       <button
-                        onClick={() => setDeleteModal({ orderId: order.id, orderNumber: order.order_number })}
+                        onClick={() => setDeleteModal({ orderId: order.id, orderNumber: order.order_number, status: order.status, failedReason: getDelivery(order)?.failed_reason })}
                         disabled={actionLoading === order.id}
                         className="text-[11px] px-2 py-1 rounded-[6px] bg-[#fee2e2] text-[#b91c1c] font-medium hover:bg-[#fecaca] disabled:opacity-50"
                       >🗑️</button>
@@ -468,7 +471,7 @@ function OwnerOrdersContent() {
                 >취소</button>
               )}
               <button
-                onClick={() => setDeleteModal({ orderId: order.id, orderNumber: order.order_number })}
+                onClick={() => setDeleteModal({ orderId: order.id, orderNumber: order.order_number, status: order.status, failedReason: getDelivery(order)?.failed_reason })}
                 className="flex-1 text-[12px] py-1.5 rounded-[8px] bg-[#fee2e2] text-[#b91c1c] font-medium"
               >🗑️ 삭제</button>
             </div>
@@ -516,10 +519,14 @@ function OwnerOrdersContent() {
       )}
 
       {/* 삭제 확인 모달 */}
-      {deleteModal && (
+      {deleteModal && (() => {
+        const isFailed = deleteModal.status === 'delivery_failed'
+        const requiresType = isFailed
+        const canDelete = !requiresType || deleteConfirmText === '삭제'
+        return (
         <div
           className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center px-4 pb-4"
-          onClick={e => { if (e.target === e.currentTarget) setDeleteModal(null) }}
+          onClick={e => { if (e.target === e.currentTarget) { setDeleteModal(null); setDeleteConfirmText('') } }}
         >
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <div className="relative w-full max-w-sm bg-white rounded-[16px] p-6">
@@ -529,13 +536,32 @@ function OwnerOrdersContent() {
               <p className="text-[13px] text-[#b91c1c] font-semibold">⚠️ 이 작업은 되돌릴 수 없습니다</p>
               <p className="text-[12px] text-[#b91c1c] mt-1">주문, 상품 내역, 배달 기록이 모두 삭제됩니다.</p>
             </div>
+            {isFailed && (
+              <>
+                <div className="bg-[#fffbeb] border border-[#fde68a] rounded-[8px] px-4 py-3 mb-4">
+                  <p className="text-[13px] text-[#92400e] font-semibold mb-1">⚠️ 배달실패 주문입니다</p>
+                  <p className="text-[12px] text-[#78350f]">감사 추적용 <b>실패 사유 · 처리 이력 · 사장님 메모</b>가 함께 영구 삭제됩니다. 일반적으로는 <b>🛑 종료</b>로 취소 처리하는 것을 권장합니다 (이력 보존).</p>
+                  {deleteModal.failedReason && (
+                    <p className="text-[11px] text-[#7f1d1d] mt-2 bg-[#fef2f2] rounded px-2 py-1 whitespace-pre-wrap">실패 사유: {deleteModal.failedReason}</p>
+                  )}
+                </div>
+                <label className="block text-[12px] text-[#3c4a42] mb-1.5 font-semibold">진짜로 삭제하려면 <code className="bg-[#f1f5f9] px-1 rounded text-[#dc2626]">삭제</code> 라고 입력하세요</label>
+                <input
+                  value={deleteConfirmText}
+                  onChange={e => setDeleteConfirmText(e.target.value)}
+                  placeholder="삭제"
+                  className="w-full bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] px-3 py-2 text-[14px] text-[#1a1c1c] outline-none focus:border-[#dc2626] mb-4"
+                />
+              </>
+            )}
             <div className="flex gap-3">
-              <Button variant="secondary" className="flex-1" onClick={() => setDeleteModal(null)}>취소</Button>
-              <Button variant="danger" className="flex-1" onClick={handleDelete} loading={actionLoading === deleteModal.orderId}>완전 삭제</Button>
+              <Button variant="secondary" className="flex-1" onClick={() => { setDeleteModal(null); setDeleteConfirmText('') }}>취소</Button>
+              <Button variant="danger" className="flex-1" onClick={handleDelete} loading={actionLoading === deleteModal.orderId} disabled={!canDelete}>완전 삭제</Button>
             </div>
           </div>
         </div>
-      )}
+        )
+      })()}
 
       {/* 거절 사유 모달 */}
       {rejectModal && (

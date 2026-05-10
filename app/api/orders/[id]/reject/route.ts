@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { notifyAdmin } from '@/lib/telegram/messages'
 import { cookies } from 'next/headers'
 import { getOwnerStoreId } from '@/lib/auth/owner-store'
+import { enrichLatestStatusLog } from '@/lib/audit/order-status-log'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const cookieStore = await cookies()
@@ -38,6 +39,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (updateError) {
     return NextResponse.json({ data: null, error: updateError.message }, { status: 500 })
   }
+  await enrichLatestStatusLog(id, 'rejected', { note: rejected_reason })
 
   const { data: order } = await supabase
     .from('orders')

@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { notifyAdmin, notifyDriver } from '@/lib/telegram/messages'
 import { cookies } from 'next/headers'
 import { getOwnerStoreId } from '@/lib/auth/owner-store'
+import { enrichLatestStatusLog } from '@/lib/audit/order-status-log'
 
 // POST /api/orders/[id]/confirm-payment
 // 입금확인 + 자동 승인 (pending → approved 한 번에)
@@ -31,6 +32,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     .in('status', ['pending', 'paid'])
 
   if (updateError) return NextResponse.json({ data: null, error: updateError.message }, { status: 500 })
+  await enrichLatestStatusLog(id, 'approved', { note: '입금확인 자동 승인' })
 
   const { data: order } = await supabase
     .from('orders')

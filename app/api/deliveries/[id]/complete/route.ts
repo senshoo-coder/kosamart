@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { notifyAdmin, notifyStore, getStoreChatId, TelegramMessages } from '@/lib/telegram/messages'
 import { cookies } from 'next/headers'
+import { enrichLatestStatusLog } from '@/lib/audit/order-status-log'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const cookieStore = await cookies()
@@ -31,6 +32,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   // 주문 상태도 delivered로 업데이트
   if (data.order_id) {
     await supabase.from('orders').update({ status: 'delivered' }).eq('id', data.order_id)
+    await enrichLatestStatusLog(data.order_id, 'delivered', { note: body.driver_memo || undefined })
   }
 
   const msg = data.order ? TelegramMessages.deliveryCompleted(data.order, body.driver_memo) : ''

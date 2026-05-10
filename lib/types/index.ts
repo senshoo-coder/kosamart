@@ -137,6 +137,7 @@ export interface OrderStatusLog {
   from_status?: OrderStatus
   to_status: OrderStatus
   changed_by?: string
+  actor_role?: string
   note?: string
   created_at: string
   user?: User

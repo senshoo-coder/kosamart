@@ -261,16 +261,24 @@ export default function AdminOrderDetailPage() {
           <h2 className="text-[13px] font-semibold text-[#1a1c1c] mb-3">상태 변경 이력</h2>
           <div className="space-y-2">
             {order.status_logs.map(log => (
-              <div key={log.id} className="flex items-center gap-2 text-[12px]">
-                <span className="text-[#a3a3a3]">{timeAgo(log.created_at)}</span>
-                {log.from_status && (
-                  <>
-                    <span className="text-[#a3a3a3]">{ORDER_STATUS_CONFIG[log.from_status]?.label}</span>
-                    <span className="text-[#a3a3a3]">→</span>
-                  </>
-                )}
-                <span className="text-[#1a1c1c] font-medium">{ORDER_STATUS_CONFIG[log.to_status]?.label}</span>
-                {log.note && <span className="text-[#a3a3a3]">({log.note})</span>}
+              <div key={log.id} className="text-[12px] border-l-2 border-[#e5e7eb] pl-3 py-0.5">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[#a3a3a3]">{timeAgo(log.created_at)}</span>
+                  {log.from_status && (
+                    <>
+                      <span className="text-[#a3a3a3]">{ORDER_STATUS_CONFIG[log.from_status]?.label}</span>
+                      <span className="text-[#a3a3a3]">→</span>
+                    </>
+                  )}
+                  <span className="text-[#1a1c1c] font-medium">{ORDER_STATUS_CONFIG[log.to_status]?.label}</span>
+                  {log.actor_role && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#f1f5f9] text-[#475569]">
+                      {log.actor_role === 'owner' ? '🏪 사장님' : log.actor_role === 'admin' ? '⚙️ 관리자' : log.actor_role === 'driver' ? '🚚 배달맨' : log.actor_role}
+                    </span>
+                  )}
+                  {log.user?.nickname && <span className="text-[10px] text-[#94a3b8]">({log.user.nickname})</span>}
+                </div>
+                {log.note && <p className="text-[11px] text-[#3c4a42] mt-0.5 whitespace-pre-wrap">💬 {log.note}</p>}
               </div>
             ))}
           </div>

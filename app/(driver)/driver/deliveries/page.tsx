@@ -581,11 +581,13 @@ function DeliveryCard({ delivery, onPickup, onComplete, onIssue, loading }: {
               <p className="text-[11px] text-[#7f1d1d] whitespace-pre-wrap">{delivery.failed_reason}</p>
             </div>
           )}
-          {order?.owner_memo && (
+          {order?.owner_memo ? (
             <div className="ml-5 rounded-[8px] bg-[#ecfeff] border border-[#a5f3fc] px-2.5 py-1.5">
               <p className="text-[10px] text-[#0e7490] font-semibold mb-0.5">📝 사장님 메모</p>
               <p className="text-[11px] text-[#155e75] whitespace-pre-wrap">{order.owner_memo}</p>
             </div>
+          ) : (
+            <p className="text-[10px] text-[#94a3b8] ml-5">[debug] owner_memo: {JSON.stringify(order?.owner_memo)}</p>
           )}
           <p className="text-[11px] text-[#a3a3a3] ml-5">
             📦 {order?.items?.map(i => i.product_name).join(', ')}

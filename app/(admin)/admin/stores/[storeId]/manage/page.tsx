@@ -241,7 +241,7 @@ export default function AdminStoreManagePage({ params }: { params: Promise<{ sto
 
   async function deleteProduct(productId: string) {
     try {
-      const res = await fetch(`/api/store/products?id=${productId}`, { method: 'DELETE' })
+      const res = await fetch(`/api/store/products?id=${productId}&store_id=${storeId}`, { method: 'DELETE' })
       const json = await res.json()
       if (json.data) {
         setProducts(prev => prev.filter(p => p.id !== productId))

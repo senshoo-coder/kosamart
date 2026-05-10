@@ -302,7 +302,10 @@ export default function OwnerStorePage() {
 
   async function deleteProduct(productId: string) {
     try {
-      const res = await fetch(`/api/store/products?id=${productId}`, { method: 'DELETE' })
+      const url = storeId
+        ? `/api/store/products?id=${productId}&store_id=${storeId}`
+        : `/api/store/products?id=${productId}`
+      const res = await fetch(url, { method: 'DELETE' })
       const json = await res.json()
       if (json.data) {
         setProducts(prev => prev.filter(p => p.id !== productId))

@@ -13,12 +13,15 @@ const STATUS_FILTERS = [
 ]
 
 const STATUS_STYLE: Record<string, { bg: string; text: string; label: string }> = {
-  pending:    { bg: '#fef3c7', text: '#b45309', label: '승인 대기' },
-  approved:   { bg: '#dbeafe', text: '#1d4ed8', label: '승인됨' },
-  delivering: { bg: '#d1fae5', text: '#065f46', label: '배달중' },
-  delivered:  { bg: '#f1f5f9', text: '#475569', label: '완료' },
-  cancelled:  { bg: '#fee2e2', text: '#b91c1c', label: '취소됨' },
-  rejected:   { bg: '#fee2e2', text: '#b91c1c', label: '거절됨' },
+  pending:                { bg: '#fef3c7', text: '#b45309', label: '승인 대기' },
+  paid:                   { bg: '#fef3c7', text: '#b45309', label: '입금완료' },
+  approved:               { bg: '#dbeafe', text: '#1d4ed8', label: '승인됨' },
+  delivering:             { bg: '#d1fae5', text: '#065f46', label: '배달중' },
+  delivered:              { bg: '#f1f5f9', text: '#475569', label: '완료' },
+  picked_up_by_customer:  { bg: '#ede9fe', text: '#6d28d9', label: '픽업완료' },
+  delivery_failed:        { bg: '#fee2e2', text: '#b91c1c', label: '배달 실패 (확인중)' },
+  cancelled:              { bg: '#fee2e2', text: '#b91c1c', label: '취소됨' },
+  rejected:               { bg: '#fee2e2', text: '#b91c1c', label: '거절됨' },
 }
 
 const STEPS = ['pending', 'approved', 'delivering', 'delivered'] as const
@@ -251,7 +254,10 @@ function OrderCard({ order, expanded, onToggle }: { order: Order; expanded: bool
             <div className="border-t border-[#eee] pt-2 mt-2 space-y-1">
               <p className="text-[12px] text-[#3c4a42]">📍 {order.delivery_address}</p>
               {order.delivery_memo && <p className="text-[12px] text-[#3c4a42]">📝 {order.delivery_memo}</p>}
-              {order.owner_memo && <p className="text-[12px] text-amber-600">💬 {order.owner_memo}</p>}
+              {(() => {
+                const customerVisible = (order.owner_memo ?? '').split('\n').filter(l => !l.startsWith('[재배달')).join('\n').trim()
+                return customerVisible ? <p className="text-[12px] text-amber-600">💬 {customerVisible}</p> : null
+              })()}
               {order.rejected_reason && <p className="text-[12px] text-red-500">❌ 거절 사유: {order.rejected_reason}</p>}
             </div>
             {order.status_logs && order.status_logs.length > 0 && (

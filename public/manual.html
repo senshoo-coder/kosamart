@@ -1020,7 +1020,8 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
       <div class="faq-item"><div class="faq-q">여러 가게에서 동시에 주문할 수 있나요?</div><div class="faq-a">네! 여러 가게 상품을 동시에 담아 주문할 수 있어요. 단, 가게별로 각각 계좌이체 결제가 필요해요.</div></div>
       <div class="faq-item"><div class="faq-q">주문 취소는 어떻게 하나요?</div><div class="faq-a">앱 내 취소 기능은 없어요. 가게에 직접 연락해서 취소 요청해 주세요.</div></div>
       <div class="faq-item"><div class="faq-q">희망 시간 선택을 안 해도 되나요?</div><div class="faq-a">네, 선택하지 않으면 시간 제약 없이 빠르게 배달돼요.</div></div>
-      <div class="faq-item"><div class="faq-q">비밀번호를 잊어버렸어요</div><div class="faq-a">로그인 화면 하단 <b>"비밀번호를 잊으셨나요?"</b> 링크를 눌러 닉네임을 입력하면 관리자에게 자동으로 재설정 요청이 가요. 보통 영업일 기준 1일 이내 회신됩니다.</div></div>
+      <div class="faq-item"><div class="faq-q">비밀번호를 잊어버렸어요</div><div class="faq-a">로그인 화면 하단 <b>"비밀번호를 잊으셨나요?"</b> 링크 → <b>전화로 직접 변경</b> 탭에서 가입 시 등록한 전화번호와 새 비밀번호를 입력하면 즉시 변경됩니다. 전화 미등록·번호 변경 등으로 셀프 변경 불가하면 <b>관리자에 요청</b> 탭으로 (영업일 기준 1일 이내 회신).</div></div>
+      <div class="faq-item"><div class="faq-q">"배달 실패 (확인중)"이라고 떠요</div><div class="faq-a">배달맨이 배달 중 문제(부재, 주소 오류 등)를 보고한 상태예요. 가게 사장님이 내용 확인 후 <b>재배달</b>을 시도하거나 통화로 안내드립니다. 잠시 기다려 주세요.</div></div>
       <div class="faq-item"><div class="faq-q">로그아웃은 어떻게 하나요?</div><div class="faq-a">화면 맨 위 오른쪽에 <b>로그아웃</b> 버튼이 있어요. 누르시면 끝납니다. 다음에 다시 들어오실 때 닉네임과 비밀번호를 다시 입력하시면 돼요.</div></div>
       <div class="faq-item"><div class="faq-q">실수로 다른 곳을 눌렀어요</div><div class="faq-a">화면 왼쪽 위 <b>← 뒤로 화살표</b>를 누르면 이전 화면으로 돌아갑니다. 어디로 가도 메인 화면(가게 목록)으로 다시 갈 수 있으니 걱정 마세요.</div></div>
       <div class="faq-item"><div class="faq-q">화면 글씨가 너무 작아요</div><div class="faq-a">휴대폰: 두 손가락으로 화면을 살짝 벌리면 커집니다. 컴퓨터: <kbd>Ctrl</kbd> 누른 채로 <kbd>+</kbd> 키를 누르면 커지고, <kbd>-</kbd>는 작아져요.</div></div>
@@ -1264,6 +1265,18 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
       </ul>
 
       <div class="warn">⚠️ 가격을 음수로 입력할 수 없어요 (서버에서 차단). 0원 상품은 등록 가능하지만 권장하지 않습니다.</div>
+
+      <h3 style="font-size:14px;font-weight:700;color:#dc2626;margin:18px 0 6px;">★ 배달 실패 처리 (재배달·종료)</h3>
+      <div class="info">ℹ️ 배달맨이 배달 도중 문제(수취인 부재 / 공동현관 비밀번호 오류 / 주소 오류 / 기타)를 보고하면 주문이 <b>배달실패</b> 상태로 사장님 화면에 남습니다. 자동 취소되지 않으니 사장님이 직접 조치해야 해요.</div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>대시보드 또는 주문 관리에서 배달실패 확인</strong><p>대시보드 4번째 카드에 <b>⚠ 배달실패 N건</b>이 빨간색으로 떠요. 주문 관리 화면에도 상단 알림과 <b>배달실패</b> 탭에 빨간 카운트 표시.</p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>해당 주문 카드의 ⚠ 배달맨 보고 사유 확인</strong><p>예) "수취인 부재", "기타: 엘리베이터 고장" 등 배달맨이 입력한 사유가 그대로 표시됩니다.</p></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>고객과 통화로 상황 파악</strong><p>주문 카드의 전화번호 탭하여 바로 통화. 다시 배달 가능한지, 시간대를 바꿀지, 환불할지 결정.</p></div></li>
+        <li><div class="step-num">4</div><div class="step-text"><strong>🔄 재배달 시도 (다시 배달 가능할 때)</strong><p>버튼 탭 → <b>배달맨에게 전달할 메모</b> 입력 (예: "도착 전 전화 부탁", "옆집에 맡겨주세요", "공동현관 비번 1234"). → 재배달 요청. 주문은 다시 <b>배송준비</b> 상태로 돌아가고 다른 배달맨이 잡을 수 있어요. 메모는 배달맨 화면에 청록색 박스로 표시됩니다.</p></div></li>
+        <li><div class="step-num">5</div><div class="step-text"><strong>🛑 종료 (재배달 불가능할 때)</strong><p>버튼 탭 → <b>종료 사유</b> 입력 (필수, 예: "고객과 통화 후 환불 처리"). → 종료 확정. 주문은 <b>취소</b> 상태로 처리되며 더 이상 재시도 불가. 입금된 경우 별도로 환불 안내해 주세요.</p></div></li>
+      </ul>
+      <div class="tip">💡 재배달은 같은 주문에 대해 여러 번 가능해요. 한 번 실패해도 메모로 정보 추가해서 다시 시도하면 성공률이 올라갑니다.</div>
+      <div class="warn">⚠️ 종료(취소) 처리는 되돌릴 수 없어요. 환불 처리 책임은 사장님께 있습니다 (코사마트 자동 환불 기능 없음).</div>
 
       <h3 style="font-size:14px;font-weight:700;color:#1976d2;margin:14px 0 6px;">⑦ 엑셀로 한 번에 여러 상품 등록 (📥 일괄 등록)</h3>
       <div class="info">ℹ️ 처음 가게를 열거나 메뉴를 크게 바꿀 때 매우 편해요. <b>한 번에 최대 500개</b>까지 등록 가능.</div>
@@ -1671,11 +1684,13 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
       </div>
 
       <ul class="steps">
-        <li><div class="step-num">1</div><div class="step-text"><strong>배달 상세 화면에서 <kbd>배달 실패</kbd> 버튼 탭</strong></div></li>
-        <li><div class="step-num">2</div><div class="step-text"><strong>실패 사유 입력</strong><p>예) "고객 연락 안 됨", "주소 불명", "고객 수령 거부"</p></div></li>
-        <li><div class="step-num">3</div><div class="step-text"><strong>처리 후 관리자에게 연락</strong></div></li>
+        <li><div class="step-num">1</div><div class="step-text"><strong>배달 카드 우측 ⚠️ 버튼 탭</strong><p>"배달 이슈 보고" 모달이 열립니다.</p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>이슈 사유 선택</strong><p>① <b>수취인 부재</b> ② <b>공동현관 비밀번호 오류</b> ③ <b>주소 오류 / 오배송</b> ④ <b>기타</b></p></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>세부 내용 입력</strong><p><b>"기타"</b> 선택 시 세부 내용 <b>필수</b> (예: "엘리베이터 고장", "반려동물 짖음"). 다른 사유에도 추가 메모 입력 가능 (선택).</p></div></li>
+        <li><div class="step-num">4</div><div class="step-text"><strong>"사장님께 보고" 탭</strong><p>주문이 사장님 화면에 <b>배달실패</b>로 남고, 사장님이 내용 확인 후 <b>재배달</b> 또는 <b>종료</b>를 결정해요.</p></div></li>
       </ul>
-      <div class="warn">⚠️ 실패 사유를 입력해야 처리돼요. 빈 칸으로는 불가해요.</div>
+      <div class="info">ℹ️ <b>사장님이 재배달 시도하면</b> 다시 배달 가능 목록에 떠요. 새로 받은 배달 카드에는 <span style="color:#b91c1c">⚠ 이전 실패 사유</span>(분홍 박스)와 <span style="color:#0e7490">📝 사장님 메모</span>(청록 박스)가 표시되니 꼭 확인하고 출발하세요.</div>
+      <div class="warn">⚠️ "기타" 사유는 세부 내용이 비어 있으면 서버에서 거절돼요. 무엇이 문제였는지 한 줄이라도 적어주세요 — 사장님이 고객에게 안내할 때 꼭 필요해요.</div>
     </div>
   </div>
 

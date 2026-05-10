@@ -10,10 +10,11 @@ interface Stats {
   todayRevenue: number
   pendingCount: number
   deliveringCount: number
+  failedCount?: number
 }
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<Stats>({ todayOrders: 0, todayRevenue: 0, pendingCount: 0, deliveringCount: 0 })
+  const [stats, setStats] = useState<Stats>({ todayOrders: 0, todayRevenue: 0, pendingCount: 0, deliveringCount: 0, failedCount: 0 })
   const [recentOrders, setRecentOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [today, setToday] = useState('')
@@ -33,7 +34,9 @@ export default function AdminDashboard() {
   const STAT_CARDS = [
     { label: '오늘 신규 주문', value: stats.todayOrders + '건', icon: '📦', accent: '#10b981', bg: '#f0fdf4' },
     { label: '입금 확인 대기', value: stats.pendingCount + '건', icon: '⏳', accent: '#b45309', bg: '#fef3c7' },
-    { label: '배달 진행중',    value: stats.deliveringCount + '건', icon: '🚚', accent: '#1d4ed8', bg: '#dbeafe' },
+    (stats.failedCount ?? 0) > 0
+      ? { label: '⚠ 배달실패',  value: (stats.failedCount ?? 0) + '건', icon: '⚠️', accent: '#dc2626', bg: '#fee2e2' }
+      : { label: '배달 진행중', value: stats.deliveringCount + '건', icon: '🚚', accent: '#1d4ed8', bg: '#dbeafe' },
     { label: '오늘 매출',     value: formatPrice(stats.todayRevenue), icon: '💰', accent: '#6d28d9', bg: '#ede9fe' },
   ]
 

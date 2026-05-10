@@ -39,6 +39,7 @@ export async function GET(_req: NextRequest) {
   let pendingQ    = supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'pending')
   let paidQ       = supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'paid')
   let deliveringQ = supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'delivering')
+  let failedQ     = supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'delivery_failed')
   let revenueQ    = supabase.from('orders').select('total_amount').gte('created_at', todayISO)
 
   if (storeId) {
@@ -46,6 +47,7 @@ export async function GET(_req: NextRequest) {
     pendingQ    = pendingQ.eq('store_id', storeId)
     paidQ       = paidQ.eq('store_id', storeId)
     deliveringQ = deliveringQ.eq('store_id', storeId)
+    failedQ     = failedQ.eq('store_id', storeId)
     revenueQ    = revenueQ.eq('store_id', storeId)
   }
 
@@ -54,12 +56,14 @@ export async function GET(_req: NextRequest) {
     { count: newOrders },
     { count: paidOrders },
     { count: delivering },
+    { count: failed },
     { data: revenueData },
   ] = await Promise.all([
     todayQ,
     pendingQ,
     paidQ,
     deliveringQ,
+    failedQ,
     revenueQ,
   ])
 
@@ -71,6 +75,7 @@ export async function GET(_req: NextRequest) {
       pendingCount: newOrders ?? 0,
       paidCount: paidOrders ?? 0,
       deliveringCount: delivering ?? 0,
+      failedCount: failed ?? 0,
       todayRevenue,
     },
     error: null,

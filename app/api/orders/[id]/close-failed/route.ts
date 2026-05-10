@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { getOwnerStoreId } from '@/lib/auth/owner-store'
-import { notifyAdmin } from '@/lib/telegram/messages'
+import { notifyAdmin, notifyStore, getStoreChatId } from '@/lib/telegram/messages'
 
 // POST /api/orders/[id]/close-failed
 // 배달 실패 → 종료 (취소). 더 이상 재시도하지 않음.
@@ -41,11 +41,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
   }
 
-  const { error: updateError } = await supabase
+  const { data: updated, error: updateError } = await supabase
     .from('orders')
     .update({ status: 'cancelled', rejected_reason: `[배달실패 종료] ${closeReason}` })
     .eq('id', id)
+    .eq('status', 'delivery_failed')
+    .select('id')
   if (updateError) return NextResponse.json({ data: null, error: updateError.message }, { status: 500 })
+  if (!updated || updated.length === 0) {
+    return NextResponse.json({ data: null, error: '이미 처리되었거나 상태가 변경되었습니다' }, { status: 409 })
+  }
 
   // 배달 레코드는 failed 유지 (이력 보존)
 
@@ -60,7 +65,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     `금액: ₩${order.total_amount?.toLocaleString() ?? ''}`,
     `종료 사유: <b>${closeReason}</b>`,
   ].join('\n')
-  await notifyAdmin(msg).catch(() => {})
+  const storeChatId = order.store_id ? await getStoreChatId(order.store_id) : null
+  await Promise.all([
+    notifyAdmin(msg).catch(() => {}),
+    notifyStore(storeChatId, msg).catch(() => {}),
+  ])
 
   return NextResponse.json({ data: { id, status: 'cancelled' }, error: null })
 }

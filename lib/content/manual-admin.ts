@@ -962,6 +962,58 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
     </div>
   </div>
 
+  <!-- 배달 실패 / 재배달 / 종료 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#fee2e2">⚠️</div>
+      <div class="section-title"><h2>배달 실패 처리 (재배달 · 종료)</h2><p>사장님이 자리 비울 때 관리자가 대신 처리</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <div class="info">ℹ️ 관리자도 사장님과 <b>완전히 동일한 권한</b>으로 배달실패 주문을 처리할 수 있어요. 사장님 응답이 늦거나 휴무일 때 활용.</div>
+      <h3 style="font-size:14px;font-weight:700;color:#dc2626;margin:14px 0 6px;">전체 흐름</h3>
+      <ol style="font-size:13px;color:#3c4a42;line-height:1.8;padding-left:20px;">
+        <li>배달맨이 ⚠️ 이슈 보고 → 주문 <b>delivery_failed</b> 상태로 전환</li>
+        <li>관리자/사장님 화면 상단에 <b>"⚠ 배달실패 N건"</b> 알림 표시 (대시보드 카드 + 주문 관리 헤더)</li>
+        <li>해당 주문 클릭 → <b>⚠ 배달맨 보고 사유</b> 확인 (예: "수취인 부재", "기타: 엘리베이터 고장")</li>
+        <li><b>🔄 재배달 시도</b> → 배달맨용 메모 입력 → 주문이 다시 <b>approved</b> 상태로 돌아감 + 배달 레코드는 <b>pending</b>으로 리셋 (failed_reason은 보존)</li>
+        <li>또는 <b>🛑 종료</b> → 종료 사유 입력 → 주문 <b>cancelled</b> 처리 (rejected_reason에 "[배달실패 종료] ..." 기록)</li>
+      </ol>
+      <h3 style="font-size:14px;font-weight:700;color:#1976d2;margin:14px 0 6px;">표시 데이터</h3>
+      <ul style="font-size:13px;color:#3c4a42;line-height:1.8;padding-left:20px;">
+        <li>주문 카드/상세에 표시: <b>실패 사유</b>(분홍), <b>사장님/관리자 메모</b>(청록), <b>재배달 진행중 안내</b>(approved + [재배달] 마커)</li>
+        <li>재배달 시 <code>order.owner_memo</code>에 항상 <b>[재배달 &lt;시각&gt;] &lt;메모&gt;</b> 줄 추가 (메모 비어있어도 마커는 추가)</li>
+        <li>배달맨 카드에 <b>⚠ 이전 실패 사유</b>(보존된 failed_reason) + <b>📝 사장님 메모</b> 박스 노출</li>
+      </ul>
+      <h3 style="font-size:14px;font-weight:700;color:#1976d2;margin:14px 0 6px;">동시성 / 안전장치</h3>
+      <ul style="font-size:13px;color:#3c4a42;line-height:1.8;padding-left:20px;">
+        <li>재배달·종료 UPDATE는 <code>status='delivery_failed'</code> 가드 사용 → 동시 클릭 시 한 명만 성공 (409 응답)</li>
+        <li>"기타" 사유는 서버에서 세부 내용 필수 검증 (빈 값 거절)</li>
+        <li>배달 실패 / 재배달 / 종료 시 <b>관리자 + 매장 텔레그램</b> 모두 알림 (감사 로그)</li>
+        <li>고객 화면에는 <b>"배달 실패 (확인중)"</b> 빨간 뱃지로 노출 (자동 안내). [재배달] 내부 마커는 자동 필터링되어 고객에 안 보임.</li>
+      </ul>
+      <div class="tip">💡 종료(취소) 처리 후 환불은 자동 안 돼요. 사장님이 직접 계좌이체로 환불해야 합니다 — 종료 사유 적을 때 "환불 완료" 또는 "환불 안내 예정" 명시 권장.</div>
+    </div>
+  </div>
+
+  <!-- 비밀번호 재설정 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon" style="background:#dbeafe">🔑</div>
+      <div class="section-title"><h2>비밀번호 재설정 (관리자 처리)</h2><p>자가 변경 실패 시 수동 처리</p></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="section-body">
+      <div class="info">ℹ️ 사용자가 <b>전화번호로 직접 변경</b> 가능한 경로(닉네임 + 가입 시 전화번호 + 새 비밀번호)는 자동 처리되며, 성공 시 관리자 텔레그램에 감사 로그가 발송됩니다. 이 섹션은 그 외 케이스(전화 미등록·번호 변경)만 다룹니다.</div>
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-text"><strong>관리자 텔레그램에 [비밀번호 재설정 요청] 알림 수신</strong><p>닉네임·역할·연락처·메모 포함됨.</p></div></li>
+        <li><div class="step-num">2</div><div class="step-text"><strong>본인 확인 통화 (가입 시 전화번호로)</strong><p>닉네임만으로는 불충분 — 반드시 전화 인증.</p></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>관리자 → 사용자 관리에서 비밀번호 재설정</strong><p>임시 비밀번호 발급 후 사용자에게 안전한 방법(전화)으로 전달. 사용자에게 첫 로그인 후 변경 권장.</p></div></li>
+      </ul>
+      <div class="tip">💡 전화번호는 가입·수정 시 자동으로 숫자만 남도록 정규화되니 (예: "010-1234-5678" → "01012345678"), 비교 시 하이픈 유무 신경 안 써도 됩니다.</div>
+    </div>
+  </div>
+
   <!-- 보안 및 개인정보 -->
   <div class="section">
     <div class="section-header" onclick="toggleSection(this)">

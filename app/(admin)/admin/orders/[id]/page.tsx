@@ -16,6 +16,16 @@ export default function AdminOrderDetailPage() {
   const [rejectModal, setRejectModal] = useState(false)
   const [rejectReason, setRejectReason] = useState('')
   const [ownerMemo, setOwnerMemo] = useState('')
+  const [retryModal, setRetryModal] = useState(false)
+  const [retryNote, setRetryNote] = useState('')
+  const [closeModal, setCloseModal] = useState(false)
+  const [closeReason, setCloseReason] = useState('')
+
+  function getDelivery(o: Order | null): any {
+    if (!o) return null
+    const d = (o as any).delivery
+    return Array.isArray(d) ? d[0] : d
+  }
 
   useEffect(() => {
     fetch(`/api/orders?limit=500`)
@@ -61,6 +71,46 @@ export default function AdminOrderDetailPage() {
       body: JSON.stringify({ rejected_reason: rejectReason }),
     })
     if (res.ok) { const d = await res.json(); setOrder(d.data); setRejectModal(false) }
+    setActionLoading(false)
+  }
+
+  async function handleRetry() {
+    if (!order) return
+    setActionLoading(true)
+    try {
+      const res = await fetch(`/api/orders/${order.id}/retry-delivery`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ owner_note: retryNote.trim() }),
+      })
+      const json = await res.json()
+      if (!res.ok || json.error) { alert(`재배달 요청 실패: ${json.error || '오류'}`); setActionLoading(false); return }
+      const d = await fetch(`/api/orders?limit=500`).then(r => r.json())
+      const found = (d.data || []).find((o: Order) => o.id === order.id)
+      if (found) setOrder(found)
+      setRetryModal(false)
+      setRetryNote('')
+    } catch { alert('네트워크 오류') }
+    setActionLoading(false)
+  }
+
+  async function handleCloseFailed() {
+    if (!order || !closeReason.trim()) return
+    setActionLoading(true)
+    try {
+      const res = await fetch(`/api/orders/${order.id}/close-failed`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ close_reason: closeReason.trim() }),
+      })
+      const json = await res.json()
+      if (!res.ok || json.error) { alert(`종료 실패: ${json.error || '오류'}`); setActionLoading(false); return }
+      const d = await fetch(`/api/orders?limit=500`).then(r => r.json())
+      const found = (d.data || []).find((o: Order) => o.id === order.id)
+      if (found) setOrder(found)
+      setCloseModal(false)
+      setCloseReason('')
+    } catch { alert('네트워크 오류') }
     setActionLoading(false)
   }
 
@@ -185,8 +235,23 @@ export default function AdminOrderDetailPage() {
       {/* 거절 사유 */}
       {order.rejected_reason && (
         <div className="bg-[#fee2e2] rounded-[8px] p-5 border border-[#fecaca]">
-          <h2 className="text-[13px] font-semibold text-[#b91c1c] mb-2">취소/거절 사유</h2>
-          <p className="text-[13px] text-[#b91c1c]">{order.rejected_reason}</p>
+          <h2 className="text-[13px] font-semibold text-[#b91c1c] mb-2">취소/종료 사유</h2>
+          <p className="text-[13px] text-[#b91c1c] whitespace-pre-wrap">{order.rejected_reason}</p>
+        </div>
+      )}
+
+      {/* 배달 실패 사유 */}
+      {order.status === 'delivery_failed' && getDelivery(order)?.failed_reason && (
+        <div className="bg-[#fef2f2] rounded-[8px] p-5 border border-[#fecaca]">
+          <h2 className="text-[13px] font-semibold text-[#b91c1c] mb-2">⚠ 배달맨 보고 사유</h2>
+          <p className="text-[13px] text-[#7f1d1d] whitespace-pre-wrap">{getDelivery(order).failed_reason}</p>
+        </div>
+      )}
+
+      {/* 재배달 진행 안내 */}
+      {order.status === 'approved' && order.owner_memo?.includes('[재배달') && (
+        <div className="bg-[#ecfeff] rounded-[8px] p-4 border border-[#a5f3fc]">
+          <p className="text-[13px] text-[#0e7490] font-semibold">🔄 재배달 진행중 — 배달팀 다시 배정 대기</p>
         </div>
       )}
 
@@ -243,6 +308,70 @@ export default function AdminOrderDetailPage() {
         <div className="flex gap-3">
           <Button className="flex-1 py-3" onClick={handleApprove} loading={actionLoading}>✅ 배달 승인</Button>
           <Button className="flex-1 py-3" variant="danger" onClick={() => setRejectModal(true)} disabled={actionLoading}>❌ 취소</Button>
+        </div>
+      )}
+      {order.status === 'delivery_failed' && (
+        <div className="flex gap-3">
+          <Button className="flex-1 py-3" onClick={() => setRetryModal(true)} disabled={actionLoading}>🔄 재배달 시도</Button>
+          <Button className="flex-1 py-3" variant="danger" onClick={() => setCloseModal(true)} disabled={actionLoading}>🛑 종료</Button>
+        </div>
+      )}
+
+      {/* 재배달 모달 */}
+      {retryModal && (
+        <div
+          className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center px-4 pb-4"
+          onClick={e => { if (e.target === e.currentTarget) setRetryModal(false) }}
+        >
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div className="relative w-full max-w-sm bg-white rounded-[16px] p-6">
+            <h3 className="text-[16px] font-bold text-[#1a1c1c] mb-1">재배달 시도</h3>
+            <p className="text-[11px] text-[#a3a3a3] mb-3 font-mono">{order.order_number}</p>
+            {getDelivery(order)?.failed_reason && (
+              <div className="rounded-[8px] bg-[#fef2f2] border border-[#fecaca] px-3 py-2 mb-3">
+                <p className="text-[11px] text-[#b91c1c] font-semibold mb-0.5">⚠ 이전 실패 사유</p>
+                <p className="text-[12px] text-[#7f1d1d] whitespace-pre-wrap">{getDelivery(order).failed_reason}</p>
+              </div>
+            )}
+            <p className="text-[12px] text-[#3c4a42] mb-2">주문이 다시 배달팀에 배정 가능 상태가 됩니다.</p>
+            <textarea
+              value={retryNote}
+              onChange={e => setRetryNote(e.target.value)}
+              placeholder="배달맨에 전달할 메모 (선택)"
+              className="w-full bg-[#f2f4f6] border border-transparent rounded-[12px] px-4 py-3 text-[#1a1c1c] text-[14px] placeholder-[#a3a3a3] outline-none focus:border-[#10b981] focus:bg-white resize-none h-24"
+              maxLength={300}
+            />
+            <div className="flex gap-3 mt-4">
+              <Button variant="secondary" className="flex-1" onClick={() => { setRetryModal(false); setRetryNote('') }}>닫기</Button>
+              <Button className="flex-1" onClick={handleRetry} loading={actionLoading}>재배달 요청</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 종료 모달 */}
+      {closeModal && (
+        <div
+          className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center px-4 pb-4"
+          onClick={e => { if (e.target === e.currentTarget) setCloseModal(false) }}
+        >
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div className="relative w-full max-w-sm bg-white rounded-[16px] p-6">
+            <h3 className="text-[16px] font-bold text-[#1a1c1c] mb-1">배달건 종료</h3>
+            <p className="text-[11px] text-[#a3a3a3] mb-3 font-mono">{order.order_number}</p>
+            <p className="text-[12px] text-[#b45309] mb-2">⚠ 종료 시 주문은 취소 처리되며 더 이상 재시도할 수 없습니다.</p>
+            <textarea
+              value={closeReason}
+              onChange={e => setCloseReason(e.target.value)}
+              placeholder="종료 사유 입력 (필수)"
+              className="w-full bg-[#f2f4f6] border border-transparent rounded-[12px] px-4 py-3 text-[#1a1c1c] text-[14px] placeholder-[#a3a3a3] outline-none focus:border-[#dc2626] focus:bg-white resize-none h-24"
+              maxLength={300}
+            />
+            <div className="flex gap-3 mt-4">
+              <Button variant="secondary" className="flex-1" onClick={() => { setCloseModal(false); setCloseReason('') }}>닫기</Button>
+              <Button variant="danger" className="flex-1" onClick={handleCloseFailed} loading={actionLoading} disabled={!closeReason.trim()}>종료 확정</Button>
+            </div>
+          </div>
         </div>
       )}
 

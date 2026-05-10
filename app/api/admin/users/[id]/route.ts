@@ -46,8 +46,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (action === 'update_info') {
     const { nickname, phone, role } = body
     if (!nickname?.trim()) return NextResponse.json({ data: null, error: '닉네임을 입력하세요' }, { status: 400 })
+    const { normalizePhone, isValidPhone } = await import('@/lib/utils/phone')
+    const phoneNormalized = normalizePhone(phone)
+    if (phoneNormalized && !isValidPhone(phoneNormalized)) {
+      return NextResponse.json({ data: null, error: '전화번호 형식이 올바르지 않습니다' }, { status: 400 })
+    }
     const { data, error } = await supabase
-      .from('users').update({ nickname: nickname.trim(), phone: phone || null, role: role || undefined })
+      .from('users').update({ nickname: nickname.trim(), phone: phoneNormalized || null, role: role || undefined })
       .eq('id', id)
       .select('id, nickname, role, status, phone, store_id').single()
     if (error) return NextResponse.json({ data: null, error: error.message }, { status: 500 })

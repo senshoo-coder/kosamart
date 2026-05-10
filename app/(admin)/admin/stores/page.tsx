@@ -211,6 +211,29 @@ export default function AdminStoresPage() {
     setIsNewStore(true)
   }
 
+  // 일회성: 사용자 전화번호 정규화
+  const [phoneMigBusy, setPhoneMigBusy] = useState(false)
+  async function runPhoneMigration() {
+    if (!confirm('users 테이블의 전화번호를 모두 숫자만 남도록 정규화합니다.\n예) "010-1234-5678" → "01012345678"\n\n진행할까요?')) return
+    setPhoneMigBusy(true)
+    try {
+      const res = await fetch('/api/admin/migrate-normalize-phones', { method: 'POST' })
+      const json = await res.json()
+      if (json.error) {
+        alert('실패: ' + json.error)
+      } else {
+        alert(
+          '✅ 완료\n\n변경: ' + json.data.changed_count + '건\n' +
+          '이미 정규화됨: ' + json.data.unchanged_count + '건\n' +
+          '총: ' + json.data.total + '건'
+        )
+      }
+    } catch (e: any) {
+      alert('오류: ' + e.message)
+    }
+    setPhoneMigBusy(false)
+  }
+
   // 일회성: 홈앤미트 카테고리 정리
   const [butcherCatBusy, setButcherCatBusy] = useState(false)
   async function runButcherCategoriesMigration() {
@@ -315,6 +338,11 @@ export default function AdminStoresPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button onClick={runPhoneMigration} disabled={phoneMigBusy}
+            className="h-[36px] px-3 rounded-[10px] bg-[#dbeafe] text-[#1e40af] text-[11px] font-semibold border border-[#bfdbfe] disabled:opacity-50"
+            title="users 전화번호 정규화 (1회용)">
+            {phoneMigBusy ? '실행 중...' : '📞 전화번호 정규화'}
+          </button>
           <button onClick={runButcherCategoriesMigration} disabled={butcherCatBusy}
             className="h-[36px] px-3 rounded-[10px] bg-[#fef3c7] text-[#b45309] text-[11px] font-semibold border border-[#fde68a] disabled:opacity-50"
             title="홈앤미트 카테고리 정리 (1회용)">

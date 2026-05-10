@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import bcrypt from 'bcryptjs'
 import { notifyAdmin } from '@/lib/telegram/messages'
 import { isValidPasswordFormat } from '@/lib/utils/password'
+import { normalizePhone, isValidPhone } from '@/lib/utils/phone'
 
 const ROLE_LABELS_REG: Record<string, string> = {
   customer: '고객',
@@ -22,6 +23,11 @@ export async function POST(req: NextRequest) {
   }
   if (!['customer', 'owner', 'driver'].includes(role)) {
     return NextResponse.json({ data: null, error: '유효하지 않은 역할입니다' }, { status: 400 })
+  }
+
+  const phoneNormalized = normalizePhone(phone)
+  if (phoneNormalized && !isValidPhone(phoneNormalized)) {
+    return NextResponse.json({ data: null, error: '전화번호 형식이 올바르지 않습니다 (예: 010-1234-5678)' }, { status: 400 })
   }
 
   const supabase = await createAdminClient()
@@ -44,7 +50,7 @@ export async function POST(req: NextRequest) {
 
   const { data: user, error } = await supabase
     .from('users')
-    .insert({ nickname: nickname.trim(), password_hash, role, status, phone: phone?.trim() || null, device_uuid: device_uuid || null })
+    .insert({ nickname: nickname.trim(), password_hash, role, status, phone: phoneNormalized || null, device_uuid: device_uuid || null })
     .select()
     .single()
 

@@ -6,7 +6,7 @@ import { STORES } from '@/lib/market-data'
 import { useAllStoreImages } from '@/lib/hooks/useStoreImages'
 import { useMarketCart } from '@/lib/cart/MarketCartContext'
 
-const CATEGORIES = ['전체', '정육', '슈퍼', '반찬', '분식', '치킨', '베이커리']
+const CATEGORIES = ['전체', '슈퍼', '정육', '치킨', '반찬', '분식', '베이커리']
 
 const CATEGORY_MAP: Record<string, string> = {
   '정육·축산': '정육',

@@ -481,6 +481,12 @@ function AvailableCard({ delivery, onClaim, onHold, onDelete, loading, held = fa
           {order?.delivery_memo && (
             <p className="text-[11px] text-[#b45309] ml-5">⚠️ {order.delivery_memo}</p>
           )}
+          {delivery.failed_reason && (
+            <div className="ml-5 rounded-[8px] bg-[#fef2f2] border border-[#fecaca] px-2.5 py-1.5">
+              <p className="text-[10px] text-[#b91c1c] font-semibold mb-0.5">⚠ 이전 실패 사유</p>
+              <p className="text-[11px] text-[#7f1d1d] whitespace-pre-wrap">{delivery.failed_reason}</p>
+            </div>
+          )}
           {order?.owner_memo && (
             <div className="ml-5 rounded-[8px] bg-[#ecfeff] border border-[#a5f3fc] px-2.5 py-1.5">
               <p className="text-[10px] text-[#0e7490] font-semibold mb-0.5">📝 사장님 메모</p>
@@ -568,6 +574,12 @@ function DeliveryCard({ delivery, onPickup, onComplete, onIssue, loading }: {
           </div>
           {order?.delivery_memo && (
             <p className="text-[11px] text-[#b45309] ml-5">⚠️ {order.delivery_memo}</p>
+          )}
+          {delivery.failed_reason && (
+            <div className="ml-5 rounded-[8px] bg-[#fef2f2] border border-[#fecaca] px-2.5 py-1.5">
+              <p className="text-[10px] text-[#b91c1c] font-semibold mb-0.5">⚠ 이전 실패 사유</p>
+              <p className="text-[11px] text-[#7f1d1d] whitespace-pre-wrap">{delivery.failed_reason}</p>
+            </div>
           )}
           {order?.owner_memo && (
             <div className="ml-5 rounded-[8px] bg-[#ecfeff] border border-[#a5f3fc] px-2.5 py-1.5">

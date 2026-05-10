@@ -38,16 +38,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   }
 
   // 주문 → approved 복귀
-  const newOwnerMemo = ownerNote
-    ? (order.owner_memo ? `${order.owner_memo}\n[재배달 ${new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}] ${ownerNote}` : `[재배달] ${ownerNote}`)
-    : order.owner_memo
+  // 메모가 비어있어도 [재배달] 마커는 항상 남겨서 새 배달맨이 재배달건임을 알 수 있게
+  const ts = new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
+  const retryLine = ownerNote ? `[재배달 ${ts}] ${ownerNote}` : `[재배달 ${ts}]`
+  const newOwnerMemo = order.owner_memo ? `${order.owner_memo}\n${retryLine}` : retryLine
   const { error: updateOrderError } = await supabase
     .from('orders')
     .update({ status: 'approved', owner_memo: newOwnerMemo })
     .eq('id', id)
   if (updateOrderError) return NextResponse.json({ data: null, error: updateOrderError.message }, { status: 500 })
 
-  // 배달 레코드 리셋: 기존 failed 레코드를 pending으로, driver/타임스탬프 초기화
+  // 배달 레코드 리셋: 기존 failed 레코드를 pending으로 되돌리되 failed_reason은 보존
+  // (새 배달맨이 이전 실패 맥락을 알 수 있도록)
   const { error: updateDeliveryError } = await supabase
     .from('deliveries')
     .update({
@@ -56,7 +58,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       assigned_at: null,
       picked_up_at: null,
       delivered_at: null,
-      failed_reason: null,
     })
     .eq('order_id', id)
   if (updateDeliveryError) {

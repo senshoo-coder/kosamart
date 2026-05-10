@@ -565,6 +565,12 @@ export default function AdminStoreManagePage({ params }: { params: Promise<{ sto
           onClose={() => setEditingProduct(null)}
           calcDiscount={calcDiscount}
           accentColor={ACCENT}
+          storeId={storeId}
+          currentImageUrl={editingProduct.id ? (images[editingProduct.id] || editingProduct.image_url || null) : (editingProduct.image_url || null)}
+          onImageUploaded={(url) => {
+            setEditingProduct(prev => prev ? { ...prev, image_url: url } : prev)
+            if (editingProduct.id) setImages(prev => ({ ...prev, [editingProduct.id!]: url }))
+          }}
         />
       )}
 
@@ -721,6 +727,9 @@ function ProductModal({
   onClose,
   calcDiscount,
   accentColor,
+  storeId,
+  currentImageUrl,
+  onImageUploaded,
 }: {
   product: Partial<DBProduct>
   isNew: boolean
@@ -730,8 +739,49 @@ function ProductModal({
   onClose: () => void
   calcDiscount: (price: number, original: number | null) => number | null
   accentColor: string
+  storeId: string | null
+  currentImageUrl: string | null
+  onImageUploaded: (url: string) => void
 }) {
   const discount = calcDiscount(product.price || 0, product.original_price || null)
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const [uploadError, setUploadError] = useState('')
+  const imgInputRef = useRef<HTMLInputElement>(null)
+
+  async function handleImagePick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !storeId) return
+    setUploadError('')
+    if (!product.id) {
+      setUploadError('이미지는 상품을 먼저 저장한 뒤 추가할 수 있어요.')
+      e.target.value = ''
+      return
+    }
+    setUploadingImage(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('store_id', storeId)
+      formData.append('target_type', 'product')
+      formData.append('target_id', product.id)
+      const res = await fetch('/api/store/images', { method: 'POST', body: formData })
+      const json = await res.json()
+      if (json.data?.image_url) {
+        await fetch('/api/store/products', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: product.id, store_id: storeId, image_url: json.data.image_url }),
+        })
+        onImageUploaded(json.data.image_url)
+      } else {
+        setUploadError(json.error || '업로드 실패')
+      }
+    } catch {
+      setUploadError('업로드 중 오류가 발생했습니다')
+    }
+    setUploadingImage(false)
+    e.target.value = ''
+  }
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center" onClick={onClose}>
@@ -740,6 +790,7 @@ function ProductModal({
         className="relative w-full max-w-md max-h-[90vh] overflow-y-auto rounded-t-[16px] sm:rounded-[16px] bg-white p-5"
         onClick={e => e.stopPropagation()}
       >
+        <input ref={imgInputRef} type="file" accept="image/*" className="hidden" onChange={handleImagePick} />
         <div className="w-10 h-1 bg-[#e0e0e0] rounded-full mx-auto mb-4 sm:hidden" />
         <div className="flex items-center justify-between mb-5">
           <h3 className="text-[16px] font-bold text-[#1a1c1c]">{isNew ? '상품 추가' : '상품 수정'}</h3>
@@ -747,6 +798,54 @@ function ProductModal({
         </div>
 
         <div className="space-y-4">
+          {/* 사진 */}
+          <div>
+            <label className="text-[12px] text-[#a3a3a3] mb-1.5 block font-medium">사진</label>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => imgInputRef.current?.click()}
+                disabled={uploadingImage || isNew}
+                className="relative w-20 h-20 rounded-[10px] overflow-hidden border border-[#e0e0e0] bg-[#f9fafb] flex items-center justify-center hover:border-[#8B5CF6] disabled:opacity-50 disabled:cursor-not-allowed group"
+              >
+                {currentImageUrl ? (
+                  <img src={currentImageUrl} alt="상품" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-3xl">{product.emoji || '📦'}</span>
+                )}
+                {uploadingImage && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  </div>
+                )}
+                {!uploadingImage && !isNew && (
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+                    <span className="opacity-0 group-hover:opacity-100 text-white text-[10px] font-medium">변경</span>
+                  </div>
+                )}
+              </button>
+              <div className="flex-1">
+                {isNew ? (
+                  <p className="text-[11px] text-[#a3a3a3]">상품을 먼저 저장한 후 사진을 추가할 수 있어요.</p>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => imgInputRef.current?.click()}
+                      disabled={uploadingImage}
+                      className="text-[12px] px-3 py-1.5 rounded-[8px] text-white font-semibold disabled:opacity-50"
+                      style={{ background: accentColor }}
+                    >
+                      {uploadingImage ? '업로드 중...' : currentImageUrl ? '사진 변경' : '사진 업로드'}
+                    </button>
+                    <p className="text-[10px] text-[#a3a3a3] mt-1">JPG · PNG · WebP · GIF / 10MB 이하</p>
+                  </>
+                )}
+                {uploadError && <p className="text-[11px] text-[#b91c1c] mt-1">{uploadError}</p>}
+              </div>
+            </div>
+          </div>
+
           {/* 이모지 */}
           <div>
             <label className="text-[12px] text-[#a3a3a3] mb-1.5 block font-medium">이모지</label>

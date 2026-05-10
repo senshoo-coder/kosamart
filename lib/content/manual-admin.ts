@@ -956,6 +956,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
       <ul class="steps">
         <li><div class="step-num">1</div><div class="step-text"><strong>가게별 상품 관리</strong><p>가게 관리 → 해당 가게 → 상품 목록. ▲▼ 버튼으로 순서 조정 가능.</p></div></li>
         <li><div class="step-num">2</div><div class="step-text"><strong>공구 상품 관리</strong><p>공구 상품 페이지에서 ▲▼ 버튼으로 순서를 바꿀 수 있어요.</p></div></li>
+        <li><div class="step-num">3</div><div class="step-text"><strong>엑셀 일괄 등록</strong><p>가게 관리 화면 우측 상단의 <b>📥 엑셀 일괄 등록</b> 버튼 → <b>템플릿 다운로드</b> → 엑셀로 상품 입력 → 업로드. 미리보기로 검증 후 등록. 같은 이름의 기존 상품은 자동 건너뜀 (idempotent). 한 번에 최대 500개. 이미지는 등록 후 개별 업로드.</p></div></li>
       </ul>
       <div class="tip">💡 사장님 계정은 본인 가게 상품만 수정 가능하고, 타 가게 상품은 읽기·수정 모두 차단돼요. (API 레벨에서 store_id 검증)</div>
     </div>

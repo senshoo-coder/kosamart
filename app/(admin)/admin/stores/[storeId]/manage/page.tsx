@@ -2,6 +2,7 @@
 import { use, useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { STORES, type Store } from '@/lib/market-data'
+import BulkProductUpload from '@/components/products/BulkProductUpload'
 
 interface DBProduct {
   id: string
@@ -348,13 +349,20 @@ export default function AdminStoreManagePage({ params }: { params: Promise<{ sto
             <h1 className="text-[20px] font-bold text-[#1a1c1c]">가게 관리 — {storeName}</h1>
             <p className="text-[12px] text-[#a3a3a3] mt-0.5">가게 정보 및 상품 관리 (관리자)</p>
           </div>
-          <button
-            onClick={openAddProduct}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-[8px] text-[13px] font-semibold text-white"
-            style={{ background: ACCENT }}
-          >
-            + 상품 추가
-          </button>
+          <div className="flex items-center gap-2">
+            <BulkProductUpload
+              storeId={storeId}
+              accentColor={ACCENT}
+              onSuccess={() => loadProducts(storeId)}
+            />
+            <button
+              onClick={openAddProduct}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-[8px] text-[13px] font-semibold text-white"
+              style={{ background: ACCENT }}
+            >
+              + 상품 추가
+            </button>
+          </div>
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { STORES, type Store } from '@/lib/market-data'
+import BulkProductUpload from '@/components/products/BulkProductUpload'
 
 const HOUR_OPTIONS_START = Array.from({ length: 19 }, (_, i) => i + 5) // 05~23
 const HOUR_OPTIONS_END   = Array.from({ length: 19 }, (_, i) => i + 6) // 06~24
@@ -407,13 +408,22 @@ export default function OwnerStorePage() {
           <h1 className="text-[20px] font-bold text-[#1a1c1c]">내 가게</h1>
           <p className="text-[12px] text-[#a3a3a3] mt-0.5">가게 정보 및 상품 관리</p>
         </div>
-        <button
-          onClick={openAddProduct}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-[8px] text-[13px] font-semibold text-white"
-          style={{ background: '#10b981' }}
-        >
-          + 상품 추가
-        </button>
+        <div className="flex items-center gap-2">
+          {storeId && (
+            <BulkProductUpload
+              storeId={storeId}
+              accentColor={accentColor}
+              onSuccess={() => loadProducts(storeId)}
+            />
+          )}
+          <button
+            onClick={openAddProduct}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-[8px] text-[13px] font-semibold text-white"
+            style={{ background: '#10b981' }}
+          >
+            + 상품 추가
+          </button>
+        </div>
       </div>
 
       {/* 가게 대표 이미지 */}

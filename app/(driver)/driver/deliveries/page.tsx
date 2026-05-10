@@ -481,6 +481,12 @@ function AvailableCard({ delivery, onClaim, onHold, onDelete, loading, held = fa
           {order?.delivery_memo && (
             <p className="text-[11px] text-[#b45309] ml-5">⚠️ {order.delivery_memo}</p>
           )}
+          {order?.owner_memo && (
+            <div className="ml-5 rounded-[8px] bg-[#ecfeff] border border-[#a5f3fc] px-2.5 py-1.5">
+              <p className="text-[10px] text-[#0e7490] font-semibold mb-0.5">📝 사장님 메모</p>
+              <p className="text-[11px] text-[#155e75] whitespace-pre-wrap">{order.owner_memo}</p>
+            </div>
+          )}
           <p className="text-[11px] text-[#a3a3a3] ml-5">
             📦 {order?.items?.map(i => i.product_name).join(', ')}
           </p>
@@ -562,6 +568,12 @@ function DeliveryCard({ delivery, onPickup, onComplete, onIssue, loading }: {
           </div>
           {order?.delivery_memo && (
             <p className="text-[11px] text-[#b45309] ml-5">⚠️ {order.delivery_memo}</p>
+          )}
+          {order?.owner_memo && (
+            <div className="ml-5 rounded-[8px] bg-[#ecfeff] border border-[#a5f3fc] px-2.5 py-1.5">
+              <p className="text-[10px] text-[#0e7490] font-semibold mb-0.5">📝 사장님 메모</p>
+              <p className="text-[11px] text-[#155e75] whitespace-pre-wrap">{order.owner_memo}</p>
+            </div>
           )}
           <p className="text-[11px] text-[#a3a3a3] ml-5">
             📦 {order?.items?.map(i => i.product_name).join(', ')}

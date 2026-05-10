@@ -3,6 +3,9 @@ import { cookies } from 'next/headers'
 import { createAdminClient } from '@/lib/supabase/server'
 import { DEMO_DELIVERIES } from '@/lib/demo-data'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 const isDemoMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_URL?.startsWith('https')
 
 // GET /api/deliveries

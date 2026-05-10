@@ -13,8 +13,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { id } = await params
   const { failed_reason } = await req.json()
 
-  if (!failed_reason?.trim()) {
+  const reasonTrimmed = (failed_reason ?? '').trim()
+  if (!reasonTrimmed) {
     return NextResponse.json({ data: null, error: '실패 사유를 입력해주세요' }, { status: 400 })
+  }
+  // "기타"는 반드시 콜론 뒤 세부 내용이 있어야 함 ("기타", "기타:", "기타: " 모두 차단)
+  if (/^기타\s*:?\s*$/.test(reasonTrimmed)) {
+    return NextResponse.json({ data: null, error: '기타 사유의 세부 내용을 입력해주세요' }, { status: 400 })
   }
 
   const supabase = await createAdminClient()

@@ -1,10 +1,30 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://xn--bb0bw4xzve3ni.kr'
+const NAVER_VERIFICATION = process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION
+const GOOGLE_VERIFICATION = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: '코사마트 상점가 | 평창동 공동구매',
   description: '평창동 코사마트 상점가 O2O 공동구매 플랫폼',
   manifest: '/manifest.json',
+  alternates: { canonical: '/' },
+  openGraph: {
+    title: '코사마트 상점가 | 평창동 공동구매',
+    description: '평창동 코사마트 상점가 O2O 공동구매 플랫폼',
+    url: SITE_URL,
+    siteName: '코사마트',
+    locale: 'ko_KR',
+    type: 'website',
+  },
+  verification: {
+    other: {
+      ...(NAVER_VERIFICATION ? { 'naver-site-verification': NAVER_VERIFICATION } : {}),
+    },
+    ...(GOOGLE_VERIFICATION ? { google: GOOGLE_VERIFICATION } : {}),
+  },
 }
 
 export const viewport: Viewport = {

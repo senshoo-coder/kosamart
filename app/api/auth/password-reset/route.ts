@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import bcrypt from 'bcryptjs'
 import { isValidPasswordFormat } from '@/lib/utils/password'
 import { normalizePhone, isValidPhone } from '@/lib/utils/phone'
-import { notifyAdmin } from '@/lib/telegram/messages'
+import { notifyAdmin, escapeHtml as e } from '@/lib/telegram/messages'
 
 const isDemoMode = !process.env.NEXT_PUBLIC_SUPABASE_URL ||
   !process.env.NEXT_PUBLIC_SUPABASE_URL?.startsWith('https') ||
@@ -68,9 +68,9 @@ export async function POST(req: NextRequest) {
   const msg = [
     `🔓 <b>[비밀번호 자가 재설정]</b>`,
     ``,
-    `닉네임: <b>${nickname}</b>`,
-    `역할: ${user.role}`,
-    `전화: ${user.phone}`,
+    `닉네임: <b>${e(nickname)}</b>`,
+    `역할: ${e(user.role)}`,
+    `전화: ${e(user.phone)}`,
     `시각: ${new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}`,
   ].join('\n')
   notifyAdmin(msg).catch(() => {})

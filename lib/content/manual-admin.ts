@@ -1035,6 +1035,11 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
         <div class="notif-row"><span class="notif-emoji">📚</span><div class="notif-text"><strong>매뉴얼 분리</strong><span>공개 매뉴얼(/manual.html)과 관리자 매뉴얼(/manual-admin)이 분리. 관리자 매뉴얼은 관리자 로그인 시에만 접근 가능.</span></div></div>
         <div class="notif-row"><span class="notif-emoji">🤖</span><div class="notif-text"><strong>웹훅 보안</strong><span>텔레그램 알림 웹훅은 비밀 키(WEBHOOK_SECRET)로 인증돼요. 외부에서 위조 요청을 보낼 수 없어요.</span></div></div>
         <div class="notif-row"><span class="notif-emoji">👤</span><div class="notif-text"><strong>개인정보 자동 파기</strong><span>고객의 전화번호·주소·닉네임 등 개인정보는 일정 기간 후 자동 익명화돼요 (PII 자동 purge 정책).</span></div></div>
+        <div class="notif-row"><span class="notif-emoji">🛡️</span><div class="notif-text"><strong>HTTP 보안 헤더</strong><span>HSTS(2년)·X-Frame-Options:DENY·X-Content-Type-Options:nosniff·Referrer-Policy·Permissions-Policy 가 모든 응답에 자동 부착. clickjacking·MIME 스니핑·외부 iframe 임베드 차단.</span></div></div>
+        <div class="notif-row"><span class="notif-emoji">📨</span><div class="notif-text"><strong>텔레그램 HTML 이스케이프</strong><span>사장님 이름·주소·메모 등 사용자 입력값은 텔레그램 전송 전 자동 escape. 악성 닉네임을 이용한 HTML 인젝션·피싱 차단.</span></div></div>
+        <div class="notif-row"><span class="notif-emoji">🖼️</span><div class="notif-text"><strong>가게 이미지 소유권 검증</strong><span>POST/DELETE /api/store/images에서 owner는 본인 store_id만 업로드/삭제 가능. 파일명에 path traversal 방지를 위한 sanitize 적용.</span></div></div>
+        <div class="notif-row"><span class="notif-emoji">🔒</span><div class="notif-text"><strong>고객 응답 필드 필터링</strong><span>/api/orders 응답에서 고객은 본인 주문만 보되, owner_memo의 [재배달] 마커·delivery.failed_reason·driver_memo 등 운영 정보는 자동 제거.</span></div></div>
+        <div class="notif-row"><span class="notif-emoji">🏁</span><div class="notif-text"><strong>상태 변경 동시성 가드</strong><span>주문 승인·거절·재배달·종료 UPDATE 쿼리에 status 가드 + select. 동시 클릭 시 1명만 성공(409 응답), 중복 알림·이중 메모 방지.</span></div></div>
       </div>
 
       <ul class="steps">

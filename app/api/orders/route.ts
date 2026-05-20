@@ -121,6 +121,31 @@ export async function GET(req: NextRequest) {
   const { data, error } = await query
   if (error) return NextResponse.json({ data: null, error: error.message }, { status: 500 })
 
+  // 고객 응답에서는 내부 메모([재배달] 마커 포함)와 운영용 필드 정리
+  if (cookieRole === 'customer' && Array.isArray(data)) {
+    for (const o of data) {
+      if (!o) continue
+      if (typeof o.owner_memo === 'string') {
+        const customerVisible = o.owner_memo
+          .split('\n')
+          .filter((l: string) => !l.startsWith('[재배달'))
+          .join('\n')
+          .trim()
+        o.owner_memo = customerVisible || null
+      }
+      if (o.delivery) {
+        const arr = Array.isArray(o.delivery) ? o.delivery : [o.delivery]
+        for (const d of arr) {
+          if (!d) continue
+          d.failed_reason = null
+          d.driver_memo = null
+          d.driver_id = null
+          d.delivery_photo_url = null
+        }
+      }
+    }
+  }
+
   return NextResponse.json({ data, error: null })
 }
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { notifyAdmin } from '@/lib/telegram/messages'
+import { notifyAdmin, escapeHtml as e } from '@/lib/telegram/messages'
 
 const isDemoMode = !process.env.NEXT_PUBLIC_SUPABASE_URL ||
   !process.env.NEXT_PUBLIC_SUPABASE_URL?.startsWith('https') ||
@@ -40,10 +40,10 @@ export async function POST(req: NextRequest) {
   const msg = [
     `🔑 <b>[비밀번호 재설정 요청]</b>`,
     ``,
-    `닉네임: <b>${nickname}</b>`,
-    `역할: ${roleLabel}`,
-    contact ? `연락처: ${contact}` : null,
-    note ? `메모: ${note}` : null,
+    `닉네임: <b>${e(nickname)}</b>`,
+    `역할: ${e(roleLabel)}`,
+    contact ? `연락처: ${e(contact)}` : null,
+    note ? `메모: ${e(note)}` : null,
     `요청 시각: ${new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}`,
     ``,
     `→ 관리자 화면 → 사용자 관리에서 비밀번호 재설정 후 본인 확인 절차에 따라 전달해 주세요.`,

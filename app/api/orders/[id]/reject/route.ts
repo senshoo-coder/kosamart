@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { notifyAdmin } from '@/lib/telegram/messages'
+import { notifyAdmin, escapeHtml as e } from '@/lib/telegram/messages'
 import { cookies } from 'next/headers'
 import { getOwnerStoreId } from '@/lib/auth/owner-store'
 import { enrichLatestStatusLog } from '@/lib/audit/order-status-log'
@@ -30,14 +30,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
   }
 
-  const { error: updateError } = await supabase
+  const { data: updated, error: updateError } = await supabase
     .from('orders')
     .update({ status: 'rejected', rejected_reason })
     .eq('id', id)
     .in('status', ['pending', 'paid'])
+    .select('id')
 
   if (updateError) {
     return NextResponse.json({ data: null, error: updateError.message }, { status: 500 })
+  }
+  if (!updated || updated.length === 0) {
+    return NextResponse.json({ data: null, error: '이미 처리되었거나 상태가 변경되었습니다' }, { status: 409 })
   }
   await enrichLatestStatusLog(id, 'rejected', { note: rejected_reason })
 
@@ -54,12 +58,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const cancelMsg = [
     `❌ <b>[주문 취소]</b>`,
     ``,
-    `주문번호: <code>${order?.order_number ?? id}</code>`,
-    `주문자: <b>${order?.kakao_nickname ?? '-'}</b>`,
-    `전화번호: ${order?.customer_phone ?? '-'}`,
-    `매장: ${order?.store_name ?? '-'}`,
+    `주문번호: <code>${e(order?.order_number ?? id)}</code>`,
+    `주문자: <b>${e(order?.kakao_nickname ?? '-')}</b>`,
+    `전화번호: ${e(order?.customer_phone ?? '-')}`,
+    `매장: ${e(order?.store_name ?? '-')}`,
     `금액: ₩${order?.total_amount?.toLocaleString() ?? ''}`,
-    `사유: <b>${rejected_reason}</b>`,
+    `사유: <b>${e(rejected_reason)}</b>`,
   ].join('\n')
   await notifyAdmin(cancelMsg).catch(() => {})
 

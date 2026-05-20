@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { getOwnerStoreId } from '@/lib/auth/owner-store'
-import { notifyAdmin, notifyDriver } from '@/lib/telegram/messages'
+import { notifyAdmin, notifyDriver, escapeHtml as e } from '@/lib/telegram/messages'
 import { enrichLatestStatusLog } from '@/lib/audit/order-status-log'
 
 // POST /api/orders/[id]/retry-delivery
@@ -75,19 +75,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const msg = [
     `🔄 <b>[재배달 요청]</b>`,
     ``,
-    `주문번호: <code>${order.order_number}</code>`,
-    `주문자: <b>${order.kakao_nickname}</b>`,
-    `전화: ${order.customer_phone ?? '-'}`,
-    `매장: ${order.store_name ?? '-'}`,
-    `주소: ${order.delivery_address}`,
-    ownerNote ? `사장님 메모: ${ownerNote}` : null,
+    `주문번호: <code>${e(order.order_number)}</code>`,
+    `주문자: <b>${e(order.kakao_nickname)}</b>`,
+    `전화: ${e(order.customer_phone ?? '-')}`,
+    `매장: ${e(order.store_name ?? '-')}`,
+    `주소: ${e(order.delivery_address)}`,
+    ownerNote ? `사장님 메모: ${e(ownerNote)}` : null,
     ``,
     `→ 배달팀 다시 배정 가능 상태입니다 🚚`,
   ].filter(Boolean).join('\n')
 
   await Promise.all([
     notifyAdmin(msg).catch(() => {}),
-    notifyDriver(`🔄 재배달 요청: ${order.kakao_nickname}\n📍 ${order.delivery_address}\n📞 ${order.customer_phone ?? '-'}`).catch(() => {}),
+    notifyDriver(`🔄 재배달 요청: ${e(order.kakao_nickname)}\n📍 ${e(order.delivery_address)}\n📞 ${e(order.customer_phone ?? '-')}`).catch(() => {}),
   ])
 
   return NextResponse.json({ data: { id, status: 'approved' }, error: null })

@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import { getOwnerStoreId } from '@/lib/auth/owner-store'
+
+// 경로 traversal / 특수문자 방지: 영숫자·하이픈·언더스코어만 허용
+function sanitizeIdSegment(s: string): string {
+  return s.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64)
+}
+const ALLOWED_TARGET_TYPES = new Set(['store', 'product'])
 
 const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 const SUPA_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
@@ -66,12 +73,34 @@ export async function POST(req: NextRequest) {
 
   const formData = await req.formData()
   const file = formData.get('file') as File | null
-  const storeId = formData.get('store_id') as string
-  const targetType = formData.get('target_type') as string // 'store' | 'product'
-  const targetId = (formData.get('target_id') as string | null) || null
+  const storeIdRaw = formData.get('store_id') as string
+  const targetTypeRaw = formData.get('target_type') as string // 'store' | 'product'
+  const targetIdRaw = (formData.get('target_id') as string | null) || null
 
-  if (!file || !storeId || !targetType) {
+  if (!file || !storeIdRaw || !targetTypeRaw) {
     return NextResponse.json({ data: null, error: '필수 항목 누락 (file, store_id, target_type)' }, { status: 400 })
+  }
+
+  // 입력 검증·정규화 (path traversal·인젝션 방지)
+  if (!ALLOWED_TARGET_TYPES.has(targetTypeRaw)) {
+    return NextResponse.json({ data: null, error: '잘못된 target_type' }, { status: 400 })
+  }
+  const storeId = sanitizeIdSegment(storeIdRaw)
+  const targetType = targetTypeRaw
+  const targetId = targetIdRaw ? sanitizeIdSegment(targetIdRaw) : null
+  if (!storeId) {
+    return NextResponse.json({ data: null, error: '잘못된 store_id' }, { status: 400 })
+  }
+  if (targetIdRaw && !targetId) {
+    return NextResponse.json({ data: null, error: '잘못된 target_id' }, { status: 400 })
+  }
+
+  // 소유권 검증: owner는 본인 가게에만 업로드 가능
+  if (role === 'owner') {
+    const ownerStoreId = await getOwnerStoreId()
+    if (!ownerStoreId || ownerStoreId !== storeId) {
+      return NextResponse.json({ data: null, error: '본인 가게만 관리 가능' }, { status: 403 })
+    }
   }
 
   const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
@@ -84,7 +113,9 @@ export async function POST(req: NextRequest) {
   }
 
   const bytes = await file.arrayBuffer()
-  const ext = file.name.split('.').pop() || 'jpg'
+  // 확장자도 화이트리스트 (file.name 신뢰 안 함)
+  const mimeToExt: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif' }
+  const ext = mimeToExt[file.type] || 'jpg'
   const filename = `${storeId}/${targetType}-${targetId || 'main'}-${Date.now()}.${ext}`
 
   // Upload to store-images bucket
@@ -135,12 +166,26 @@ export async function DELETE(req: NextRequest) {
   }
 
   const { searchParams } = new URL(req.url)
-  const storeId = searchParams.get('store_id')
-  const targetType = searchParams.get('target_type')
-  const targetId = searchParams.get('target_id') || null
+  const storeIdRaw = searchParams.get('store_id')
+  const targetTypeRaw = searchParams.get('target_type')
+  const targetIdRaw = searchParams.get('target_id') || null
 
-  if (!storeId || !targetType) {
+  if (!storeIdRaw || !targetTypeRaw) {
     return NextResponse.json({ data: null, error: 'store_id, target_type 필수' }, { status: 400 })
+  }
+  if (!ALLOWED_TARGET_TYPES.has(targetTypeRaw)) {
+    return NextResponse.json({ data: null, error: '잘못된 target_type' }, { status: 400 })
+  }
+  const storeId = sanitizeIdSegment(storeIdRaw)
+  const targetType = targetTypeRaw
+  const targetId = targetIdRaw ? sanitizeIdSegment(targetIdRaw) : null
+  if (!storeId) return NextResponse.json({ data: null, error: '잘못된 store_id' }, { status: 400 })
+
+  if (role === 'owner') {
+    const ownerStoreId = await getOwnerStoreId()
+    if (!ownerStoreId || ownerStoreId !== storeId) {
+      return NextResponse.json({ data: null, error: '본인 가게만 관리 가능' }, { status: 403 })
+    }
   }
 
   const records = await readMeta(storeId)

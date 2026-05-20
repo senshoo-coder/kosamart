@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { getOwnerStoreId } from '@/lib/auth/owner-store'
-import { notifyAdmin, notifyStore, getStoreChatId } from '@/lib/telegram/messages'
+import { notifyAdmin, notifyStore, getStoreChatId, escapeHtml as e } from '@/lib/telegram/messages'
 import { enrichLatestStatusLog } from '@/lib/audit/order-status-log'
 
 // POST /api/orders/[id]/close-failed
@@ -59,13 +59,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const msg = [
     `🛑 <b>[배달 실패 — 종료]</b>`,
     ``,
-    `주문번호: <code>${order.order_number}</code>`,
-    `주문자: <b>${order.kakao_nickname}</b>`,
-    `전화: ${order.customer_phone ?? '-'}`,
-    `매장: ${order.store_name ?? '-'}`,
-    `주소: ${order.delivery_address}`,
+    `주문번호: <code>${e(order.order_number)}</code>`,
+    `주문자: <b>${e(order.kakao_nickname)}</b>`,
+    `전화: ${e(order.customer_phone ?? '-')}`,
+    `매장: ${e(order.store_name ?? '-')}`,
+    `주소: ${e(order.delivery_address)}`,
     `금액: ₩${order.total_amount?.toLocaleString() ?? ''}`,
-    `종료 사유: <b>${closeReason}</b>`,
+    `종료 사유: <b>${e(closeReason)}</b>`,
   ].join('\n')
   const storeChatId = order.store_id ? await getStoreChatId(order.store_id) : null
   await Promise.all([

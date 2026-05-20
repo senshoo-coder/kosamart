@@ -20,6 +20,19 @@ export async function getStoreChatId(storeId: string): Promise<string | null> {
   } catch { return null }
 }
 
+// HTML 이스케이프: parse_mode='HTML' 전송 시 사용자 입력에 의한 인젝션·피싱 방지
+// (닉네임·주소·메모 등은 모두 이 함수로 감싸야 함)
+export function escapeHtml(value: unknown): string {
+  if (value == null) return ''
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+const e = escapeHtml // shorthand
+
 // 전화번호 마스킹: 010-1234-5678 → 010-****-5678
 function maskPhone(phone?: string | null): string {
   if (!phone) return '-'
@@ -76,11 +89,11 @@ export const TelegramMessages = {
   newOrder: (order: Order) => `
 📢 <b>[신규 주문 접수]</b>
 
-주문번호: <code>${order.order_number}</code>
-주문자: <b>${order.kakao_nickname}</b>
+주문번호: <code>${e(order.order_number)}</code>
+주문자: <b>${e(order.kakao_nickname)}</b>
 금액: <b>₩${order.total_amount.toLocaleString()}</b>
-주소: ${order.delivery_address}
-${order.delivery_memo ? `메모: ${order.delivery_memo}` : ''}
+주소: ${e(order.delivery_address)}
+${order.delivery_memo ? `메모: ${e(order.delivery_memo)}` : ''}
 
 → 관리자 페이지에서 입금 확인 후 승인해주세요`,
 
@@ -88,11 +101,11 @@ ${order.delivery_memo ? `메모: ${order.delivery_memo}` : ''}
   orderApproved: (order: Order) => `
 ✅ <b>[주문 승인 완료 · 배달 준비]</b>
 
-<b>${order.kakao_nickname}</b>님의 주문이 승인되었습니다.
+<b>${e(order.kakao_nickname)}</b>님의 주문이 승인되었습니다.
 
-주문번호: <code>${order.order_number}</code>
+주문번호: <code>${e(order.order_number)}</code>
 금액: ₩${order.total_amount.toLocaleString()}
-${order.owner_memo ? `안내사항: ${order.owner_memo}` : ''}
+${order.owner_memo ? `안내사항: ${e(order.owner_memo)}` : ''}
 
 배달이 시작되면 다시 안내드립니다 🚚`,
 
@@ -100,12 +113,12 @@ ${order.owner_memo ? `안내사항: ${order.owner_memo}` : ''}
   pickupApproved: (order: Order) => `
 ✅ <b>[고객 픽업 승인 · 준비완료]</b>
 
-<b>${order.kakao_nickname}</b>님의 픽업 주문이 승인되었습니다.
+<b>${e(order.kakao_nickname)}</b>님의 픽업 주문이 승인되었습니다.
 
-주문번호: <code>${order.order_number}</code>
-매장: ${(order as any).store_name ?? '-'}
+주문번호: <code>${e(order.order_number)}</code>
+매장: ${e((order as any).store_name ?? '-')}
 금액: ₩${order.total_amount.toLocaleString()}
-${order.delivery_memo ? `메모: ${order.delivery_memo}` : ''}
+${order.delivery_memo ? `메모: ${e(order.delivery_memo)}` : ''}
 
 매장에서 준비가 완료되었습니다. 방문하여 픽업해 주세요 🏪`,
 
@@ -113,10 +126,10 @@ ${order.delivery_memo ? `메모: ${order.delivery_memo}` : ''}
   pickupCompleted: (order: Order) => `
 🏪 <b>[고객 픽업 완료]</b>
 
-<b>${order.kakao_nickname}</b>님이 직접 픽업을 완료했습니다.
+<b>${e(order.kakao_nickname)}</b>님이 직접 픽업을 완료했습니다.
 
-주문번호: <code>${order.order_number}</code>
-매장: ${(order as any).store_name ?? '-'}
+주문번호: <code>${e(order.order_number)}</code>
+매장: ${e((order as any).store_name ?? '-')}
 금액: ₩${order.total_amount.toLocaleString()}
 
 이용해주셔서 감사합니다 💚`,
@@ -125,8 +138,8 @@ ${order.delivery_memo ? `메모: ${order.delivery_memo}` : ''}
   orderRejected: (order: Order) => `
 ❌ <b>[주문 거절]</b>
 
-주문번호: <code>${order.order_number}</code>
-사유: ${order.rejected_reason ?? '미기재'}
+주문번호: <code>${e(order.order_number)}</code>
+사유: ${e(order.rejected_reason ?? '미기재')}
 
 불편을 드려 죄송합니다.`,
 
@@ -134,9 +147,9 @@ ${order.delivery_memo ? `메모: ${order.delivery_memo}` : ''}
   deliveryStarted: (order: Order) => `
 🚚 <b>[배달 출발]</b>
 
-<b>${order.kakao_nickname}</b>님 주문 배달이 시작되었습니다.
-주문번호: <code>${order.order_number}</code>
-배달지: ${order.delivery_address}
+<b>${e(order.kakao_nickname)}</b>님 주문 배달이 시작되었습니다.
+주문번호: <code>${e(order.order_number)}</code>
+배달지: ${e(order.delivery_address)}
 
 곧 도착합니다! 📦`,
 
@@ -144,9 +157,9 @@ ${order.delivery_memo ? `메모: ${order.delivery_memo}` : ''}
   deliveryCompleted: (order: Order, memo?: string) => `
 🎉 <b>[배달 완료]</b>
 
-<b>${order.kakao_nickname}</b>님 배달이 완료되었습니다.
-주문번호: <code>${order.order_number}</code>
-${memo ? `기사 메모: ${memo}` : ''}
+<b>${e(order.kakao_nickname)}</b>님 배달이 완료되었습니다.
+주문번호: <code>${e(order.order_number)}</code>
+${memo ? `기사 메모: ${e(memo)}` : ''}
 
 이용해주셔서 감사합니다 💚`,
 
@@ -154,10 +167,10 @@ ${memo ? `기사 메모: ${memo}` : ''}
   deliveryFailed: (order: Order, reason: string) => `
 ⚠️ <b>[배달 실패 보고]</b>
 
-주문번호: <code>${order.order_number}</code>
-주문자: ${order.kakao_nickname}
-주소: ${order.delivery_address}
-사유: <b>${reason}</b>
+주문번호: <code>${e(order.order_number)}</code>
+주문자: ${e(order.kakao_nickname)}
+주소: ${e(order.delivery_address)}
+사유: <b>${e(reason)}</b>
 
 즉시 고객에게 연락이 필요합니다.`,
 
@@ -173,15 +186,15 @@ ${memo ? `기사 메모: ${memo}` : ''}
   }) => `
 📢 <b>[상점가 신규 주문]</b>
 
-매장: <b>${order.store_name}</b>
-주문번호: <code>${order.order_number}</code>
-주문자: <b>${order.kakao_nickname}</b>
+매장: <b>${e(order.store_name)}</b>
+주문번호: <code>${e(order.order_number)}</code>
+주문자: <b>${e(order.kakao_nickname)}</b>
 유형: ${order.pickup_type === 'bopis' ? '🏪 매장 픽업' : '🚚 문앞 배송 O2O'}
-${order.delivery_address ? `주소: ${maskAddress(order.delivery_address)}` : ''}
+${order.delivery_address ? `주소: ${e(maskAddress(order.delivery_address))}` : ''}
 금액: <b>₩${order.total_amount.toLocaleString()}</b>
 
 상품:
-${order.items.map(i => `• ${i.product_name} x${i.quantity} (₩${i.subtotal.toLocaleString()})`).join('\n')}`,
+${order.items.map(i => `• ${e(i.product_name)} x${i.quantity} (₩${i.subtotal.toLocaleString()})`).join('\n')}`,
 
   // 픽업/배달 시간 알림 (T-60, T-30) — 전화번호는 마스킹하여 단체방 노출 최소화
   scheduleAlert: (order: {
@@ -199,11 +212,11 @@ ${order.items.map(i => `• ${i.product_name} x${i.quantity} (₩${i.subtotal.to
     return [
       `⏰ <b>[${timeLabel} ${minutesBefore}분 전 알림]</b>`,
       ``,
-      `주문번호: <code>${order.order_number}</code>`,
-      `주문자: <b>${order.kakao_nickname}</b>`,
-      `전화번호: ${maskPhone(order.customer_phone)}`,
-      `매장: ${order.store_name}`,
-      isPickup ? `유형: 🏪 매장 픽업` : `유형: 🚚 배달\n주소: ${maskAddress(order.delivery_address)}`,
+      `주문번호: <code>${e(order.order_number)}</code>`,
+      `주문자: <b>${e(order.kakao_nickname)}</b>`,
+      `전화번호: ${e(maskPhone(order.customer_phone))}`,
+      `매장: ${e(order.store_name)}`,
+      isPickup ? `유형: 🏪 매장 픽업` : `유형: 🚚 배달\n주소: ${e(maskAddress(order.delivery_address))}`,
       `예정시간: <b>${scheduledTime}</b>`,
       `금액: ₩${order.total_amount?.toLocaleString() ?? ''}`,
     ].join('\n')

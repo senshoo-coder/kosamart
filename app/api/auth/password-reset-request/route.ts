@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { notifyAdmin, escapeHtml as e } from '@/lib/telegram/messages'
+import { getClientIp } from '@/lib/auth/rate-limit'
+import { logAuthEvent } from '@/lib/audit/auth-events'
 
 const isDemoMode = !process.env.NEXT_PUBLIC_SUPABASE_URL ||
   !process.env.NEXT_PUBLIC_SUPABASE_URL?.startsWith('https') ||
@@ -50,6 +52,16 @@ export async function POST(req: NextRequest) {
   ].filter(Boolean).join('\n')
 
   await notifyAdmin(msg).catch(() => {})
+
+  // 감사 로그: 사용자 존재 여부와 무관하게 요청 기록 (이상행위 추적용)
+  logAuthEvent({
+    event_type: 'password_reset_request',
+    nickname,
+    role: foundRole,
+    ip: getClientIp(req.headers),
+    user_agent: req.headers.get('user-agent') || null,
+    detail: foundRole ? 'user exists' : 'user not found',
+  })
 
   // 보안: 사용자 존재 여부와 무관하게 동일한 성공 응답 (열거 공격 방지)
   return NextResponse.json({

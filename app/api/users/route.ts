@@ -19,10 +19,12 @@ export async function GET(req: NextRequest) {
 
   const supabase = await createAdminClient()
 
+  // status='active'으로 필터 (suspend 처리된 계정 제외)
+  // is_active(BOOLEAN, 기본값 true)는 suspend 시 갱신되지 않아 누출 위험 있어 사용 안 함
   let query = supabase
     .from('users')
     .select('id, nickname, device_uuid, role, phone')
-    .eq('is_active', true)
+    .eq('status', 'active')
     .order('nickname')
 
   if (role) query = query.eq('role', role)

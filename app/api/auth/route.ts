@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import bcrypt from 'bcryptjs'
+import { checkRateLimit, recordFailure, resetRateLimit, getClientIp } from '@/lib/auth/rate-limit'
+import { logAuthEvent } from '@/lib/audit/auth-events'
 
 const isDemoMode = !process.env.NEXT_PUBLIC_SUPABASE_URL ||
   !process.env.NEXT_PUBLIC_SUPABASE_URL?.startsWith('https') ||
@@ -38,6 +40,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ data: null, error: '비밀번호를 입력해주세요' }, { status: 400 })
   }
 
+  // Rate limiting: per-nickname + per-IP
+  const cleanNickname = nickname.trim()
+  const ip = getClientIp(req.headers)
+  const userAgent = req.headers.get('user-agent') || null
+  const nickKey = `login:nick:${cleanNickname.toLowerCase()}`
+  const ipKey = `login:ip:${ip}`
+  const nickCheck = checkRateLimit(nickKey)
+  const ipCheck = checkRateLimit(ipKey)
+  if (!nickCheck.allowed || !ipCheck.allowed) {
+    const retry = Math.max(nickCheck.retryAfterSeconds ?? 0, ipCheck.retryAfterSeconds ?? 0)
+    logAuthEvent({
+      event_type: 'login_blocked_rate_limit',
+      nickname: cleanNickname, ip, user_agent: userAgent,
+      detail: `retryAfter=${retry}s nickRetry=${nickCheck.retryAfterSeconds ?? 0} ipRetry=${ipCheck.retryAfterSeconds ?? 0}`,
+    })
+    return NextResponse.json(
+      { data: null, error: `너무 많은 로그인 시도. ${Math.ceil(retry / 60)}분 후 다시 시도해 주세요` },
+      { status: 429, headers: { 'Retry-After': String(retry) } }
+    )
+  }
+
   // 선택한 역할과 실제 계정 역할이 다르면 차단
   // (보안: 실제 역할을 노출하지 않음 — 계정 열거 공격 방지)
   function checkRoleMatch(actualRole: string): NextResponse | null {
@@ -55,10 +78,17 @@ export async function POST(req: NextRequest) {
   if (isDemoMode) {
     const demoUser = DEMO_ACCOUNTS.find(u => u.nickname === nickname.trim() && u.password === password)
     if (!demoUser) {
+      recordFailure(nickKey); recordFailure(ipKey)
+      logAuthEvent({ event_type: 'login_failure', nickname: cleanNickname, ip, user_agent: userAgent, detail: 'demo-mode no match' })
       return NextResponse.json({ data: null, error: '닉네임 또는 비밀번호가 올바르지 않습니다' }, { status: 401 })
     }
     const roleErr = checkRoleMatch(demoUser.role)
-    if (roleErr) return roleErr
+    if (roleErr) {
+      logAuthEvent({ event_type: 'login_blocked_role_mismatch', nickname: cleanNickname, user_id: demoUser.id, role: demoUser.role, ip, user_agent: userAgent, detail: `expected=${expected_role}` })
+      return roleErr
+    }
+    resetRateLimit(nickKey); resetRateLimit(ipKey)
+    logAuthEvent({ event_type: 'login_success', nickname: cleanNickname, user_id: demoUser.id, role: demoUser.role, ip, user_agent: userAgent, detail: 'demo-mode' })
     const cookieStore = await cookies()
     const secure = process.env.NODE_ENV === 'production'
     cookieStore.set('cosmart_user_id', demoUser.id, { httpOnly: true, sameSite: 'lax', secure, maxAge: 60 * 60 * 24 * 30 })
@@ -81,18 +111,28 @@ export async function POST(req: NextRequest) {
       const demoUser = DEMO_ACCOUNTS.find(u => u.nickname === nickname.trim() && u.password === password)
       if (demoUser) {
         const roleErr = checkRoleMatch(demoUser.role)
-        if (roleErr) return roleErr
+        if (roleErr) {
+          logAuthEvent({ event_type: 'login_blocked_role_mismatch', nickname: cleanNickname, user_id: demoUser.id, role: demoUser.role, ip, user_agent: userAgent, detail: `expected=${expected_role} (demo fallback)` })
+          return roleErr
+        }
+        resetRateLimit(nickKey); resetRateLimit(ipKey)
+        logAuthEvent({ event_type: 'login_success', nickname: cleanNickname, user_id: demoUser.id, role: demoUser.role, ip, user_agent: userAgent, detail: 'demo fallback' })
         const cookieStore = await cookies()
+        // 이 블록은 NODE_ENV !== 'production' 안이라 secure=false로 두는 게 맞음 (dev 환경 fallback)
         cookieStore.set('cosmart_user_id', demoUser.id, { httpOnly: true, sameSite: 'lax', maxAge: 60 * 60 * 24 * 30 })
         cookieStore.set('cosmart_role', demoUser.role, { httpOnly: true, sameSite: 'lax', maxAge: 60 * 60 * 24 * 30 })
         return NextResponse.json({ data: { id: demoUser.id, nickname: demoUser.nickname, device_uuid: device_uuid || demoUser.device_uuid, role: demoUser.role, store_id: (demoUser as any).store_id || null }, error: null })
       }
     }
+    recordFailure(nickKey); recordFailure(ipKey)
+    logAuthEvent({ event_type: 'login_failure', nickname: cleanNickname, ip, user_agent: userAgent, detail: 'no such user' })
     return NextResponse.json({ data: null, error: '닉네임 또는 비밀번호가 올바르지 않습니다' }, { status: 401 })
   }
 
   // 비밀번호 확인
   if (!user.password_hash) {
+    recordFailure(nickKey); recordFailure(ipKey)
+    logAuthEvent({ event_type: 'login_failure', nickname: cleanNickname, user_id: user.id, role: user.role, ip, user_agent: userAgent, detail: 'no password hash' })
     return NextResponse.json({ data: null, error: '비밀번호가 설정되지 않은 계정입니다. 관리자에게 문의하세요' }, { status: 401 })
   }
 
@@ -103,20 +143,31 @@ export async function POST(req: NextRequest) {
     if (demoUser) passwordMatch = true
   }
   if (!passwordMatch) {
+    recordFailure(nickKey); recordFailure(ipKey)
+    logAuthEvent({ event_type: 'login_failure', nickname: cleanNickname, user_id: user.id, role: user.role, ip, user_agent: userAgent, detail: 'password mismatch' })
     return NextResponse.json({ data: null, error: '닉네임 또는 비밀번호가 올바르지 않습니다' }, { status: 401 })
   }
 
   // 선택한 역할과 실제 계정 역할 일치 검증
   const roleErr = checkRoleMatch(user.role)
-  if (roleErr) return roleErr
+  if (roleErr) {
+    logAuthEvent({ event_type: 'login_blocked_role_mismatch', nickname: cleanNickname, user_id: user.id, role: user.role, ip, user_agent: userAgent, detail: `expected=${expected_role}` })
+    return roleErr
+  }
 
   // 계정 상태 확인
   if (user.status === 'pending') {
+    logAuthEvent({ event_type: 'login_blocked_pending', nickname: cleanNickname, user_id: user.id, role: user.role, ip, user_agent: userAgent })
     return NextResponse.json({ data: null, error: '승인 대기 중인 계정입니다. 관리자 승인 후 로그인 가능합니다' }, { status: 403 })
   }
   if (user.status === 'suspended') {
+    logAuthEvent({ event_type: 'login_blocked_suspended', nickname: cleanNickname, user_id: user.id, role: user.role, ip, user_agent: userAgent })
     return NextResponse.json({ data: null, error: '정지된 계정입니다. 관리자에게 문의하세요' }, { status: 403 })
   }
+
+  // 성공: 실패 카운트 리셋 + 감사 로그
+  resetRateLimit(nickKey); resetRateLimit(ipKey)
+  logAuthEvent({ event_type: 'login_success', nickname: cleanNickname, user_id: user.id, role: user.role, ip, user_agent: userAgent })
 
   // device_uuid 업데이트 (로그인 기기 바인딩)
   if (device_uuid && user.device_uuid !== device_uuid) {

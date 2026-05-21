@@ -18,6 +18,20 @@ export const metadata: Metadata = {
     siteName: '코사마트',
     locale: 'ko_KR',
     type: 'website',
+    images: [
+      {
+        url: '/opengraph-image',
+        width: 1200,
+        height: 630,
+        alt: '코사마트 상점가 — 평창동 공동구매 플랫폼',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '코사마트 상점가 | 평창동 공동구매',
+    description: '평창동 코사마트 상점가 O2O 공동구매 플랫폼',
+    images: ['/opengraph-image'],
   },
   verification: {
     other: {

@@ -22,21 +22,22 @@ export default async function OpenGraphImage() {
           background: 'linear-gradient(135deg, #2d6a4f 0%, #1b4332 50%, #081c15 100%)',
           color: '#ffffff',
           fontFamily: 'sans-serif',
-          padding: '60px',
+          padding: '40px',
         }}
       >
         <div
           style={{
-            fontSize: 30,
-            fontWeight: 700,
+            fontSize: 56,
+            fontWeight: 800,
             color: '#1b4332',
             background: '#ffd60a',
             borderRadius: 999,
-            padding: '12px 32px',
-            marginBottom: 28,
+            padding: '14px 44px',
+            marginBottom: 18,
             display: 'flex',
             alignItems: 'center',
-            gap: 12,
+            gap: 16,
+            letterSpacing: -1,
           }}
         >
           <span>🎁</span>
@@ -44,10 +45,12 @@ export default async function OpenGraphImage() {
         </div>
         <div
           style={{
-            fontSize: 32,
+            fontSize: 70,
+            fontWeight: 700,
             color: '#d8f3dc',
-            marginBottom: 18,
+            marginBottom: 8,
             display: 'flex',
+            letterSpacing: -2,
           }}
         >
           온누리상품권 사용 가능한
@@ -56,7 +59,7 @@ export default async function OpenGraphImage() {
           style={{
             fontSize: 92,
             fontWeight: 800,
-            marginBottom: 18,
+            marginBottom: 8,
             display: 'flex',
             letterSpacing: -2,
           }}
@@ -65,25 +68,28 @@ export default async function OpenGraphImage() {
         </div>
         <div
           style={{
-            fontSize: 36,
+            fontSize: 70,
+            fontWeight: 700,
             color: '#b7e4c7',
-            marginBottom: 46,
+            marginBottom: 22,
             display: 'flex',
+            letterSpacing: -2,
           }}
         >
           O2O 판매 플랫폼
         </div>
         <div
           style={{
-            fontSize: 30,
-            fontWeight: 600,
+            fontSize: 56,
+            fontWeight: 700,
             background: 'rgba(255,255,255,0.12)',
             border: '2px solid rgba(255,255,255,0.3)',
-            borderRadius: 16,
-            padding: '14px 36px',
+            borderRadius: 20,
+            padding: '14px 44px',
             display: 'flex',
             alignItems: 'center',
-            gap: 14,
+            gap: 18,
+            letterSpacing: -1,
           }}
         >
           <span>🔗</span>

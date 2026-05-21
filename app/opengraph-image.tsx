@@ -25,39 +25,53 @@ export default async function OpenGraphImage() {
           padding: '60px',
         }}
       >
-        <div style={{ fontSize: 140, marginBottom: 16, display: 'flex' }}>🛒</div>
         <div
           style={{
-            fontSize: 28,
-            letterSpacing: 8,
-            color: '#b7e4c7',
+            fontSize: 30,
+            fontWeight: 700,
+            color: '#1b4332',
+            background: '#ffd60a',
+            borderRadius: 999,
+            padding: '12px 32px',
+            marginBottom: 28,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+          }}
+        >
+          <span>🎁</span>
+          <span>정부 판매 7% 할인</span>
+        </div>
+        <div
+          style={{
+            fontSize: 32,
+            color: '#d8f3dc',
             marginBottom: 18,
             display: 'flex',
           }}
         >
-          PYEONGCHANG-DONG
+          온누리상품권 사용 가능한
         </div>
         <div
           style={{
-            fontSize: 96,
+            fontSize: 92,
             fontWeight: 800,
-            marginBottom: 28,
+            marginBottom: 18,
             display: 'flex',
             letterSpacing: -2,
           }}
         >
-          코사마트 상점가
+          평창동 골목형 상점가
         </div>
         <div
           style={{
-            fontSize: 34,
-            color: '#d8f3dc',
-            marginBottom: 50,
+            fontSize: 36,
+            color: '#b7e4c7',
+            marginBottom: 46,
             display: 'flex',
-            textAlign: 'center',
           }}
         >
-          평창동 골목상점 공동구매 플랫폼
+          O2O 판매 플랫폼
         </div>
         <div
           style={{

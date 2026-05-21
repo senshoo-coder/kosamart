@@ -7,15 +7,15 @@ const GOOGLE_VERIFICATION = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: '코사마트 상점가 | 평창동 공동구매',
-  description: '평창동 코사마트 상점가 O2O 공동구매 플랫폼',
+  title: '평창동 골목형 상점가 | 정부 판매 7% 할인 · 온누리상품권',
+  description: '온누리상품권 사용 가능한 평창동 골목형 상점가 O2O 판매 플랫폼. 정부 판매 7% 할인.',
   manifest: '/manifest.json',
   alternates: { canonical: '/' },
   openGraph: {
-    title: '코사마트 상점가 | 평창동 공동구매',
-    description: '평창동 코사마트 상점가 O2O 공동구매 플랫폼',
+    title: '평창동 골목형 상점가 | 정부 판매 7% 할인 · 온누리상품권',
+    description: '온누리상품권 사용 가능한 평창동 골목형 상점가 O2O 판매 플랫폼. 정부 판매 7% 할인.',
     url: SITE_URL,
-    siteName: '코사마트',
+    siteName: '골목상점',
     locale: 'ko_KR',
     type: 'website',
     images: [
@@ -23,14 +23,14 @@ export const metadata: Metadata = {
         url: '/opengraph-image',
         width: 1200,
         height: 630,
-        alt: '코사마트 상점가 — 평창동 공동구매 플랫폼',
+        alt: '평창동 골목형 상점가 — 정부 판매 7% 할인 · 온누리상품권 사용 가능',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: '코사마트 상점가 | 평창동 공동구매',
-    description: '평창동 코사마트 상점가 O2O 공동구매 플랫폼',
+    title: '평창동 골목형 상점가 | 정부 판매 7% 할인 · 온누리상품권',
+    description: '온누리상품권 사용 가능한 평창동 골목형 상점가 O2O 판매 플랫폼.',
     images: ['/opengraph-image'],
   },
   verification: {

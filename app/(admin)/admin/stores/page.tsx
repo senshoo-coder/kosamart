@@ -211,6 +211,34 @@ export default function AdminStoresPage() {
     setIsNewStore(true)
   }
 
+  // 일회성: 옥김치 → 옥식당 가게명 일괄 변경
+  const [renameMigBusy, setRenameMigBusy] = useState(false)
+  async function runRenameOkkimchi() {
+    if (!confirm('가게명에서 "옥김치"를 "옥식당"으로 일괄 변경합니다.\n\n' +
+      '• 가게명 (예: "옥김치(반찬)" → "옥식당(반찬)")\n' +
+      '• 과거 주문에 박힌 store_name도 함께 변경\n' +
+      '• 가게 ID, 사장님 닉네임은 변경하지 않음\n\n진행할까요?')) return
+    setRenameMigBusy(true)
+    try {
+      const res = await fetch('/api/admin/migrate-rename-okkimchi', { method: 'POST' })
+      const json = await res.json()
+      if (json.error) {
+        alert('실패: ' + json.error)
+      } else {
+        const lines = (json.data.changes || []).map((c: any) => `• ${c.where}: "${c.from}" → "${c.to}"`).join('\n')
+        alert(
+          '✅ 완료\n\n가게 설정 변경: ' + json.data.stores_config_changed + '건\n' +
+          '과거 주문 store_name 변경: ' + json.data.orders_renamed + '건\n\n' +
+          (lines ? '【상세】\n' + lines : '')
+        )
+        loadAll()
+      }
+    } catch (e: any) {
+      alert('오류: ' + e.message)
+    }
+    setRenameMigBusy(false)
+  }
+
   // 일회성: 사용자 전화번호 정규화
   const [phoneMigBusy, setPhoneMigBusy] = useState(false)
   async function runPhoneMigration() {
@@ -338,6 +366,11 @@ export default function AdminStoresPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button onClick={runRenameOkkimchi} disabled={renameMigBusy}
+            className="h-[36px] px-3 rounded-[10px] bg-[#fce7f3] text-[#9f1239] text-[11px] font-semibold border border-[#fbcfe8] disabled:opacity-50"
+            title="가게명 옥김치 → 옥식당 (1회용)">
+            {renameMigBusy ? '실행 중...' : '✏️ 옥김치→옥식당'}
+          </button>
           <button onClick={runPhoneMigration} disabled={phoneMigBusy}
             className="h-[36px] px-3 rounded-[10px] bg-[#dbeafe] text-[#1e40af] text-[11px] font-semibold border border-[#bfdbfe] disabled:opacity-50"
             title="users 전화번호 정규화 (1회용)">

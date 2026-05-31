@@ -552,7 +552,7 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
   <div class="header-top">
     <div>
       <h1>⚙️ 관리자 매뉴얼</h1>
-      <p>관리자 전용 운영 가이드 &nbsp;·&nbsp; 골목상점.kr &nbsp;·&nbsp; 최종 업데이트: 2026.05.20</p>
+      <p>관리자 전용 운영 가이드 &nbsp;·&nbsp; 골목상점.kr &nbsp;·&nbsp; 최종 업데이트: 2026.05.31</p>
     </div>
     <button class="btn-pdf" id="btnPdf" onclick="downloadPDF()">⬇️ PDF</button>
   </div>
@@ -1040,6 +1040,10 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
         <div class="notif-row"><span class="notif-emoji">🖼️</span><div class="notif-text"><strong>가게 이미지 소유권 검증</strong><span>POST/DELETE /api/store/images에서 owner는 본인 store_id만 업로드/삭제 가능. 파일명에 path traversal 방지를 위한 sanitize 적용.</span></div></div>
         <div class="notif-row"><span class="notif-emoji">🔒</span><div class="notif-text"><strong>고객 응답 필드 필터링</strong><span>/api/orders 응답에서 고객은 본인 주문만 보되, owner_memo의 [재배달] 마커·delivery.failed_reason·driver_memo 등 운영 정보는 자동 제거.</span></div></div>
         <div class="notif-row"><span class="notif-emoji">🏁</span><div class="notif-text"><strong>상태 변경 동시성 가드</strong><span>주문 승인·거절·재배달·종료 UPDATE 쿼리에 status 가드 + select. 동시 클릭 시 1명만 성공(409 응답), 중복 알림·이중 메모 방지.</span></div></div>
+        <div class="notif-row"><span class="notif-emoji">⏱️</span><div class="notif-text"><strong>로그인 무차별 시도 차단</strong><span>닉네임+IP 단위로 10분 안에 8회 실패 시 15분 자동 차단(429 응답). 비밀번호 자가 재설정에도 동일 적용. 잠긴 계정은 관리자가 즉시 해제 가능.</span></div></div>
+        <div class="notif-row"><span class="notif-emoji">📒</span><div class="notif-text"><strong>인증 감사 로그</strong><span>로그인 성공/실패/차단·비밀번호 재설정 모두 auth_events 테이블에 기록. IP는 salt SHA-256 해시로 저장(원본 IP 비저장).</span></div></div>
+        <div class="notif-row"><span class="notif-emoji">📸</span><div class="notif-text"><strong>배달 사진 소유권 검증</strong><span>배달맨은 본인에게 배정된 배달건의 사진만 업로드 가능. driver_id 비교 후 차단.</span></div></div>
+        <div class="notif-row"><span class="notif-emoji">🚫</span><div class="notif-text"><strong>정지 계정 누출 차단</strong><span>드라이버·사장님 목록 조회 시 status='active' 필터 적용. suspended 계정은 어디에도 나타나지 않음.</span></div></div>
       </div>
 
       <ul class="steps">
@@ -1087,7 +1091,9 @@ hr  { border: none; border-top: 1px solid #f0f0f0; margin: 12px 0; }
       <div class="faq-item"><div class="faq-q">사장님이 영업시간 설정했는데 반영이 안 돼요</div><div class="faq-a">저장 후 새로고침을 해보세요. 형식이 맞아야 해요: HH:MM-HH:MM</div></div>
       <div class="faq-item"><div class="faq-q">새 가게를 추가하고 싶어요</div><div class="faq-a">관리자 화면 또는 Supabase 관리 패널에서 신규 가게를 등록할 수 있어요. 가게 생성 후 사장님 계정에 store_id 배정 필수.</div></div>
       <div class="faq-item"><div class="faq-q">주문 상태를 직접 수정하고 싶어요</div><div class="faq-a">관리자 주문 상세 화면에서 상태를 직접 변경할 수 있어요.</div></div>
-      <div class="faq-item"><div class="faq-q">사장님/기사가 비밀번호를 잊었어요</div><div class="faq-a">텔레그램으로 [비밀번호 재설정 요청] 알림을 받으면, 본인 확인 후 사용자 관리 → 해당 계정 → 비밀번호 초기화. 임시 비번을 안전한 채널로 전달.</div></div>
+      <div class="faq-item"><div class="faq-q">사장님/기사가 비밀번호를 잊었어요</div><div class="faq-a">대부분 자가 변경 가능: 본인이 로그인 화면 → "비밀번호를 잊으셨나요?" → 전화번호로 직접 변경. 전화 미등록·번호 변경 케이스만 텔레그램 [비밀번호 재설정 요청] 알림으로 옴 → 본인 확인 후 사용자 관리에서 초기화.</div></div>
+      <div class="faq-item"><div class="faq-q">사용자가 로그인 차단됐다고 해요</div><div class="faq-a">10분 안에 8회 실패하면 15분 자동 차단. 즉시 해제 필요하면 Railway 재배포(인메모리 카운터 초기화) 또는 15분 대기. 반복적이면 auth_events 테이블에서 IP·시각 확인 후 의심 IP 차단 검토.</div></div>
+      <div class="faq-item"><div class="faq-q">auth_events 로그는 어디서 봐요?</div><div class="faq-a">Supabase 콘솔 → Tables → auth_events. event_type, nickname, role, ip_hash(원본 X), created_at으로 정렬 가능. ip_hash는 동일 IP면 같은 해시라 비교 가능하지만 역추론은 불가 (salt 적용).</div></div>
       <div class="faq-item"><div class="faq-q">왜 비밀번호에 한글이 안 들어가요?</div><div class="faq-a">한국어 IME 토글로 인한 사고를 방지하기 위해 ASCII printable(영문·숫자·특수기호)만 허용. 클라이언트에서 자동 필터링 + 서버에서 재검증합니다.</div></div>
       <div class="faq-item"><div class="faq-q">관리자 매뉴얼은 누구나 볼 수 있나요?</div><div class="faq-a">아니요. /manual-admin은 관리자 로그인 시에만 접근 가능합니다. 비관리자는 자동으로 로그인 페이지로 리다이렉트됩니다.</div></div>
       <div class="faq-item"><div class="faq-q">WEBHOOK_SECRET은 어떻게 설정하나요?</div><div class="faq-a">Railway 대시보드 → Variables → WEBHOOK_SECRET에 임의의 긴 문자열을 입력하면 돼요. DB 트리거 설정 시 x-webhook-secret 헤더에 같은 값을 넣어야 해요.</div></div>

@@ -219,7 +219,7 @@ function LoginForm() {
             비밀번호를 잊으셨나요?
           </Link>
           <p className="text-[10px] text-[#9aa1a6] mt-1">
-            닉네임은 비밀번호 재설정의 유일한 단서입니다 — 안전하게 보관해 주세요
+            닉네임 + 가입 시 전화번호로 본인이 직접 재설정할 수 있어요
           </p>
         </div>
 
@@ -250,7 +250,7 @@ function LoginForm() {
         )}
 
         <p className="mt-8 text-center text-[10px] text-[#6c7a71]">
-          © 2024 평창동 상점가. ALL RIGHTS RESERVED.
+          © 2026 평창동 상점가. ALL RIGHTS RESERVED.
         </p>
       </div>
 

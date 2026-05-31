@@ -7,6 +7,8 @@ export const runtime = 'edge'
 export const alt = '코사마트 상점가 — 평창동 공동구매 플랫폼'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
+// 디자인이 자주 안 바뀌므로 하루 단위 캐시 (edge function 호출량·비용 감소)
+export const revalidate = 86400
 
 export default async function OpenGraphImage() {
   return new ImageResponse(

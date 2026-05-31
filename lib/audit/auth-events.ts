@@ -25,10 +25,17 @@ interface LogAuthEventOpts {
   detail?: string | null
 }
 
-const IP_SALT = process.env.AUTH_EVENT_IP_SALT || 'kosamart-dev-default-salt'
+// 환경변수 누락 시 production에서는 IP 해시를 저장 안 함 (약한 salt로 인한 역추론 방지).
+// dev/local 에서만 fallback salt 사용 (테스트 편의).
+const IP_SALT = process.env.AUTH_EVENT_IP_SALT || ''
+const IS_PROD = process.env.NODE_ENV === 'production'
 
 function hashIp(ip: string | null | undefined): string | null {
   if (!ip || ip === 'unknown') return null
+  if (!IP_SALT) {
+    if (IS_PROD) return null // production에서 salt 없으면 해시 자체를 안 남김
+    return createHash('sha256').update(`dev-salt:${ip}`).digest('hex').slice(0, 32)
+  }
   return createHash('sha256').update(`${IP_SALT}:${ip}`).digest('hex').slice(0, 32)
 }
 

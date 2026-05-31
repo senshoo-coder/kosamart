@@ -69,14 +69,24 @@ export function resetRateLimit(key: string) {
   buckets.delete(key)
 }
 
-/** 요청에서 클라이언트 IP 추출 (Railway/Cloudflare 프록시 뒤). */
+/** 요청에서 클라이언트 IP 추출 (Railway/Cloudflare 프록시 뒤).
+ *
+ * 보안 주의: X-Forwarded-For는 클라이언트가 임의로 prepend 가능합니다.
+ * Railway·Cloudflare는 신뢰 가능한 IP를 right-most에 추가하므로 마지막 값을 사용.
+ * Cloudflare가 앞단에 있는 경우 CF-Connecting-IP 우선 (Cloudflare가 직접 채워 신뢰 가능).
+ */
 export function getClientIp(headers: Headers): string {
-  // Cloudflare → CF-Connecting-IP, Railway/Vercel → X-Forwarded-For
-  const cf = headers.get('cf-connecting-ip')
+  // 1) Cloudflare (있을 때 가장 신뢰 가능)
+  const cf = headers.get('cf-connecting-ip')?.trim()
   if (cf) return cf
+  // 2) XFF의 마지막 hop (프록시가 직접 추가한 값)
   const xff = headers.get('x-forwarded-for')
-  if (xff) return xff.split(',')[0].trim()
-  const real = headers.get('x-real-ip')
+  if (xff) {
+    const parts = xff.split(',').map(s => s.trim()).filter(Boolean)
+    if (parts.length > 0) return parts[parts.length - 1]
+  }
+  // 3) X-Real-IP (단일 값, 프록시가 채움)
+  const real = headers.get('x-real-ip')?.trim()
   if (real) return real
   return 'unknown'
 }

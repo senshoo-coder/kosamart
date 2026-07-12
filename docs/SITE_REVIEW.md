@@ -209,6 +209,13 @@ curl -s https://xn--bb0bw4xzve3ni.kr/ | grep -oE '<title>[^<]*</title>|og:title[
 - 010 delivery_failed status, 011 market order nullable
 - 012 PII auto purge (90일 후 익명화)
 - 013 item memo, 014 status log actor_role, 015 auth_events
+- 016 telegram_notifications RLS 활성화 (2026-07-12, Supabase Security Advisor 대응)
+
+> ⚠️ **레포 ↔ 실제 DB 드리프트 주의**: 007/008에서 만든 `store_images`·`store_settings`
+> 테이블은 운영 DB에 실제로는 존재하지 않는다(이후 삭제됐거나 미적용). 가게 설정·이미지는
+> Supabase Storage JSON(`config/*.json`)으로 이관됨. 2026-07-12 pg_class 조회 기준
+> public 스키마 RLS 미적용 테이블은 telegram_notifications 하나뿐이었고, 016으로 잠금 완료.
+> 실제 스키마 확인은 `pg_class`/`pg_policies` 조회 권장(마이그레이션 파일만 믿지 말 것).
 
 ---
 

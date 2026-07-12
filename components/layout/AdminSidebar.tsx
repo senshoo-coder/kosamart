@@ -22,6 +22,25 @@ const BOTTOM_NAV = [
 
 interface StoreItem { id: string; name: string; emoji: string }
 
+function NavLink({ href, icon, label, pathname }: { href: string; icon: string; label: string; pathname: string }) {
+  const active = pathname === href || (href !== '/admin/dashboard' && pathname.startsWith(href + '/') && !pathname.includes('/manage') && !pathname.includes('/orders'))
+  return (
+    <Link
+      href={href}
+      className={cn(
+        'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 text-[13px]',
+        active
+          ? 'bg-[#ede9fe] text-[#8B5CF6] font-semibold'
+          : 'text-[#3c4a42] hover:bg-[#f2f4f6] hover:text-[#191c1e]'
+      )}
+    >
+      <span className="material-symbols-outlined text-[18px]" style={active ? { fontVariationSettings: "'FILL' 1" } : {}}>{icon}</span>
+      <span>{label}</span>
+      {active && <span className="ml-auto w-1.5 h-1.5 bg-[#8B5CF6] rounded-full" />}
+    </Link>
+  )
+}
+
 export function AdminSidebar() {
   const pathname = usePathname()
 
@@ -44,30 +63,11 @@ export function AdminSidebar() {
       .then(r => r.json())
       .then(({ data }) => {
         if (Array.isArray(data)) {
-          setStoresList(data.map((s: any) => ({ id: s.id, name: s.name, emoji: s.emoji })))
+          setStoresList(data.map((s: StoreItem) => ({ id: s.id, name: s.name, emoji: s.emoji })))
         }
       })
       .catch(() => {})
   }, [])
-
-  function NavLink({ href, icon, label }: { href: string; icon: string; label: string }) {
-    const active = pathname === href || (href !== '/admin/dashboard' && pathname.startsWith(href + '/') && !pathname.includes('/manage') && !pathname.includes('/orders'))
-    return (
-      <Link
-        href={href}
-        className={cn(
-          'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 text-[13px]',
-          active
-            ? 'bg-[#ede9fe] text-[#8B5CF6] font-semibold'
-            : 'text-[#3c4a42] hover:bg-[#f2f4f6] hover:text-[#191c1e]'
-        )}
-      >
-        <span className="material-symbols-outlined text-[18px]" style={active ? { fontVariationSettings: "'FILL' 1" } : {}}>{icon}</span>
-        <span>{label}</span>
-        {active && <span className="ml-auto w-1.5 h-1.5 bg-[#8B5CF6] rounded-full" />}
-      </Link>
-    )
-  }
 
   return (
     <aside className="w-60 min-h-screen flex-shrink-0 flex flex-col py-6 px-3 bg-white border-r border-[#eceef0] overflow-y-auto" style={{ boxShadow: '4px 0 24px rgba(25,28,30,0.03)' }}>
@@ -85,7 +85,7 @@ export function AdminSidebar() {
       {/* 네비게이션 */}
       <nav className="flex flex-col gap-0.5 flex-1">
         {/* 상단 메뉴 */}
-        {TOP_NAV.map(item => <NavLink key={item.href} {...item} />)}
+        {TOP_NAV.map(item => <NavLink key={item.href} {...item} pathname={pathname} />)}
 
         {/* ── 상점가 가게 (expandable) ── */}
         <div className="mt-1">
@@ -145,7 +145,7 @@ export function AdminSidebar() {
         </div>
 
         {/* 배달맨 */}
-        <NavLink href="/admin/drivers" icon="directions_bike" label="배달맨" />
+        <NavLink href="/admin/drivers" icon="directions_bike" label="배달맨" pathname={pathname} />
 
         {/* ── 주문 현황 (expandable) ── */}
         <div className="mt-1">
@@ -205,7 +205,7 @@ export function AdminSidebar() {
         </div>
 
         {/* 하단 메뉴 */}
-        {BOTTOM_NAV.map(item => <NavLink key={item.href} {...item} />)}
+        {BOTTOM_NAV.map(item => <NavLink key={item.href} {...item} pathname={pathname} />)}
       </nav>
 
       <div className="px-3 text-[11px] text-[#6c7a71] mt-4 font-medium flex-shrink-0">평창동 상점가</div>

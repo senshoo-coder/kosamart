@@ -25,12 +25,6 @@ const STATUS_STYLE: Record<string, { bg: string; text: string; label: string }> 
 }
 
 const STEPS = ['pending', 'approved', 'delivering', 'delivered'] as const
-const STEP_LABELS: Record<string, string> = {
-  pending: '주문 접수',
-  approved: '사장님 승인',
-  delivering: '배달 중',
-  delivered: '배달 완료',
-}
 
 export default function MyOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
@@ -47,7 +41,6 @@ export default function MyOrdersPage() {
       .catch(() => setLoading(false))
   }, [deviceUuid])
 
-  const activeOrders = orders.filter(o => ['pending', 'approved', 'delivering'].includes(o.status))
   const filtered = filter === 'all' ? orders : orders.filter(o => o.status === filter)
 
   return (
@@ -95,7 +88,7 @@ export default function MyOrdersPage() {
             const bundleMap = new Map<string, Order[]>()
             const standalone: Order[] = []
             filtered.forEach(order => {
-              const bid = (order as any).bundle_id
+              const bid = (order as { bundle_id?: string }).bundle_id
               if (bid) {
                 if (!bundleMap.has(bid)) bundleMap.set(bid, [])
                 bundleMap.get(bid)!.push(order)
@@ -131,59 +124,6 @@ export default function MyOrdersPage() {
           })()
         )}
       </div>
-    </div>
-  )
-}
-
-function DeliveryTracker({ order }: { order: Order }) {
-  const currentStep = STEPS.indexOf(order.status as typeof STEPS[number])
-
-  return (
-    <div className="bg-white rounded-[8px] p-4">
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-[13px] font-bold text-[#1a1c1c]">{order.store_name ?? order.group_buy?.title ?? '공구'}</p>
-        <span
-          className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
-          style={STATUS_STYLE[order.status]
-            ? { background: STATUS_STYLE[order.status].bg, color: STATUS_STYLE[order.status].text }
-            : { background: '#f0f0f0', color: '#666' }
-          }
-        >
-          {STATUS_STYLE[order.status]?.label}
-        </span>
-      </div>
-
-      {/* 스텝 트래커 */}
-      <div className="flex items-center">
-        {STEPS.map((step, i) => {
-          const done = i <= currentStep
-          return (
-            <div key={step} className="flex items-center flex-1 last:flex-none">
-              <div className="flex flex-col items-center gap-1">
-                <div
-                  className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-                  style={{ background: done ? '#10b981' : '#e8e8e8', color: done ? '#fff' : '#a3a3a3' }}
-                >
-                  {done ? '✓' : i + 1}
-                </div>
-                <span className="text-[9px] text-center leading-tight whitespace-nowrap" style={{ color: done ? '#10b981' : '#a3a3a3' }}>
-                  {STEP_LABELS[step]}
-                </span>
-              </div>
-              {i < STEPS.length - 1 && (
-                <div
-                  className="flex-1 h-0.5 mx-1 mb-4"
-                  style={{ background: i < currentStep ? '#10b981' : '#e8e8e8' }}
-                />
-              )}
-            </div>
-          )
-        })}
-      </div>
-
-      {order.delivery_address && (
-        <p className="text-[11px] text-[#3c4a42] mt-2">📍 {order.delivery_address}</p>
-      )}
     </div>
   )
 }
@@ -279,7 +219,7 @@ function OrderCard({ order, expanded, onToggle }: { order: Order; expanded: bool
   )
 }
 
-function BundleCard({ bundleId, orders, expanded, onToggle }: { bundleId: string; orders: Order[]; expanded: boolean; onToggle: () => void }) {
+function BundleCard({ orders, expanded, onToggle }: { bundleId: string; orders: Order[]; expanded: boolean; onToggle: () => void }) {
   const totalAmount = orders.reduce((s, o) => s + o.total_amount, 0)
   // 번들 상태: 가장 "진행이 덜 된" 상태 사용
   const statusPriority = ['pending', 'paid', 'approved', 'delivering', 'delivered', 'cancelled', 'rejected']

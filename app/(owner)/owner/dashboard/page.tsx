@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { OrderStatusBadge } from '@/components/ui/badge'
-import { formatPrice, formatDateTime, timeAgo } from '@/lib/utils'
+import { formatPrice, timeAgo } from '@/lib/utils'
 import type { Order } from '@/lib/types'
 
 interface Stats {
@@ -13,7 +13,7 @@ interface Stats {
   failedCount?: number
 }
 
-const STAT_CARDS = (stats: Stats, _loading: boolean) => [
+const STAT_CARDS = (stats: Stats) => [
   { label: '오늘 신규 주문', value: stats.todayOrders + '건',       icon: '📦', accent: '#10b981', bg: '#f0fdf4', href: '/owner/orders' },
   { label: '오늘 매출',     value: formatPrice(stats.todayRevenue), icon: '💰', accent: '#6d28d9', bg: '#ede9fe', href: '/owner/analytics' },
   { label: '입금 확인 대기', value: stats.pendingCount + '건',       icon: '⏳', accent: '#b45309', bg: '#fef3c7', href: '/owner/orders?status=pending' },
@@ -51,7 +51,7 @@ export default function OwnerDashboard() {
 
       {/* 통계 카드 */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {STAT_CARDS(stats, loading).map((card) => (
+        {STAT_CARDS(stats).map((card) => (
           <Link key={card.label} href={card.href}>
             <div className="bg-white rounded-[8px] p-4 hover:shadow-md transition-shadow cursor-pointer active:scale-[0.98]" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
               <div className="flex items-center justify-between mb-3">

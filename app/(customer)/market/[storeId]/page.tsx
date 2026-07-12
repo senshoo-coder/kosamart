@@ -4,14 +4,35 @@ import { useRouter } from 'next/navigation'
 import { getStore } from '@/lib/market-data'
 import type { StoreProduct } from '@/lib/market-data'
 import { useStoreImages } from '@/lib/hooks/useStoreImages'
-import { useStoreProducts, type DBProduct } from '@/lib/hooks/useStoreProducts'
+import { useStoreProducts } from '@/lib/hooks/useStoreProducts'
 import { useMarketCart } from '@/lib/cart/MarketCartContext'
+
+interface StoreDynamicInfo {
+  name?: string
+  emoji?: string
+  description?: string
+  bank_account?: string
+  phone?: string
+  hours?: string
+  minOrder?: number
+  deliveryFee?: number
+  weekly_closed?: string[]
+  closed_dates?: string[]
+  image_height?: number
+  image_position?: string
+}
+
+interface ApiStoreRow extends Omit<StoreDynamicInfo, 'minOrder' | 'deliveryFee'> {
+  id: string
+  minOrder?: number | null
+  deliveryFee?: number | null
+}
 
 export default function StorePage({ params }: { params: Promise<{ storeId: string }> }) {
   const { storeId } = use(params)
   const router = useRouter()
   const staticStore = getStore(storeId)
-  const [dynamicInfo, setDynamicInfo] = useState<{ name?: string; emoji?: string; description?: string; bank_account?: string; phone?: string; hours?: string; minOrder?: number; deliveryFee?: number; weekly_closed?: string[]; closed_dates?: string[] } | null>(null)
+  const [dynamicInfo, setDynamicInfo] = useState<StoreDynamicInfo | null>(null)
   const { products: dbProducts } = useStoreProducts(storeId)
   const cart = useMarketCart()
 
@@ -25,9 +46,9 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
       .then(r => r.json())
       .then(({ data }) => {
         if (Array.isArray(data)) {
-          const found = data.find((s: any) => s.id === storeId)
+          const found = data.find((s: ApiStoreRow) => s.id === storeId)
           if (found) {
-            const info: Record<string, any> = {}
+            const info: StoreDynamicInfo = {}
             if (found.name !== undefined) info.name = found.name
             if (found.emoji !== undefined) info.emoji = found.emoji
             if (found.description !== undefined) info.description = found.description
@@ -72,6 +93,11 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
     return store?.products || []
   }, [dbProducts, store])
 
+  const subcats = useMemo(() => {
+    const cats = Array.from(new Set(products.filter(p => p.subcategory).map(p => p.subcategory!)))
+    return cats.length > 0 ? ['전체', ...cats] : store?.subcategories ? ['전체', ...store.subcategories] : ['전체']
+  }, [products, store])
+
   if (!store) {
     return (
       <div className="min-h-screen bg-[#f5f5f5] flex items-center justify-center">
@@ -84,25 +110,17 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
     )
   }
 
-  const storeItemCount = cart.getStoreItemCount(storeId)
-  const storeTotal = cart.getStoreTotal(storeId)
-
   // 오늘 휴무 여부 체크
   const DAY_KEYS = ['sun','mon','tue','wed','thu','fri','sat']
   const DAY_LABEL_LOCAL: Record<string, string> = { sun: '일', mon: '월', tue: '화', wed: '수', thu: '목', fri: '금', sat: '토' }
   const todayKey = DAY_KEYS[new Date().getDay()]
   const todayStr = new Date().toISOString().slice(0, 10)
-  const weeklyC: string[] = (store as any).weekly_closed || []
-  const datesC: string[] = (store as any).closed_dates || []
+  const weeklyC: string[] = store.weekly_closed || []
+  const datesC: string[] = store.closed_dates || []
   const isClosedToday = weeklyC.includes(todayKey) || datesC.includes(todayStr)
   const closedTodayReason = weeklyC.includes(todayKey)
     ? `매주 ${DAY_LABEL_LOCAL[todayKey]}요일 휴무일`
     : `${todayStr} 임시 휴무일`
-
-  const subcats = useMemo(() => {
-    const cats = Array.from(new Set(products.filter(p => p.subcategory).map(p => p.subcategory!)))
-    return cats.length > 0 ? ['전체', ...cats] : store.subcategories ? ['전체', ...store.subcategories] : ['전체']
-  }, [products, store])
 
   const displayedProducts = products.filter(p => {
     if (!p.isAvailable) return false
@@ -157,12 +175,12 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
       {/* 히어로 */}
       <div className="relative overflow-hidden"
         style={{
-          height: (store as any).image_height || 208,
+          height: store.image_height || 208,
           background: storeImages['store'] ? undefined : `linear-gradient(160deg, ${store.accentColor}60 0%, ${store.accentColor}20 60%, #1a1c1c 100%)`,
         }}>
         {storeImages['store'] ? (
           <img src={storeImages['store']} alt={store.name} className="w-full h-full object-contain"
-            style={{ objectPosition: (store as any).image_position || 'center' }} />
+            style={{ objectPosition: store.image_position || 'center' }} />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-[120px] opacity-30 select-none">{store.emoji}</div>
         )}
@@ -200,29 +218,29 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
           <span className="text-xl">🚚</span>
           <p className="text-[12px] text-[#3c4a42] leading-relaxed">여러 가게 상품을 장바구니에 담아 <b className="text-[#10b981]">묶음배송</b> 가능</p>
         </div>
-        {(store as any).phone && (
+        {store.phone && (
           <a
-            href={`tel:${String((store as any).phone).replace(/[^0-9+]/g, '')}`}
+            href={`tel:${String(store.phone).replace(/[^0-9+]/g, '')}`}
             className="mt-3 flex items-center gap-3 bg-[#eff6ff] border border-[#bfdbfe] rounded-xl px-4 py-3 hover:bg-[#dbeafe] transition-colors active:scale-[0.99]"
           >
             <span className="text-xl">📞</span>
             <div className="flex-1">
               <p className="text-[10px] text-[#94a3b8] mb-0.5">가게 전화</p>
-              <p className="text-[14px] font-bold text-[#1d4ed8]">{(store as any).phone}</p>
+              <p className="text-[14px] font-bold text-[#1d4ed8]">{store.phone}</p>
             </div>
             <span className="text-[12px] text-[#1d4ed8] font-semibold">바로 통화 →</span>
           </a>
         )}
-        {(store as any).bank_account && (
+        {store.bank_account && (
           <div className="mt-3 bg-[#fffbeb] border border-[#fde68a] rounded-xl px-4 py-3">
             <p className="text-[11px] text-[#92400e] mb-1 font-medium">💳 계좌이체 안내</p>
-            <p className="text-[13px] font-semibold text-[#1a1c1c]">{(store as any).bank_account}</p>
+            <p className="text-[13px] font-semibold text-[#1a1c1c]">{store.bank_account}</p>
           </div>
         )}
         {(() => {
           const DAY_LABEL: Record<string, string> = { sun: '일', mon: '월', tue: '화', wed: '수', thu: '목', fri: '금', sat: '토' }
-          const weekly: string[] = (store as any).weekly_closed || []
-          const dates: string[] = (store as any).closed_dates || []
+          const weekly: string[] = store.weekly_closed || []
+          const dates: string[] = store.closed_dates || []
           if (weekly.length === 0 && dates.length === 0) return null
           return (
             <div className="mt-3 bg-[#fff1f2] border border-[#fecdd3] rounded-xl px-4 py-3">
@@ -280,7 +298,7 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
       <div className="px-3 pb-36 grid grid-cols-2 gap-3 mt-2">
         {displayedProducts.map(product => {
           const qty = getProductQty(product.id)
-          const imgSrc = (product as any).imageUrl || storeImages[product.id]
+          const imgSrc = product.imageUrl || storeImages[product.id]
           return (
             <div key={product.id} className="bg-white rounded-xl shadow-sm overflow-hidden">
               <div className="relative aspect-square" style={{ background: imgSrc ? undefined : 'linear-gradient(135deg, #1a1c1c 0%, #2d3748 100%)' }}>
@@ -328,7 +346,7 @@ export default function StorePage({ params }: { params: Promise<{ storeId: strin
         {displayedProducts.length === 0 && (
           <div className="col-span-2 py-16 text-center text-[#94a3b8] text-sm">
             {searchQuery.trim()
-              ? <>"<b>{searchQuery}</b>" 검색 결과가 없습니다</>
+              ? <>&quot;<b>{searchQuery}</b>&quot; 검색 결과가 없습니다</>
               : '해당 카테고리 상품이 없습니다'}
           </div>
         )}

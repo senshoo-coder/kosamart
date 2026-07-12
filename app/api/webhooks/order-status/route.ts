@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null)
   if (!body) return NextResponse.json({ ok: false }, { status: 400 })
 
-  const { order, new_status, old_status } = body
+  const { order, new_status } = body
 
   try {
     switch (new_status) {

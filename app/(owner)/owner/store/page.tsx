@@ -3,6 +3,17 @@ import { useState, useEffect, useRef } from 'react'
 import { STORES, type Store } from '@/lib/market-data'
 import BulkProductUpload from '@/components/products/BulkProductUpload'
 
+// DB에서 내려오는 동적 가게 정보 (정적 Store 타입에 없는 필드 포함)
+type StoreWithExtras = Store & {
+  bank_account?: string
+  telegram_chat_id?: string
+  phone?: string
+  weekly_closed?: string[]
+  closed_dates?: string[]
+  image_height?: number
+  image_position?: string
+}
+
 const HOUR_OPTIONS_START = Array.from({ length: 19 }, (_, i) => i + 5) // 05~23
 const HOUR_OPTIONS_END   = Array.from({ length: 19 }, (_, i) => i + 6) // 06~24
 const DAYS = [
@@ -16,7 +27,7 @@ function parseHoursRange(hours: string): { start: number; end: number } {
   return { start: parseInt(m?.[1] || '9'), end: parseInt(m?.[2] || '22') }
 }
 
-function computeIsOpen(store: any): boolean {
+function computeIsOpen(store: StoreWithExtras | null): boolean {
   if (!store) return false
   if (!store.isOpen) return false
   if (!store.hours) return true
@@ -72,7 +83,7 @@ const EMPTY_PRODUCT: Omit<DBProduct, 'id' | 'store_id'> = {
 }
 
 export default function OwnerStorePage() {
-  const [store, setStore] = useState<Store | null>(null)
+  const [store, setStore] = useState<StoreWithExtras | null>(null)
   const [storeId, setStoreId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [products, setProducts] = useState<DBProduct[]>([])
@@ -107,8 +118,8 @@ export default function OwnerStorePage() {
             .then(r => r.json())
             .then(({ data }) => {
               if (Array.isArray(data)) {
-                const dynamic = data.find((s: any) => s.id === sid)
-                if (dynamic) setStore((prev: any) => prev ? { ...prev, ...dynamic } : dynamic)
+                const dynamic = (data as StoreWithExtras[]).find(s => s.id === sid)
+                if (dynamic) setStore(prev => prev ? { ...prev, ...dynamic } : dynamic)
               }
             })
             .catch(() => {})
@@ -127,11 +138,11 @@ export default function OwnerStorePage() {
       hours: store?.hours || '',
       minOrder: store?.minOrder || 0,
       deliveryFee: store?.deliveryFee || 0,
-      bank_account: (store as any)?.bank_account || '',
-      telegram_chat_id: (store as any)?.telegram_chat_id || '',
-      phone: (store as any)?.phone || '',
-      weekly_closed: (store as any)?.weekly_closed || [],
-      closed_dates: (store as any)?.closed_dates || [],
+      bank_account: store?.bank_account || '',
+      telegram_chat_id: store?.telegram_chat_id || '',
+      phone: store?.phone || '',
+      weekly_closed: store?.weekly_closed || [],
+      closed_dates: store?.closed_dates || [],
     })
     setClosedDateInput('')
     setEditingInfo(true)
@@ -148,7 +159,7 @@ export default function OwnerStorePage() {
       })
       const json = await res.json()
       if (json.error) { alert(json.error); return }
-      setStore((prev: any) => prev ? { ...prev, ...infoForm } : prev)
+      setStore(prev => prev ? { ...prev, ...infoForm } : prev)
       setEditingInfo(false)
     } catch { alert('저장 중 오류가 발생했습니다') }
     finally { setSavingInfo(false) }
@@ -193,7 +204,7 @@ export default function OwnerStorePage() {
       const json = await res.json()
       if (json.data) {
         const map: ImageMap = {}
-        json.data.forEach((img: any) => {
+        json.data.forEach((img: { target_type: string; target_id: string; image_url: string }) => {
           const key = img.target_type === 'store' ? 'store' : img.target_id
           if (key) map[key] = img.image_url
         })
@@ -435,13 +446,13 @@ export default function OwnerStorePage() {
           className="relative w-full flex items-center justify-center cursor-pointer group overflow-hidden"
           onClick={() => triggerUpload('store', null)}
           style={{
-            height: (store as any)?.image_height || 192,
+            height: store?.image_height || 192,
             background: images['store'] ? undefined : `linear-gradient(160deg, ${accentColor}60, ${accentColor}20, #1a1c1c)`,
           }}
         >
           {images['store'] ? (
             <img src={images['store']} alt={storeName} className="w-full h-full object-contain"
-              style={{ objectPosition: (store as any)?.image_position || 'center' }} />
+              style={{ objectPosition: store?.image_position || 'center' }} />
           ) : (
             <span className="text-[80px] opacity-40 select-none">{storeEmoji}</span>
           )}
@@ -681,23 +692,23 @@ export default function OwnerStorePage() {
                   <p className="text-[13px] font-semibold text-[#1a1c1c]">{products.length}개</p>
                 </div>
               </div>
-              {(store as any)?.bank_account && (
+              {store?.bank_account && (
                 <div className="mt-3 bg-[#f0fdf8] border border-[#d1fae5] rounded-[8px] p-3">
                   <p className="text-[11px] text-[#a3a3a3] mb-1">계좌이체 정보</p>
-                  <p className="text-[13px] font-semibold text-[#1a1c1c]">{(store as any).bank_account}</p>
+                  <p className="text-[13px] font-semibold text-[#1a1c1c]">{store?.bank_account}</p>
                 </div>
               )}
-              {((store as any)?.weekly_closed?.length > 0 || (store as any)?.closed_dates?.length > 0) && (
+              {((store?.weekly_closed?.length ?? 0) > 0 || (store?.closed_dates?.length ?? 0) > 0) && (
                 <div className="mt-3 bg-[#fff8f8] border border-[#fecaca] rounded-[8px] p-3">
                   <p className="text-[11px] text-[#a3a3a3] mb-1.5">휴무일</p>
-                  {(store as any)?.weekly_closed?.length > 0 && (
+                  {(store?.weekly_closed?.length ?? 0) > 0 && (
                     <p className="text-[12px] font-semibold text-[#b91c1c] mb-1">
-                      매주 {DAYS.filter(d => (store as any).weekly_closed.includes(d.key)).map(d => d.label + '요일').join(', ')}
+                      매주 {DAYS.filter(d => store?.weekly_closed?.includes(d.key)).map(d => d.label + '요일').join(', ')}
                     </p>
                   )}
-                  {(store as any)?.closed_dates?.length > 0 && (
+                  {(store?.closed_dates?.length ?? 0) > 0 && (
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {(store as any).closed_dates.map((d: string) => (
+                      {store?.closed_dates?.map((d: string) => (
                         <span key={d} className="text-[11px] px-2 py-0.5 rounded-full bg-[#fee2e2] text-[#b91c1c]">{d}</span>
                       ))}
                     </div>

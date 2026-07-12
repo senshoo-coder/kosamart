@@ -65,7 +65,7 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     fetch('/api/market/stores').then(r => r.json()).then(({ data }) => {
-      if (Array.isArray(data)) setStoreOptions(data.map((s: any) => ({ id: s.id, name: s.name, emoji: s.emoji || '🏪' })))
+      if (Array.isArray(data)) setStoreOptions(data.map((s: { id: string; name: string; emoji?: string }) => ({ id: s.id, name: s.name, emoji: s.emoji || '🏪' })))
     }).catch(() => {})
   }, [])
 

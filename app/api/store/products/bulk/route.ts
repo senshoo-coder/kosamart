@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null)
   if (!body) return NextResponse.json({ data: null, error: '잘못된 요청' }, { status: 400 })
 
-  const { store_id, products } = body as { store_id: string; products: any[] }
+  const { store_id, products } = body as { store_id: string; products: Array<Record<string, unknown>> }
   if (!store_id) return NextResponse.json({ data: null, error: 'store_id 필수' }, { status: 400 })
   if (!Array.isArray(products) || products.length === 0) {
     return NextResponse.json({ data: null, error: 'products 배열 필수' }, { status: 400 })
@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
   const skipped: { name: string; reason: string }[] = []
   const errors: { row: number; name: string; reason: string }[] = []
 
-  products.forEach((row: any, i: number) => {
+  products.forEach((row: Record<string, unknown>, i: number) => {
     const rowNum = i + 2 // 엑셀 기준 (1행은 헤더)
     const name = String(row.name ?? '').trim()
     if (!name) {

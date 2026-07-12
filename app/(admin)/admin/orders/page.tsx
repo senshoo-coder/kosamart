@@ -5,7 +5,7 @@ import { OrderStatusBadge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatPrice, timeAgo } from '@/lib/utils'
 import { STORES } from '@/lib/market-data'
-import type { Order, OrderStatus } from '@/lib/types'
+import type { Order, OrderStatus, Delivery } from '@/lib/types'
 
 // Static fallback — overridden by dynamic fetch below
 let STORE_NAME_MAP: Record<string, { name: string; emoji: string }> = Object.fromEntries(
@@ -49,7 +49,7 @@ function OwnerOrdersContent() {
       .then(({ data }) => {
         if (Array.isArray(data)) {
           const map: Record<string, { name: string; emoji: string }> = {}
-          data.forEach((s: any) => { map[s.id] = { name: s.name, emoji: s.emoji } })
+          data.forEach((s: { id: string; name: string; emoji: string }) => { map[s.id] = { name: s.name, emoji: s.emoji } })
           STORE_NAME_MAP = map
           setStoreNameMap(map)
         }
@@ -112,7 +112,7 @@ function OwnerOrdersContent() {
 
   // Supabase는 delivery:deliveries(*) 를 배열로 반환하므로 첫 번째 요소 추출
   function getDelivery(order: Order) {
-    const d = order.delivery as any
+    const d = order.delivery as Delivery | Delivery[] | undefined
     return Array.isArray(d) ? d[0] : d
   }
 
@@ -267,7 +267,8 @@ function OwnerOrdersContent() {
               <tr><td colSpan={8} className="text-center py-10 text-[#a3a3a3] text-[13px]">주문이 없습니다</td></tr>
             ) : (
               orders.map(order => {
-                const storeInfo = (order as any).store_id ? storeNameMap[(order as any).store_id] : null
+                const storeId = (order as { store_id?: string }).store_id
+                const storeInfo = storeId ? storeNameMap[storeId] : null
                 const isTerminal = ['cancelled', 'rejected', 'delivered', 'picked_up_by_customer', 'delivery_failed'].includes(order.status)
                 return (
                 <tr key={order.id} className="border-b border-[#f9f9f9] hover:bg-[#f9f9f9] transition-colors align-top">
@@ -293,7 +294,7 @@ function OwnerOrdersContent() {
                     <OrderStatusBadge status={order.status} />
                     {/* 사유·메모 표시 */}
                     {order.status === 'delivery_failed' && getDelivery(order)?.failed_reason && (
-                      <p className="text-[10px] text-[#b91c1c] mt-1 max-w-[180px] whitespace-pre-wrap break-words">⚠ {getDelivery(order).failed_reason}</p>
+                      <p className="text-[10px] text-[#b91c1c] mt-1 max-w-[180px] whitespace-pre-wrap break-words">⚠ {getDelivery(order)?.failed_reason}</p>
                     )}
                     {(order.status === 'cancelled' || order.status === 'rejected') && order.rejected_reason && (
                       <p className="text-[10px] text-[#6b7280] mt-1 max-w-[180px] whitespace-pre-wrap break-words">사유: {order.rejected_reason}</p>
@@ -375,7 +376,8 @@ function OwnerOrdersContent() {
             <p className="text-[14px] font-semibold text-[#1a1c1c]">주문이 없습니다</p>
           </div>
         ) : orders.map(order => {
-          const storeInfo = (order as any).store_id ? storeNameMap[(order as any).store_id] : null
+          const storeId = (order as { store_id?: string }).store_id
+          const storeInfo = storeId ? storeNameMap[storeId] : null
           const isTerminal = ['cancelled', 'rejected', 'delivered', 'picked_up_by_customer', 'delivery_failed'].includes(order.status)
           return (
           <div key={order.id} className="bg-white rounded-[8px] p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
@@ -429,7 +431,7 @@ function OwnerOrdersContent() {
                 {getDelivery(order)?.failed_reason && (
                   <div className="rounded-[8px] bg-[#fef2f2] border border-[#fecaca] px-3 py-2">
                     <p className="text-[11px] text-[#b91c1c] font-semibold mb-0.5">⚠ 배달맨 보고 사유</p>
-                    <p className="text-[12px] text-[#7f1d1d] whitespace-pre-wrap">{getDelivery(order).failed_reason}</p>
+                    <p className="text-[12px] text-[#7f1d1d] whitespace-pre-wrap">{getDelivery(order)?.failed_reason}</p>
                   </div>
                 )}
                 <div className="flex gap-2">

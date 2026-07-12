@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
 
     // Public URL 대신 storage path만 반환 — 버킷은 Private으로 설정
     return NextResponse.json({ path })
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 })
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 })
   }
 }

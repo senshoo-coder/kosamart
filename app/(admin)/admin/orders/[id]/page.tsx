@@ -5,7 +5,7 @@ import { OrderStatusBadge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatPrice, formatDateTime, timeAgo } from '@/lib/utils'
 import { ORDER_STATUS_CONFIG } from '@/lib/types'
-import type { Order } from '@/lib/types'
+import type { Order, Delivery } from '@/lib/types'
 
 export default function AdminOrderDetailPage() {
   const router = useRouter()
@@ -21,10 +21,10 @@ export default function AdminOrderDetailPage() {
   const [closeModal, setCloseModal] = useState(false)
   const [closeReason, setCloseReason] = useState('')
 
-  function getDelivery(o: Order | null): any {
+  function getDelivery(o: Order | null): Delivery | null {
     if (!o) return null
-    const d = (o as any).delivery
-    return Array.isArray(d) ? d[0] : d
+    const d = o.delivery as Delivery | Delivery[] | undefined
+    return Array.isArray(d) ? (d[0] ?? null) : (d ?? null)
   }
 
   useEffect(() => {
@@ -160,18 +160,18 @@ export default function AdminOrderDetailPage() {
             <span className="text-[#a3a3a3] w-16 flex-shrink-0">닉네임</span>
             <span className="text-[#1a1c1c] font-medium">{order.kakao_nickname}</span>
           </div>
-          {(order as any).customer_phone && (
+          {order.customer_phone && (
             <div className="flex gap-3">
               <span className="text-[#a3a3a3] w-16 flex-shrink-0">전화번호</span>
-              <a href={`tel:${(order as any).customer_phone}`} className="text-[#1d4ed8] font-medium">
-                {(order as any).customer_phone}
+              <a href={`tel:${order.customer_phone}`} className="text-[#1d4ed8] font-medium">
+                {order.customer_phone}
               </a>
             </div>
           )}
-          {(order as any).store_name && (
+          {order.store_name && (
             <div className="flex gap-3">
               <span className="text-[#a3a3a3] w-16 flex-shrink-0">매장</span>
-              <span className="text-[#1a1c1c]">{(order as any).store_name}</span>
+              <span className="text-[#1a1c1c]">{order.store_name}</span>
             </div>
           )}
         </div>
@@ -244,7 +244,7 @@ export default function AdminOrderDetailPage() {
       {order.status === 'delivery_failed' && getDelivery(order)?.failed_reason && (
         <div className="bg-[#fef2f2] rounded-[8px] p-5 border border-[#fecaca]">
           <h2 className="text-[13px] font-semibold text-[#b91c1c] mb-2">⚠ 배달맨 보고 사유</h2>
-          <p className="text-[13px] text-[#7f1d1d] whitespace-pre-wrap">{getDelivery(order).failed_reason}</p>
+          <p className="text-[13px] text-[#7f1d1d] whitespace-pre-wrap">{getDelivery(order)?.failed_reason}</p>
         </div>
       )}
 
@@ -338,7 +338,7 @@ export default function AdminOrderDetailPage() {
             {getDelivery(order)?.failed_reason && (
               <div className="rounded-[8px] bg-[#fef2f2] border border-[#fecaca] px-3 py-2 mb-3">
                 <p className="text-[11px] text-[#b91c1c] font-semibold mb-0.5">⚠ 이전 실패 사유</p>
-                <p className="text-[12px] text-[#7f1d1d] whitespace-pre-wrap">{getDelivery(order).failed_reason}</p>
+                <p className="text-[12px] text-[#7f1d1d] whitespace-pre-wrap">{getDelivery(order)?.failed_reason}</p>
               </div>
             )}
             <p className="text-[12px] text-[#3c4a42] mb-2">주문이 다시 배달팀에 배정 가능 상태가 됩니다.</p>

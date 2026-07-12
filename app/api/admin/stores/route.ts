@@ -34,7 +34,7 @@ async function readSettings(): Promise<Record<string, StoreSetting>> {
 
 // 옛 포맷: { "store-id": true }
 // 새 포맷: { "store-id": { is_active, display_status, sort_order } }
-function migrate(raw: any): Record<string, StoreSetting> {
+function migrate(raw: unknown): Record<string, StoreSetting> {
   const out: Record<string, StoreSetting> = {}
   if (!raw || typeof raw !== 'object') return out
   let idx = 0
@@ -46,7 +46,7 @@ function migrate(raw: any): Record<string, StoreSetting> {
         sort_order: idx,
       }
     } else if (val && typeof val === 'object') {
-      const v = val as any
+      const v = val as Record<string, unknown>
       const display_status: DisplayStatus =
         v.display_status === 'hidden' || v.display_status === 'coming_soon'
           ? v.display_status
@@ -111,7 +111,7 @@ export async function PUT(req: NextRequest) {
       sort_order: Object.keys(current).length,
     }
 
-    let next: StoreSetting = { ...existing }
+    const next: StoreSetting = { ...existing }
 
     // display_status 우선 처리
     if (body.display_status === 'visible' || body.display_status === 'hidden' || body.display_status === 'coming_soon') {

@@ -3,7 +3,7 @@ import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { generateDeviceUUID, getLocalStorage, setLocalStorage } from '@/lib/utils'
+import { generateDeviceUUID, setLocalStorage } from '@/lib/utils'
 import { filterPasswordInput, isValidPasswordFormat, PASSWORD_HELPER_TEXT } from '@/lib/utils/password'
 import Link from 'next/link'
 

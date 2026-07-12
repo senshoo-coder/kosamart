@@ -1,15 +1,9 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { formatPrice, getDeadlineText, getLocalStorage, formatDate } from '@/lib/utils'
-import type { GroupBuy, Product, CartItem } from '@/lib/types'
-
-// =============================================
-// 장바구니 전역 상태 (간이 구현)
-// =============================================
-let globalCart: CartItem[] = []
+import type { GroupBuy, Product } from '@/lib/types'
 
 export default function ShopPage() {
   const router = useRouter()
@@ -329,7 +323,7 @@ function OrderModal({ groupBuy, products, cart, totalAmount, onClose, onSuccess 
         <div className="glass rounded-xl p-4 mb-4" style={{ borderColor: 'rgba(16,185,129,0.25)' }}>
           <p className="text-sm font-600 text-white mb-1">💳 계좌이체</p>
           <p className="text-xs text-slate-400">국민은행 <span className="text-white font-600">123-456-789012</span> (코사마트)</p>
-          <p className="text-xs text-amber-400 mt-1.5">⚠️ 입금자명을 닉네임 <span className="font-700">'{nickname}'</span>으로 해주세요</p>
+          <p className="text-xs text-amber-400 mt-1.5">⚠️ 입금자명을 닉네임 <span className="font-700">&apos;{nickname}&apos;</span>으로 해주세요</p>
         </div>
 
         <label className="flex items-start gap-3 mb-4 cursor-pointer">

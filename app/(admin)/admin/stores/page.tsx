@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { STORES } from '@/lib/market-data'
 
 type DisplayStatus = 'visible' | 'hidden' | 'coming_soon'
 
@@ -23,6 +22,31 @@ interface StoreDisplay {
   isCustom: boolean
   product_count?: number
   owner_nickname?: string
+  bank_account?: string
+  telegram_chat_id?: string
+  phone?: string
+  weekly_closed?: string[]
+  closed_dates?: string[]
+}
+
+interface EditingStore {
+  id: string
+  name: string
+  emoji: string
+  category: string
+  description: string
+  isOpen: boolean
+  badge: string
+  hours: string
+  minOrder: number
+  deliveryFee: number
+  accentColor: string
+  bank_account: string
+  telegram_chat_id: string
+  phone: string
+  weekly_closed?: string[]
+  closed_dates?: string[]
+  isCustom?: boolean
 }
 
 const STATUS_LABEL: Record<DisplayStatus, string> = {
@@ -37,8 +61,8 @@ const STATUS_COLOR: Record<DisplayStatus, { bg: string; text: string; border: st
 }
 
 interface StoresConfig {
-  overrides: Record<string, any>
-  custom: any[]
+  overrides: Record<string, unknown>
+  custom: unknown[]
   deleted: string[]
 }
 
@@ -98,17 +122,15 @@ function StatusSelect({ value, onChange, disabled, size = 'md' }: {
 
 export default function AdminStoresPage() {
   const [stores, setStores] = useState<StoreDisplay[]>([])
-  const [config, setConfig] = useState<StoresConfig>({ overrides: {}, custom: [], deleted: [] })
+  const [, setConfig] = useState<StoresConfig>({ overrides: {}, custom: [], deleted: [] })
   const [loading, setLoading] = useState(true)
   const [toggling, setToggling] = useState<string | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<StoreDisplay | null>(null)
-  const [editingStore, setEditingStore] = useState<any | null>(null)
+  const [editingStore, setEditingStore] = useState<EditingStore | null>(null)
   const [isNewStore, setIsNewStore] = useState(false)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [adminClosedDateInput, setAdminClosedDateInput] = useState('')
-
-  useEffect(() => { loadAll() }, [])
 
   async function loadAll() {
     setLoading(true)
@@ -127,7 +149,7 @@ export default function AdminStoresPage() {
 
       if (configData.data) setConfig(configData.data)
 
-      const storeList: StoreDisplay[] = (marketData.data || []).map((s: any, i: number) => ({
+      const storeList: StoreDisplay[] = (marketData.data || []).map((s: StoreDisplay, i: number) => ({
         ...s,
         display_status: (s.display_status as DisplayStatus) || (s.is_active ? 'visible' : 'hidden'),
         sort_order: typeof s.sort_order === 'number' ? s.sort_order : i,
@@ -137,11 +159,11 @@ export default function AdminStoresPage() {
 
       if (products.data) {
         const counts: Record<string, number> = {}
-        products.data.forEach((p: any) => { counts[p.store_id] = (counts[p.store_id] || 0) + 1 })
+        products.data.forEach((p: { store_id: string }) => { counts[p.store_id] = (counts[p.store_id] || 0) + 1 })
         storeList.forEach(s => { if (counts[s.id]) s.product_count = counts[s.id] })
       }
       if (users.data) {
-        users.data.forEach((u: any) => {
+        users.data.forEach((u: { store_id?: string; nickname: string }) => {
           if (u.store_id) {
             const store = storeList.find(s => s.id === u.store_id)
             if (store) store.owner_nickname = u.nickname
@@ -154,7 +176,7 @@ export default function AdminStoresPage() {
         const settingsRes = await fetch('/api/admin/stores')
         const settings = await settingsRes.json()
         if (settings.data) {
-          settings.data.forEach((s: any) => {
+          settings.data.forEach((s: { store_id: string; display_status?: DisplayStatus; sort_order?: number }) => {
             const store = storeList.find(st => st.id === s.store_id)
             if (store) {
               if (s.display_status) store.display_status = s.display_status
@@ -174,6 +196,8 @@ export default function AdminStoresPage() {
     }
     setLoading(false)
   }
+
+  useEffect(() => { loadAll() }, [])
 
   async function setDisplayStatus(store_id: string, display_status: DisplayStatus) {
     setToggling(store_id)
@@ -224,11 +248,11 @@ export default function AdminStoresPage() {
       minOrder: store.minOrder,
       deliveryFee: store.deliveryFee,
       accentColor: store.accentColor,
-      bank_account: (store as any).bank_account || '',
-      telegram_chat_id: (store as any).telegram_chat_id || '',
-      phone: (store as any).phone || '',
-      weekly_closed: (store as any).weekly_closed || [],
-      closed_dates: (store as any).closed_dates || [],
+      bank_account: store.bank_account || '',
+      telegram_chat_id: store.telegram_chat_id || '',
+      phone: store.phone || '',
+      weekly_closed: store.weekly_closed || [],
+      closed_dates: store.closed_dates || [],
       isCustom: store.isCustom,
     })
     setAdminClosedDateInput('')

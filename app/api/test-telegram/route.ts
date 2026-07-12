@@ -32,7 +32,7 @@ export async function GET() {
     })
     const data = await res.json()
     return NextResponse.json({ ok: res.ok, debug, telegram_response: data })
-  } catch (e: any) {
-    return NextResponse.json({ ok: false, debug, error: e.message })
+  } catch (e) {
+    return NextResponse.json({ ok: false, debug, error: e instanceof Error ? e.message : String(e) })
   }
 }

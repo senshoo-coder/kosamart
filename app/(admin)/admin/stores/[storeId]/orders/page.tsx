@@ -38,7 +38,7 @@ function AdminStoreOrdersContent({ storeId }: { storeId: string }) {
       .then(r => r.json())
       .then(({ data }) => {
         if (Array.isArray(data)) {
-          const found = data.find((s: any) => s.id === storeId)
+          const found = data.find((s: { id: string; name: string }) => s.id === storeId)
           if (found?.name) setStoreName(found.name)
         }
       })

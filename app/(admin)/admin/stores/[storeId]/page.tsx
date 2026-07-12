@@ -28,10 +28,6 @@ export default function AdminStoreProductsPage({ params }: { params: Promise<{ s
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'available' | 'unavailable'>('all')
 
-  useEffect(() => {
-    loadProducts()
-  }, [storeId])
-
   async function loadProducts() {
     setLoading(true)
     try {
@@ -61,6 +57,10 @@ export default function AdminStoreProductsPage({ params }: { params: Promise<{ s
     } catch {}
     setLoading(false)
   }
+
+  useEffect(() => {
+    loadProducts()
+  }, [storeId])
 
   const filtered = products.filter(p => {
     if (filter === 'available') return p.is_available

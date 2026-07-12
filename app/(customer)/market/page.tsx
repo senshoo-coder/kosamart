@@ -36,6 +36,8 @@ interface DynamicStore {
   deliveryFee: number; accentColor: string; is_active: boolean; isCustom: boolean
   display_status?: DisplayStatus
   sort_order?: number
+  image_height?: number
+  image_position?: string
 }
 
 function NeighborhoodIllustration() {
@@ -202,6 +204,19 @@ function NeighborhoodIllustration() {
   )
 }
 
+interface ApiProductRow {
+  id: string
+  store_id: string
+  name: string
+  description?: string
+  price: number
+  original_price?: number | null
+  unit?: string
+  emoji?: string
+  image_url?: string | null
+  is_available?: boolean
+}
+
 interface SearchProduct {
   id: string
   store_id: string
@@ -250,8 +265,8 @@ export default function MarketPage() {
         const storeMap: Record<string, DynamicStore> = {}
         dynamicStores.forEach(s => { storeMap[s.id] = s })
         const products: SearchProduct[] = data
-          .filter((p: any) => storeMap[p.store_id]) // 알려진 가게만
-          .map((p: any) => {
+          .filter((p: ApiProductRow) => storeMap[p.store_id]) // 알려진 가게만
+          .map((p: ApiProductRow) => {
             const store = storeMap[p.store_id]
             return {
               id: p.id,
@@ -440,7 +455,7 @@ export default function MarketPage() {
               <div className="py-12 text-center text-[13px]" style={{ color: '#8c9688' }}>검색 중...</div>
             ) : searchResults.length === 0 ? (
               <div className="py-12 text-center text-[13px]" style={{ color: '#8c9688' }}>
-                "<b>{searchQuery}</b>" 검색 결과가 없습니다
+                &quot;<b>{searchQuery}</b>&quot; 검색 결과가 없습니다
               </div>
             ) : (
               <>
@@ -517,8 +532,8 @@ export default function MarketPage() {
             const gradient = STORE_GRADIENTS[store.id] || 'linear-gradient(150deg, #1e293b, #0f172a)'
             const storeImage = allImages[store.id]?.store
             const storeCartCount = cart.getStoreItemCount(store.id)
-            const imgHeight = (store as any).image_height || 176
-            const imgPosition = (store as any).image_position || 'center'
+            const imgHeight = store.image_height || 176
+            const imgPosition = store.image_position || 'center'
             const isComing = store.display_status === 'coming_soon'
 
             const cardBody = (

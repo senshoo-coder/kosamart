@@ -5,7 +5,7 @@ import { OrderStatusBadge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatPrice, formatDateTime, timeAgo } from '@/lib/utils'
 import { ORDER_STATUS_CONFIG } from '@/lib/types'
-import type { Order } from '@/lib/types'
+import type { Order, Delivery } from '@/lib/types'
 
 export default function OrderDetailPage() {
   const router = useRouter()
@@ -21,9 +21,9 @@ export default function OrderDetailPage() {
   const [closeModal, setCloseModal] = useState(false)
   const [closeReason, setCloseReason] = useState('')
 
-  function getDelivery(o: Order | null): any {
+  function getDelivery(o: Order | null): Delivery | null | undefined {
     if (!o) return null
-    const d = (o as any).delivery
+    const d = (o as { delivery?: Delivery | Delivery[] }).delivery
     return Array.isArray(d) ? d[0] : d
   }
 
@@ -172,9 +172,9 @@ export default function OrderDetailPage() {
               <div>
                 <p className="text-[13px] text-[#1a1c1c]">{item.product_name}</p>
                 <p className="text-[11px] text-[#a3a3a3] mt-0.5">{formatPrice(item.unit_price)} × {item.quantity}</p>
-                {(item as any).item_memo && (
+                {(item as { item_memo?: string }).item_memo && (
                   <p className="text-[11px] text-[#b45309] mt-1 bg-[#fef3c7] rounded px-2 py-0.5 inline-block">
-                    💬 {(item as any).item_memo}
+                    💬 {(item as { item_memo?: string }).item_memo}
                   </p>
                 )}
               </div>
@@ -212,10 +212,10 @@ export default function OrderDetailPage() {
               <span className="text-[#1a1c1c]">{order.delivery_address}</span>
             </div>
           )}
-          {(order as any).scheduled_at && (
+          {order.scheduled_at && (
             <div className="flex gap-3">
               <span className="text-[#a3a3a3] w-14 flex-shrink-0">수령시간</span>
-              <span className="text-[#1a1c1c] font-medium">{formatDateTime((order as any).scheduled_at)}</span>
+              <span className="text-[#1a1c1c] font-medium">{formatDateTime(order.scheduled_at)}</span>
             </div>
           )}
           {order.delivery_memo && (
@@ -249,7 +249,7 @@ export default function OrderDetailPage() {
       {order.status === 'delivery_failed' && getDelivery(order)?.failed_reason && (
         <div className="bg-[#fef2f2] rounded-[8px] p-5 border border-[#fecaca]">
           <h2 className="text-[13px] font-semibold text-[#b91c1c] mb-2">⚠ 배달맨 보고 사유</h2>
-          <p className="text-[13px] text-[#7f1d1d] whitespace-pre-wrap">{getDelivery(order).failed_reason}</p>
+          <p className="text-[13px] text-[#7f1d1d] whitespace-pre-wrap">{getDelivery(order)?.failed_reason}</p>
         </div>
       )}
 
@@ -352,7 +352,7 @@ export default function OrderDetailPage() {
             {getDelivery(order)?.failed_reason && (
               <div className="rounded-[8px] bg-[#fef2f2] border border-[#fecaca] px-3 py-2 mb-3">
                 <p className="text-[11px] text-[#b91c1c] font-semibold mb-0.5">⚠ 이전 실패 사유</p>
-                <p className="text-[12px] text-[#7f1d1d] whitespace-pre-wrap">{getDelivery(order).failed_reason}</p>
+                <p className="text-[12px] text-[#7f1d1d] whitespace-pre-wrap">{getDelivery(order)?.failed_reason}</p>
               </div>
             )}
             <p className="text-[12px] text-[#3c4a42] mb-2">주문이 다시 배달팀에 배정 가능 상태가 됩니다.</p>

@@ -15,7 +15,7 @@ async function getStoreChatId(storeId: string): Promise<string | null> {
     const config = await res.json()
     const override = config?.overrides?.[storeId]
     if (override?.telegram_chat_id) return override.telegram_chat_id
-    const custom = config?.custom?.find((s: any) => s.id === storeId)
+    const custom = config?.custom?.find((s: { id: string; telegram_chat_id?: string }) => s.id === storeId)
     return custom?.telegram_chat_id ?? null
   } catch { return null }
 }
@@ -63,7 +63,16 @@ export async function POST(req: NextRequest) {
   let sent60 = 0
   let sent30 = 0
 
-  async function sendAlerts(order: any, minutesBefore: number) {
+  async function sendAlerts(order: {
+    order_number: string
+    kakao_nickname: string
+    customer_phone?: string | null
+    store_name?: string | null
+    store_id?: string | null
+    delivery_address: string
+    total_amount?: number | null
+    scheduled_at: string
+  }, minutesBefore: number) {
     const isPickup = order.delivery_address === '매장 픽업'
     const timeLabel = isPickup ? '픽업' : '배달'
     const scheduledTime = new Date(order.scheduled_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })

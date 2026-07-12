@@ -13,7 +13,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   // 배달맨 조회: 쿠키 우선, 없으면 device_uuid fallback
   const cookieStore = await cookies()
   const cookieUserId = cookieStore.get('cosmart_user_id')?.value
-  const cookieRole = cookieStore.get('cosmart_role')?.value
 
   let driver: { id: string; nickname: string } | null = null
   if (cookieUserId) {

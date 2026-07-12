@@ -17,7 +17,7 @@ async function getStoreChatId(storeId: string): Promise<string | null> {
     const config = await res.json()
     const override = config?.overrides?.[storeId]
     if (override?.telegram_chat_id) return override.telegram_chat_id
-    const custom = config?.custom?.find((s: any) => s.id === storeId)
+    const custom = config?.custom?.find((s: { id: string; telegram_chat_id?: string }) => s.id === storeId)
     return custom?.telegram_chat_id ?? null
   } catch { return null }
 }

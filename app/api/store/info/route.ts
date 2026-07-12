@@ -41,7 +41,7 @@ async function readConfig() {
   } catch { return { overrides: {}, custom: [], deleted: [] } }
 }
 
-async function writeConfig(data: any) {
+async function writeConfig(data: unknown) {
   await fetch(UPLOAD_URL, {
     method: 'PUT',
     headers: {
@@ -75,16 +75,16 @@ export async function PATCH(req: NextRequest) {
 
   // owner가 수정 가능한 필드만 허용
   const ALLOWED = ['name', 'description', 'hours', 'minOrder', 'deliveryFee', 'isOpen', 'bank_account', 'telegram_chat_id', 'weekly_closed', 'closed_dates', 'phone']
-  const filtered: Record<string, any> = {}
+  const filtered: Record<string, unknown> = {}
   for (const f of ALLOWED) {
     if (f in fields) filtered[f] = fields[f]
   }
 
   // 음수 차단
-  if (filtered.deliveryFee != null && filtered.deliveryFee < 0) {
+  if (filtered.deliveryFee != null && (filtered.deliveryFee as number) < 0) {
     return NextResponse.json({ error: '배달비는 0 이상이어야 합니다' }, { status: 400 })
   }
-  if (filtered.minOrder != null && filtered.minOrder < 0) {
+  if (filtered.minOrder != null && (filtered.minOrder as number) < 0) {
     return NextResponse.json({ error: '최소 주문 금액은 0 이상이어야 합니다' }, { status: 400 })
   }
 
@@ -93,7 +93,7 @@ export async function PATCH(req: NextRequest) {
   }
 
   const config = await readConfig()
-  const customIdx = config.custom?.findIndex((s: any) => s.id === targetStoreId) ?? -1
+  const customIdx = config.custom?.findIndex((s: { id: string }) => s.id === targetStoreId) ?? -1
   if (customIdx >= 0) {
     config.custom[customIdx] = { ...config.custom[customIdx], ...filtered }
   } else {

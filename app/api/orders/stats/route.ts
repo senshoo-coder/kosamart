@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { DEMO_STATS } from '@/lib/demo-data'
 import { cookies } from 'next/headers'
@@ -6,7 +6,7 @@ import { cookies } from 'next/headers'
 const isDemoMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_URL?.startsWith('https')
 
 // GET /api/orders/stats — 대시보드 통계
-export async function GET(_req: NextRequest) {
+export async function GET() {
   if (isDemoMode) return NextResponse.json({ data: DEMO_STATS, error: null })
 
   const supabase = await createAdminClient()

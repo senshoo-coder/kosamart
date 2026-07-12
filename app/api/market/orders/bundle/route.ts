@@ -15,7 +15,7 @@ async function getStoreChatId(storeId: string): Promise<string | null> {
     const config = await res.json()
     const override = config?.overrides?.[storeId]
     if (override?.telegram_chat_id) return override.telegram_chat_id
-    const custom = config?.custom?.find((s: any) => s.id === storeId)
+    const custom = config?.custom?.find((s: { id: string; telegram_chat_id?: string }) => s.id === storeId)
     return custom?.telegram_chat_id ?? null
   } catch { return null }
 }
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
 
   // 데모 모드
   if (isDemoMode) {
-    const orders = stores.map((s: any) => ({
+    const orders = stores.map((s: { store_id: string; store_name: string; total_amount: number; items: unknown }) => ({
       id: `market-${Date.now()}-${s.store_id}`,
       order_number: generateOrderNumber(),
       bundle_id: bundleId,
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ data: null, error: '인증 필요' }, { status: 401 })
   }
 
-  const createdOrders: any[] = []
+  const createdOrders: Record<string, unknown>[] = []
 
   for (const storeOrder of stores) {
     const { store_id, store_name, items, total_amount } = storeOrder
@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 주문 상품
-    const orderItems = items.map((i: any) => ({ ...i, order_id: order.id }))
+    const orderItems = items.map((i: Record<string, unknown>) => ({ ...i, order_id: order.id }))
     await supabase.from('order_items').insert(orderItems)
 
     // 배달 레코드

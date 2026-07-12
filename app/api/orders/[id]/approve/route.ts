@@ -25,7 +25,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
   }
 
-  const updatePayload: Record<string, any> = {
+  const updatePayload: Record<string, unknown> = {
     status: 'approved',
     approved_at: new Date().toISOString(),
   }
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     .single()
 
   const items = (order?.order_items ?? [])
-    .map((i: any) => `• ${e(i.product_name)} x${i.quantity} (₩${i.subtotal?.toLocaleString()})`)
+    .map((i: { product_name: string; quantity: number; subtotal?: number }) => `• ${e(i.product_name)} x${i.quantity} (₩${i.subtotal?.toLocaleString()})`)
     .join('\n')
 
   const isPickup = order?.delivery_address === '매장 픽업'

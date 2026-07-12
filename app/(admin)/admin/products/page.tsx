@@ -25,6 +25,12 @@ export default function ProductsPage() {
 
   const currentGb = groupBuys.find(gb => gb.id === selectedGb) ?? null
 
+  function loadProducts(gbId: string) {
+    fetch(`/api/products?group_buy_id=${gbId}`)
+      .then(r => r.json())
+      .then(d => setProducts(d.data || []))
+  }
+
   useEffect(() => {
     fetch('/api/group-buys')
       .then(r => r.json())
@@ -48,12 +54,6 @@ export default function ProductsPage() {
       setGroupBuys(prev => prev.map(gb => gb.id === currentGb.id ? { ...gb, status: newStatus } : gb))
     }
     setTogglingGb(false)
-  }
-
-  function loadProducts(gbId: string) {
-    fetch(`/api/products?group_buy_id=${gbId}`)
-      .then(r => r.json())
-      .then(d => setProducts(d.data || []))
   }
 
   async function handleSave() {

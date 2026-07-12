@@ -15,7 +15,7 @@ async function getStoreChatId(storeId: string): Promise<string | null> {
     const config = await res.json()
     const override = config?.overrides?.[storeId]
     if (override?.telegram_chat_id) return override.telegram_chat_id
-    const custom = config?.custom?.find((s: any) => s.id === storeId)
+    const custom = config?.custom?.find((s: { id: string; telegram_chat_id?: string }) => s.id === storeId)
     return custom?.telegram_chat_id ?? null
   } catch { return null }
 }
@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 주문 상품 저장 (market 상품은 products 테이블에 없으므로 product_id는 null)
-    const orderItems = items.map((i: any) => ({
+    const orderItems = items.map((i: { product_name: string; unit_price: number; quantity: number; subtotal?: number; item_memo?: string | null }) => ({
       order_id: order.id,
       product_id: null,
       product_name: i.product_name,
@@ -166,8 +166,8 @@ export async function POST(req: NextRequest) {
     ])
 
     return NextResponse.json({ data: order, error: null }, { status: 201 })
-  } catch (e: any) {
+  } catch (e) {
     console.error('[market/orders] unexpected error:', e)
-    return NextResponse.json({ data: null, error: 'unexpected: ' + (e?.message || String(e)) }, { status: 500 })
+    return NextResponse.json({ data: null, error: 'unexpected: ' + ((e instanceof Error ? e.message : String(e)) || String(e)) }, { status: 500 })
   }
 }

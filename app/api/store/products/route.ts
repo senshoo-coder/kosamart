@@ -223,7 +223,7 @@ export async function PATCH(req: NextRequest) {
   const allowedFields = ['name', 'description', 'price', 'original_price', 'unit', 'emoji',
     'subcategory', 'tag', 'is_available', 'is_popular', 'sort_order', 'image_url']
   for (const f of allowedFields) {
-    if (f in updates) (products[idx] as any)[f] = updates[f]
+    if (f in updates) (products[idx] as unknown as Record<string, unknown>)[f] = updates[f]
   }
   await writeProducts(targetStoreId, products)
   return NextResponse.json({ data: products[idx], error: null })

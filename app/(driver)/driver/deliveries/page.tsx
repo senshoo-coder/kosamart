@@ -50,8 +50,6 @@ export default function DriverDeliveriesPage() {
     router.push('/login?role=driver')
   }
 
-  useEffect(() => { loadAll() }, [])
-
   function loadAll() {
     setLoading(true)
     Promise.all([
@@ -64,6 +62,8 @@ export default function DriverDeliveriesPage() {
       setLoading(false)
     }).catch(() => setLoading(false))
   }
+
+  useEffect(() => { loadAll() }, [])
 
   async function handleClaim(deliveryId: string) {
     setActionLoading(deliveryId)

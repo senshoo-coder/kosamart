@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
     const secure = process.env.NODE_ENV === 'production'
     cookieStore.set('cosmart_user_id', demoUser.id, { httpOnly: true, sameSite: 'lax', secure, maxAge: 60 * 60 * 24 * 30 })
     cookieStore.set('cosmart_role', demoUser.role, { httpOnly: true, sameSite: 'lax', secure, maxAge: 60 * 60 * 24 * 30 })
-    return NextResponse.json({ data: { id: demoUser.id, nickname: demoUser.nickname, device_uuid: device_uuid || demoUser.device_uuid, role: demoUser.role, store_id: (demoUser as any).store_id || null }, error: null })
+    return NextResponse.json({ data: { id: demoUser.id, nickname: demoUser.nickname, device_uuid: device_uuid || demoUser.device_uuid, role: demoUser.role, store_id: (demoUser as { store_id?: string }).store_id || null }, error: null })
   }
 
   const supabase = await createAdminClient()
@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
         // 이 블록은 NODE_ENV !== 'production' 안이라 secure=false로 두는 게 맞음 (dev 환경 fallback)
         cookieStore.set('cosmart_user_id', demoUser.id, { httpOnly: true, sameSite: 'lax', maxAge: 60 * 60 * 24 * 30 })
         cookieStore.set('cosmart_role', demoUser.role, { httpOnly: true, sameSite: 'lax', maxAge: 60 * 60 * 24 * 30 })
-        return NextResponse.json({ data: { id: demoUser.id, nickname: demoUser.nickname, device_uuid: device_uuid || demoUser.device_uuid, role: demoUser.role, store_id: (demoUser as any).store_id || null }, error: null })
+        return NextResponse.json({ data: { id: demoUser.id, nickname: demoUser.nickname, device_uuid: device_uuid || demoUser.device_uuid, role: demoUser.role, store_id: (demoUser as { store_id?: string }).store_id || null }, error: null })
       }
     }
     recordFailure(nickKey); recordFailure(ipKey)

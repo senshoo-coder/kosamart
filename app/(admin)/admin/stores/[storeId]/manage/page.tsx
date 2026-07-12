@@ -72,29 +72,6 @@ export default function AdminStoreManagePage({ params }: { params: Promise<{ sto
     setSavingImgSettings(false)
   }
 
-  useEffect(() => {
-    // 동적 가게 정보 우선, 없으면 정적 fallback
-    fetch('/api/market/stores')
-      .then(r => r.json())
-      .then(({ data }) => {
-        if (Array.isArray(data)) {
-          const found = data.find((s: any) => s.id === storeId)
-          if (found) {
-            setStore(found as Store)
-            if (found.image_height) setImageHeight(found.image_height)
-            if (found.image_position) setImagePosition(found.image_position)
-          }
-        }
-      })
-      .catch(() => {
-        const found = STORES.find(s => s.id === storeId)
-        if (found) setStore(found)
-      })
-    loadProducts(storeId)
-    loadImages(storeId)
-    setLoading(false)
-  }, [storeId])
-
   async function loadProducts(sid: string) {
     try {
       const res = await fetch(`/api/store/products?store_id=${sid}`)
@@ -133,7 +110,7 @@ export default function AdminStoreManagePage({ params }: { params: Promise<{ sto
       const json = await res.json()
       if (json.data) {
         const map: ImageMap = {}
-        json.data.forEach((img: any) => {
+        json.data.forEach((img: { target_type: string; target_id: string; image_url: string }) => {
           const key = img.target_type === 'store' ? 'store' : img.target_id
           if (key) map[key] = img.image_url
         })
@@ -141,6 +118,29 @@ export default function AdminStoreManagePage({ params }: { params: Promise<{ sto
       }
     } catch {}
   }
+
+  useEffect(() => {
+    // 동적 가게 정보 우선, 없으면 정적 fallback
+    fetch('/api/market/stores')
+      .then(r => r.json())
+      .then(({ data }) => {
+        if (Array.isArray(data)) {
+          const found = data.find((s: Store & { image_height?: number; image_position?: string }) => s.id === storeId)
+          if (found) {
+            setStore(found as Store)
+            if (found.image_height) setImageHeight(found.image_height)
+            if (found.image_position) setImagePosition(found.image_position)
+          }
+        }
+      })
+      .catch(() => {
+        const found = STORES.find(s => s.id === storeId)
+        if (found) setStore(found)
+      })
+    loadProducts(storeId)
+    loadImages(storeId)
+    setLoading(false)
+  }, [storeId])
 
   function triggerUpload(type: string, id: string | null) {
     setUploadTarget({ type, id })

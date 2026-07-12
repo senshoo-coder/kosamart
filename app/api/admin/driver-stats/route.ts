@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
@@ -10,7 +10,7 @@ function getSupabase() {
 }
 
 // GET /api/admin/driver-stats — 배달맨별 배달 통계
-export async function GET(req: NextRequest) {
+export async function GET() {
   const cookieStore = await cookies()
   if (cookieStore.get('cosmart_role')?.value !== 'admin') {
     return NextResponse.json({ data: null, error: '권한 없음' }, { status: 403 })
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
     const stats: Record<string, { total: number; active: number; completed: number }> = {}
 
     if (deliveries) {
-      deliveries.forEach((d: any) => {
+      deliveries.forEach((d: { driver_id: string | null; status: string }) => {
         if (!d.driver_id) return
         if (!stats[d.driver_id]) stats[d.driver_id] = { total: 0, active: 0, completed: 0 }
         stats[d.driver_id].total++

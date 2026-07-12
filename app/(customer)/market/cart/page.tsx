@@ -12,7 +12,19 @@ const DEFAULT_MIN_ORDER = 5000
 const DAY_LABEL: Record<string, string> = { sun: '일', mon: '월', tue: '화', wed: '수', thu: '목', fri: '금', sat: '토' }
 const DAY_KEYS = ['sun','mon','tue','wed','thu','fri','sat']
 
-function isClosedToday(storeInfo: any): boolean {
+interface MarketStore {
+  id: string
+  name?: string
+  emoji?: string
+  hours?: string
+  minOrder?: number
+  deliveryFee?: number
+  bank_account?: string
+  weekly_closed?: string[]
+  closed_dates?: string[]
+}
+
+function isClosedToday(storeInfo: MarketStore | null | undefined): boolean {
   const today = new Date()
   const todayKey = DAY_KEYS[today.getDay()]
   const todayStr = today.toISOString().slice(0, 10)
@@ -21,7 +33,7 @@ function isClosedToday(storeInfo: any): boolean {
   return weekly.includes(todayKey) || dates.includes(todayStr)
 }
 
-function closedReason(storeInfo: any): string {
+function closedReason(storeInfo: MarketStore | null | undefined): string {
   const today = new Date()
   const todayKey = DAY_KEYS[today.getDay()]
   const todayStr = today.toISOString().slice(0, 10)
@@ -93,7 +105,7 @@ export default function CartPage() {
   // [개선2] 인라인 에러 상태
   const [errors, setErrors] = useState<FormErrors>({})
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const [dynamicStores, setDynamicStores] = useState<Record<string, any>>({})
+  const [dynamicStores, setDynamicStores] = useState<Record<string, MarketStore>>({})
 
   const nickname = typeof window !== 'undefined' ? getLocalStorage('cosmart_nickname') : null
   const storeIds = Object.keys(cart.storeGroups)
@@ -109,8 +121,8 @@ export default function CartPage() {
       .then(r => r.json())
       .then(({ data }) => {
         if (!Array.isArray(data)) return
-        const map: Record<string, any> = {}
-        data.forEach((s: any) => { map[s.id] = s })
+        const map: Record<string, MarketStore> = {}
+        data.forEach((s: MarketStore) => { map[s.id] = s })
         setDynamicStores(map)
         const initial: Record<string, string> = {}
         storeIds.forEach(sid => {
@@ -143,7 +155,7 @@ export default function CartPage() {
       map[sid] = buildSlotsForStore(hours)
     })
     return map
-  }, [storeIds.join(','), dynamicStores])
+  }, [storeIds, dynamicStores])
 
   const someStoreNoSlots = storeIds.some(sid => storeSlotsMap[sid]?.length === 0)
 
@@ -574,7 +586,7 @@ export default function CartPage() {
               <p className="text-[13px] text-[#3c4a42] font-medium">{bankAccount}</p>
               {nickname && (
                 <p className="text-[12px] text-amber-600 mt-1.5">
-                  입금자명을 닉네임 <b>'{nickname}'</b>으로 해주세요
+                  입금자명을 닉네임 <b>&apos;{nickname}&apos;</b>으로 해주세요
                 </p>
               )}
             </div>

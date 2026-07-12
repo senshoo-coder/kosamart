@@ -1,10 +1,14 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { getLocalStorage } from '@/lib/utils'
 
 interface Props {
   role: 'owner' | 'driver' | 'admin'
+}
+
+interface StoredUser {
+  id?: string
+  store_id?: string
 }
 
 const ROLE_INFO: Record<string, { label: string; icon: string; bg: string; accent: string; redirectAfterLogout: string }> = {
@@ -14,10 +18,9 @@ const ROLE_INFO: Record<string, { label: string; icon: string; bg: string; accen
 }
 
 export function RoleProfile({ role }: Props) {
-  const router = useRouter()
   const cfg = ROLE_INFO[role]
   const [nickname, setNickname] = useState('')
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<StoredUser | null>(null)
 
   useEffect(() => {
     setNickname(getLocalStorage('cosmart_nickname') ?? '')

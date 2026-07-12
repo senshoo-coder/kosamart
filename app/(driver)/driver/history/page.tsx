@@ -56,7 +56,7 @@ export default function DriverHistoryPage() {
             { label: '완료', value: `${delivered.length}건`, accent: '#10b981', bg: '#d1fae5' },
             { label: '실패', value: `${failed.length}건`,   accent: '#b91c1c', bg: '#fee2e2' },
             { label: '처리 금액', value: formatPrice(totalRevenue), accent: '#1a1c1c', bg: '#f2f4f6' },
-          ].map(({ label, value, accent, bg }) => (
+          ].map(({ label, value, accent }) => (
             <div
               key={label}
               className="bg-white rounded-[8px] p-3 text-center"

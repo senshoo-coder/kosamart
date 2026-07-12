@@ -26,18 +26,7 @@ interface BulkResult {
   final_product_count: number
 }
 
-const HEADER_MAP: Record<string, keyof Omit<ParsedRow, 'rowNum' | 'ok' | 'reason'>> = {
-  '상품명': 'name',
-  '가격': 'price',
-  '단위': 'unit',
-  '카테고리': 'subcategory',
-  '설명': 'description',
-  '이모지': 'emoji',
-  '정가': 'original_price',
-  '인기상품': 'is_popular',
-}
-
-function validateRow(row: any, rowNum: number): ParsedRow {
+function validateRow(row: Record<string, unknown>, rowNum: number): ParsedRow {
   const name = String(row['상품명'] ?? '').trim()
   const priceRaw = row['가격']
   const price = typeof priceRaw === 'number' ? priceRaw : Number(String(priceRaw ?? '').replace(/[^\d.-]/g, ''))
@@ -112,7 +101,7 @@ export default function BulkProductUpload({
       const wb = XLSX.read(buf, { type: 'array' })
       const sheetName = wb.SheetNames.find(n => n !== '작성 안내') || wb.SheetNames[0]
       const ws = wb.Sheets[sheetName]
-      const json: any[] = XLSX.utils.sheet_to_json(ws, { defval: '' })
+      const json: Record<string, unknown>[] = XLSX.utils.sheet_to_json(ws, { defval: '' })
       if (json.length === 0) {
         setError('파일에 데이터가 없습니다.')
         return
@@ -128,8 +117,8 @@ export default function BulkProductUpload({
       if (parsed.length > 500) {
         setError('한 번에 최대 500개까지만 등록할 수 있습니다. 행을 줄여주세요.')
       }
-    } catch (err: any) {
-      setError(`파일을 읽지 못했습니다: ${err?.message || ''}`)
+    } catch (err) {
+      setError(`파일을 읽지 못했습니다: ${err instanceof Error ? err.message : ''}`)
     }
   }
 
@@ -171,8 +160,8 @@ export default function BulkProductUpload({
         setResult(json.data as BulkResult)
         if (onSuccess) onSuccess()
       }
-    } catch (err: any) {
-      setError(`업로드 중 오류: ${err?.message || ''}`)
+    } catch (err) {
+      setError(`업로드 중 오류: ${err instanceof Error ? err.message : ''}`)
     }
     setSubmitting(false)
   }

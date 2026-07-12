@@ -16,7 +16,7 @@ async function fetchJSON(path: string) {
   } catch { return null }
 }
 
-function computeIsOpen(store: any): boolean {
+function computeIsOpen(store: Record<string, unknown>): boolean {
   if (!store.isOpen) return false
   if (!store.hours) return true
   const now = new Date()
@@ -27,16 +27,16 @@ function computeIsOpen(store: any): boolean {
   if (h < start || h >= end) return false
   const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
   const today = dayKeys[now.getDay()]
-  if (store.weekly_closed?.includes(today)) return false
+  if ((store.weekly_closed as string[] | undefined)?.includes(today)) return false
   const todayStr = now.toISOString().slice(0, 10)
-  if (store.closed_dates?.includes(todayStr)) return false
+  if ((store.closed_dates as string[] | undefined)?.includes(todayStr)) return false
   return true
 }
 
 type DisplayStatus = 'visible' | 'hidden' | 'coming_soon'
 interface StoreSetting { is_active: boolean; display_status: DisplayStatus; sort_order: number }
 
-function migrateSettings(raw: any): Record<string, StoreSetting> {
+function migrateSettings(raw: unknown): Record<string, StoreSetting> {
   const out: Record<string, StoreSetting> = {}
   if (!raw || typeof raw !== 'object') return out
   let idx = 0
@@ -44,7 +44,7 @@ function migrateSettings(raw: any): Record<string, StoreSetting> {
     if (typeof val === 'boolean') {
       out[id] = { is_active: val, display_status: val ? 'visible' : 'hidden', sort_order: idx }
     } else if (val && typeof val === 'object') {
-      const v = val as any
+      const v = val as Record<string, unknown>
       const display_status: DisplayStatus =
         v.display_status === 'hidden' || v.display_status === 'coming_soon'
           ? v.display_status
@@ -70,8 +70,8 @@ export async function GET() {
   const settings = migrateSettings(storeSettings)
 
   const deleted: string[] = storesConfig?.deleted || []
-  const overrides: Record<string, any> = storesConfig?.overrides || {}
-  const custom: any[] = storesConfig?.custom || []
+  const overrides: Record<string, Record<string, unknown>> = storesConfig?.overrides || {}
+  const custom: Array<{ id: string } & Record<string, unknown>> = storesConfig?.custom || []
 
   function settingFor(id: string, fallbackOrder: number): StoreSetting {
     return settings[id] ?? { is_active: true, display_status: 'visible', sort_order: fallbackOrder }

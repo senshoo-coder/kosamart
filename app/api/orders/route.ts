@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
       }
       const demoStoreId = demoUserId ? DEMO_OWNER_STORES[demoUserId] : null
       if (demoStoreId) {
-        orders = orders.filter(o => (o as any).store_id === demoStoreId)
+        orders = orders.filter(o => (o as { store_id?: string }).store_id === demoStoreId)
       }
     }
     if (deviceUuid) orders = orders.filter(o => o.customer?.device_uuid === deviceUuid)
@@ -176,12 +176,12 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ data: null, error: '인증 필요' }, { status: 401 })
 
   // 상품 가격 조회
-  const productIds = items.map((i: any) => i.product_id)
+  const productIds = items.map((i: { product_id: string }) => i.product_id)
   const { data: products } = await supabase.from('products').select('id, name, price').in('id', productIds)
   if (!products) return NextResponse.json({ data: null, error: '상품 조회 실패' }, { status: 400 })
 
   // 금액 계산
-  const orderItems = items.map((item: any) => {
+  const orderItems = items.map((item: { product_id: string; quantity: number }) => {
     const product = products.find(p => p.id === item.product_id)
     if (!product) throw new Error(`상품 없음: ${item.product_id}`)
     return {
@@ -192,7 +192,7 @@ export async function POST(req: NextRequest) {
       subtotal: product.price * item.quantity,
     }
   })
-  const totalAmount = orderItems.reduce((sum: number, i: any) => sum + i.subtotal, 0)
+  const totalAmount = orderItems.reduce((sum: number, i: { subtotal: number }) => sum + i.subtotal, 0)
 
   // 주문 생성
   const { data: order, error } = await supabase.from('orders').insert({
@@ -208,7 +208,7 @@ export async function POST(req: NextRequest) {
   if (error) return NextResponse.json({ data: null, error: error.message }, { status: 500 })
 
   // 주문 상품 저장
-  await supabase.from('order_items').insert(orderItems.map((i: any) => ({ ...i, order_id: order.id })))
+  await supabase.from('order_items').insert(orderItems.map((i: Record<string, unknown>) => ({ ...i, order_id: order.id })))
 
   // 배달 레코드 생성 (픽업 주문 제외)
   if (delivery_address !== '매장 픽업') {

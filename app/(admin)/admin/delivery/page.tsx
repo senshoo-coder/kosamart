@@ -102,7 +102,7 @@ export default function OwnerDeliveryPage() {
 
       {/* 통계 카드 */}
       <div className="grid grid-cols-5 gap-2">
-        {STAT_CARDS.map(({ label, value, accent, bg }) => (
+        {STAT_CARDS.map(({ label, value, accent }) => (
           <div key={label} className="bg-white rounded-[8px] p-3 text-center" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
             <p className="text-[20px] font-bold" style={{ color: accent }}>{value}</p>
             <p className="text-[10px] text-[#a3a3a3] mt-1">{label}</p>
@@ -165,9 +165,9 @@ export default function OwnerDeliveryPage() {
                       {delivery.status === 'failed' && (
                         <span className="text-[11px] text-[#b91c1c]">{delivery.failed_reason ?? '실패'}</span>
                       )}
-                      {delivery.status === 'delivered' && (delivery as any).driver_memo && (
+                      {delivery.status === 'delivered' && delivery.driver_memo && (
                         <span className="text-[11px] text-[#b45309] bg-[#fef3c7] px-2 py-0.5 rounded">
-                          📝 {(delivery as any).driver_memo}
+                          📝 {delivery.driver_memo}
                         </span>
                       )}
                     </td>
@@ -200,9 +200,9 @@ export default function OwnerDeliveryPage() {
                   {delivery.assigned_at && (
                     <p className="text-[11px] text-[#a3a3a3]">배정: {formatDateTime(delivery.assigned_at)}</p>
                   )}
-                  {delivery.status === 'delivered' && (delivery as any).driver_memo && (
+                  {delivery.status === 'delivered' && delivery.driver_memo && (
                     <p className="text-[12px] text-[#b45309] bg-[#fef3c7] rounded px-2 py-1 mt-1">
-                      📝 배달맨 메모: {(delivery as any).driver_memo}
+                      📝 배달맨 메모: {delivery.driver_memo}
                     </p>
                   )}
                   {delivery.status === 'failed' && delivery.failed_reason && (

@@ -142,7 +142,7 @@ export default function OwnerAnalyticsPage() {
       <div className="bg-white rounded-[8px] p-5" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
         <h3 className="text-[13px] font-bold text-[#1a1c1c] mb-4">주문 상태 분포</h3>
         <div className="space-y-3">
-          {STATUS_BARS.map(({ key, label, color, bg }) => {
+          {STATUS_BARS.map(({ key, label, color }) => {
             const count = key === 'cancelled'
               ? (statusCounts['cancelled'] ?? 0) + (statusCounts['rejected'] ?? 0)
               : (statusCounts[key] ?? 0)

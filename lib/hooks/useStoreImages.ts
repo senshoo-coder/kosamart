@@ -5,6 +5,12 @@ interface StoreImageMap {
   [key: string]: string // 'store' or product_id -> image_url
 }
 
+interface StoreImageRow {
+  target_type: string
+  target_id: string
+  image_url: string
+}
+
 const cache: Record<string, { data: StoreImageMap; ts: number }> = {}
 const CACHE_TTL = 30_000 // 30초
 
@@ -31,7 +37,7 @@ export function useStoreImages(storeId: string | undefined) {
         if (cancelled) return
         if (json.data) {
           const map: StoreImageMap = {}
-          json.data.forEach((img: any) => {
+          json.data.forEach((img: StoreImageRow) => {
             const key = img.target_type === 'store' ? 'store' : img.target_id
             if (key) map[key] = img.image_url
           })
@@ -63,7 +69,7 @@ export function useAllStoreImages(storeIds: string[]) {
           .then(r => r.json())
           .then(json => {
             const map: StoreImageMap = {}
-            json.data?.forEach((img: any) => {
+            json.data?.forEach((img: StoreImageRow) => {
               const key = img.target_type === 'store' ? 'store' : img.target_id
               if (key) map[key] = img.image_url
             })

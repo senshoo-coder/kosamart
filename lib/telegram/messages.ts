@@ -1,4 +1,4 @@
-import type { Order, Delivery } from '@/lib/types'
+import type { Order } from '@/lib/types'
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!
 const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
@@ -15,7 +15,7 @@ export async function getStoreChatId(storeId: string): Promise<string | null> {
     const config = await res.json()
     const override = config?.overrides?.[storeId]
     if (override?.telegram_chat_id) return override.telegram_chat_id
-    const custom = config?.custom?.find((s: any) => s.id === storeId)
+    const custom = config?.custom?.find((s: { id: string; telegram_chat_id?: string }) => s.id === storeId)
     return custom?.telegram_chat_id ?? null
   } catch { return null }
 }
@@ -116,7 +116,7 @@ ${order.owner_memo ? `안내사항: ${e(order.owner_memo)}` : ''}
 <b>${e(order.kakao_nickname)}</b>님의 픽업 주문이 승인되었습니다.
 
 주문번호: <code>${e(order.order_number)}</code>
-매장: ${e((order as any).store_name ?? '-')}
+매장: ${e(order.store_name ?? '-')}
 금액: ₩${order.total_amount.toLocaleString()}
 ${order.delivery_memo ? `메모: ${e(order.delivery_memo)}` : ''}
 
@@ -129,7 +129,7 @@ ${order.delivery_memo ? `메모: ${e(order.delivery_memo)}` : ''}
 <b>${e(order.kakao_nickname)}</b>님이 직접 픽업을 완료했습니다.
 
 주문번호: <code>${e(order.order_number)}</code>
-매장: ${e((order as any).store_name ?? '-')}
+매장: ${e(order.store_name ?? '-')}
 금액: ₩${order.total_amount.toLocaleString()}
 
 이용해주셔서 감사합니다 💚`,
